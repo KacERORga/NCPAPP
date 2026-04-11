@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>NCPBANK — Админка + Маркетплейс</title>
+    <title>NCPBANK — Админка + Маркетплейс + Переводы</title>
     
     <!-- Яндекс.Метрика -->
     <script type="text/javascript">
@@ -268,13 +268,6 @@
             flex-wrap: wrap;
             gap: 8px;
         }
-        .level-name {
-            font-weight: bold;
-            background: linear-gradient(135deg, #f59e0b, #eab308);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
 
         .input-group { margin-bottom: 18px; }
         label { font-weight: 600; font-size: 0.8rem; display: block; margin-bottom: 6px; color: #334155; }
@@ -307,9 +300,6 @@
         body.dark .balance { background: #334155; }
         .balance-amount { font-size: 1.8rem; font-weight: 800; }
         body.dark .balance-amount { color: #fbbf24; }
-        .history-item { background: #f8fafc; padding: 10px 14px; border-radius: 16px; margin-bottom: 8px; display: flex; justify-content: space-between; font-size: 0.8rem; flex-wrap: wrap; gap: 8px; }
-        body.dark .history-item { background: #334155; }
-        .transaction-list { max-height: 180px; overflow-y: auto; margin-top: 8px; }
         .flex-buttons { display: flex; gap: 12px; margin-top: 12px; }
         .settings-btn { background: #8b5cf6; }
         .logout-btn { background: #475569; }
@@ -328,9 +318,6 @@
         .card-type-option.selected { border-color: #fbbf24; }
         .switch-mode { text-align: center; margin-top: 16px; }
         .switch-mode a { color: #667eea; cursor: pointer; }
-        .task-card { background: #fef9e3; border-left: 4px solid #f59e0b; padding: 14px; border-radius: 20px; margin: 20px 0; }
-        body.dark .task-card { background: #4a3a2a; }
-        .btn-task { background: #f59e0b; margin-top: 10px; }
         .transfer-section { background: #eef2ff; padding: 16px; border-radius: 24px; margin: 20px 0; }
         body.dark .transfer-section { background: #1e293b; }
         .transfer-title { font-weight: bold; margin-bottom: 12px; }
@@ -451,7 +438,7 @@
 <div class="app-container">
     <div class="ncp-logo">
         <h1>🏦 NCPBANK</h1>
-        <p>Админ-панель + Маркетплейс</p>
+        <p>Админ-панель + Маркетплейс + Переводы</p>
     </div>
     <div id="appRoot"></div>
     <div class="ncp-tag">⚡ Решения принимаются здесь. Где здесь — неизвестно.</div>
@@ -459,11 +446,11 @@
 
 <script>
     // ========== КЛЮЧИ ==========
-    const USERS_KEY = 'ncpbank_admin_final';
-    const SESSION_KEY = 'ncpbank_session_final';
-    const CURRENT_USER_KEY = 'ncpbank_current_final';
-    const SETTINGS_KEY = 'ncpbank_settings_final';
-    const AGREEMENT_KEY = 'ncpbank_agreement_final';
+    const USERS_KEY = 'ncpbank_working_final';
+    const SESSION_KEY = 'ncpbank_session_working';
+    const CURRENT_USER_KEY = 'ncpbank_current_working';
+    const SETTINGS_KEY = 'ncpbank_settings_working';
+    const AGREEMENT_KEY = 'ncpbank_agreement_working';
     const ONLINE_KEY = 'ncpbank_online';
     const ADMIN_PASSWORD = '6369';
     const ADMIN_NICK = 'KacERORga';
@@ -714,7 +701,7 @@
         return { current: LEVELS[0], next: LEVELS[1], progress: 0 };
     }
 
-    // ========== ПЕРЕВОДЫ ==========
+    // ========== ПЕРЕВОДЫ (РАБОЧИЕ) ==========
     function generateContractNumber() {
         return `NCP-${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}-${Math.floor(Math.random()*10000).toString().padStart(4,'0')}`;
     }
@@ -724,7 +711,7 @@
         if (!user) return null;
         if ((user.balance || 0) < amount) return { error: `Недостаточно ${getCurrencyName()}` };
         const contract = generateContractNumber();
-        const link = `${location.origin}${location.pathname}#transfer/${encodeURIComponent(user.nickname)}/${encodeURIComponent(contract)}/${amount}/${encodeURIComponent(note || '')}`;
+        const link = `${window.location.origin}${window.location.pathname}#transfer/${encodeURIComponent(user.nickname)}/${encodeURIComponent(contract)}/${amount}/${encodeURIComponent(note || '')}`;
         return { link, contractNumber: contract, note: note || '' };
     }
     
@@ -929,6 +916,18 @@
             nextLevelHtml = `<div style="font-size:0.65rem; color:#10b981; margin-top:4px;">🏆 Максимальный уровень достигнут!</div>`;
         }
         
+        // Блок перевода (рабочий)
+        let linkHtml = '';
+        if (currentLink) {
+            linkHtml = `<div class="link-box">
+                <div>📄 Договор: ${currentContract}</div>
+                ${currentNote ? `<div>📝 Комментарий: ${escapeHtml(currentNote)}</div>` : ''}
+                <textarea rows="2" readonly id="transferLink">${currentLink}</textarea>
+                <button id="copyLinkBtn" class="copy-btn">📋 Копировать ссылку</button>
+                <button id="clearLinkBtn" style="background:#6b7280;">Очистить</button>
+            </div>`;
+        }
+        
         const adminHtml = isAdmin() ? renderAdminPanel() : '';
         
         return `
@@ -954,6 +953,7 @@
                     <div class="input-group"><input type="number" id="transferAmount" placeholder="Сумма" step="0.01"></div>
                     <div class="input-group"><input type="text" id="transferNote" placeholder="Комментарий"></div>
                     <button id="createLinkBtn">✨ Создать ссылку</button>
+                    ${linkHtml}
                 </div>
                 <div class="flex-buttons">
                     <button id="marketplaceBtn" style="background: #f59e0b;">🛍️ Маркетплейс</button>
@@ -1067,11 +1067,54 @@
             el.addEventListener('click', () => setActiveCard(parseInt(el.dataset.cardIdx)));
         });
         
+        // СОЗДАНИЕ ССЫЛКИ НА ПЕРЕВОД
         document.getElementById('createLinkBtn')?.addEventListener('click', () => {
-            const amount = document.getElementById('transferAmount')?.value;
+            const amount = parseFloat(document.getElementById('transferAmount')?.value);
+            const note = document.getElementById('transferNote')?.value || '';
             if (!amount || amount <= 0) { alert('Введите сумму'); return; }
-            alert(`🔗 Ссылка на перевод ${amount} ${getCurrencySymbol()} создана! (функция в разработке)`);
+            const user = getUserData();
+            if ((user.balance || 0) < amount) { alert(`Недостаточно ${getCurrencyName()}`); return; }
+            const res = createTransferLink(amount, note);
+            if (res.error) alert(res.error);
+            else { 
+                currentLink = res.link; 
+                currentContract = res.contractNumber; 
+                currentNote = res.note; 
+                renderApp(); 
+            }
         });
+        
+        document.getElementById('clearLinkBtn')?.addEventListener('click', () => { 
+            currentLink = null; 
+            currentContract = null; 
+            currentNote = ''; 
+            renderApp(); 
+        });
+        
+        document.getElementById('copyLinkBtn')?.addEventListener('click', () => {
+            const ta = document.getElementById('transferLink');
+            if (ta) { ta.select(); document.execCommand('copy'); alert('✅ Ссылка скопирована! Отправь её другу.'); }
+        });
+        
+        // ОБРАБОТКА ПЕРЕХОДА ПО ССЫЛКЕ
+        if (window.location.hash && window.location.hash.startsWith('#transfer/')) {
+            const parts = window.location.hash.split('/');
+            if (parts.length >= 5) {
+                const fromNick = decodeURIComponent(parts[1]);
+                const contract = decodeURIComponent(parts[2]);
+                const amount = parseFloat(parts[3]);
+                const note = decodeURIComponent(parts[4] || '');
+                const cur = getUserData();
+                if (!cur) alert('❌ Войдите в аккаунт, чтобы получить перевод');
+                else if (fromNick === cur.nickname) alert('❌ Нельзя перевести самому себе');
+                else if (confirm(`📥 Получить перевод ${amount} ${getCurrencySymbol()} от ${fromNick}? ${note ? `\n📝 ${note}` : ''}`)) {
+                    const res = executeTransfer(fromNick, amount, contract, note);
+                    alert(res.success ? `✅ Получено ${res.amount} ${getCurrencySymbol()} от ${res.from}` : `❌ ${res.error}`);
+                    window.location.hash = '';
+                    renderApp();
+                } else window.location.hash = '';
+            }
+        }
         
         document.getElementById('adminGiveBtn')?.addEventListener('click', () => {
             const nick = document.getElementById('adminGiveNick')?.value.trim();
