@@ -1,7 +1,16 @@
-# Если у вас установлен Vercel CLI
-vercel --prod
-
-# Или просто залейте через git push
-git add .
-git commit -m "Полноценное приложение NCPBANK"
-git push
+{
+  "version": 2,
+  "name": "ncpbank",
+  "builds": [
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
+}
