@@ -276,8 +276,7 @@
         .chip-icon:before {
             content: "";
             position: absolute;
-            width: 70%;
-            height: 60%;
+            width: 70%; height: 60%;
             background: rgba(255,215,120,0.4);
             top: 20%;
             left: 15%;
@@ -417,6 +416,18 @@
         body.dark .no-card-message { background: #334155; }
         .create-card-btn { background: #f59e0b; margin-top: 16px; }
         .card-click-hint { text-align: center; font-size: 0.65rem; margin-top: -12px; margin-bottom: 16px; opacity: 0.7; }
+        .link-input-section {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e2e8f0;
+        }
+        body.dark .link-input-section {
+            border-top-color: #475569;
+        }
+        .submit-link-btn {
+            background: #f59e0b;
+            margin-top: 8px;
+        }
 
         .market-balance {
             background: linear-gradient(135deg, #1E2A3E, #0F1722);
@@ -515,11 +526,11 @@
 
 <script>
     // ========== ФИКСИРОВАННЫЕ КЛЮЧИ ==========
-    const USERS_KEY = 'ncpbank_official_v8';
-    const SESSION_KEY = 'ncpbank_session_official';
-    const CURRENT_USER_KEY = 'ncpbank_current_official';
-    const SETTINGS_KEY = 'ncpbank_settings_official';
-    const AGREEMENT_KEY = 'ncpbank_agreement_official';
+    const USERS_KEY = 'ncpbank_final_v10';
+    const SESSION_KEY = 'ncpbank_session_final';
+    const CURRENT_USER_KEY = 'ncpbank_current_final';
+    const SETTINGS_KEY = 'ncpbank_settings_final';
+    const AGREEMENT_KEY = 'ncpbank_agreement_final';
     const ONLINE_KEY = 'ncpbank_online';
     const ADMIN_PASSWORD = '6369';
     const ADMIN_NICK = 'KacERORga';
@@ -880,7 +891,13 @@
             cvv: cvv,
             expiry: '08/28'
         });
-        if (user.cards.length === 1) user.activeCardIndex = 0;
+        if (user.cards.length === 1) {
+            user.activeCardIndex = 0;
+            // При создании первой карты даём стартовый баланс 100
+            if (user.balance === undefined || user.balance === 0) {
+                user.balance = 100;
+            }
+        }
         if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
         const users = loadUsers();
         users[user.nickname] = user;
@@ -933,20 +950,28 @@
         if (!fromUser) return { success: false, error: 'Отправитель не найден' };
         if ((fromUser.balance || 0) < amount && fromNick !== ADMIN_NICK) return { success: false, error: 'Недостаточно средств' };
         
-        const boosts = getActiveBoosts();
-        let multiplier = 1;
-        for (let b of boosts) multiplier *= b.value;
-        const hour = new Date().getHours();
-        if (hour >= 19 && hour < 20) multiplier *= 1.5;
-        const day = new Date().getDay();
-        if (day === 6 || day === 0) multiplier *= 2;
-        const boostedAmount = amount * multiplier;
+        // Множители применяются ТОЛЬКО если отправитель НЕ админ
+        let boostedAmount = amount;
+        if (fromNick !== ADMIN_NICK) {
+            const boosts = getActiveBoosts();
+            let multiplier = 1;
+            for (let b of boosts) multiplier *= b.value;
+            const hour = new Date().getHours();
+            if (hour >= 19 && hour < 20) multiplier *= 1.5;
+            const day = new Date().getDay();
+            if (day === 6 || day === 0) multiplier *= 2;
+            boostedAmount = amount * multiplier;
+        }
         
-        if (fromNick !== ADMIN_NICK) fromUser.balance -= amount;
+        // Списание у отправителя (админ не теряет деньги)
+        if (fromNick !== ADMIN_NICK) {
+            fromUser.balance -= amount;
+        }
         current.balance += boostedAmount;
         fromUser.totalTransactions = (fromUser.totalTransactions || 0) + 1;
         current.totalTransactions = (current.totalTransactions || 0) + 1;
         
+        // Восстанавливаем баланс админа до бесконечности
         if (fromNick === ADMIN_NICK) fromUser.balance = INFINITY_MONEY;
         if (current.nickname === ADMIN_NICK) current.balance = INFINITY_MONEY;
         
@@ -1010,6 +1035,7 @@
         const user = getUserData();
         if (!user) return renderLoginScreen();
         
+        const hasCard = user.cards && user.cards.length > 0;
         const symbol = getCurrencySymbol();
         const balance = (user.balance || 0).toFixed(2);
         const activeCard = getActiveCard();
@@ -1019,10 +1045,23 @@
         const status = getClientStatus(user.totalTransactions || 0);
         const cardsListHtml = (user.cards || []).map((c, i) => `<div class="card-tab ${i === (user.activeCardIndex||0) ? 'active' : ''}" data-card-idx="${i}">${c.emoji} ${c.typeName}</div>`).join('');
         
-        let cardHtml = activeCard ? `<div id="clickableCard" class="bank-card" style="${cardEffect}"><div class="card-chip"><div class="chip-icon"></div><div class="card-network">NCP</div></div><div class="card-number">${formatCardNumber(activeCard.cardNumber)}</div><div class="card-details"><div class="card-holder"><span>Card Holder</span><p>${escapeHtml(user.nickname.toUpperCase())}</p></div><div class="card-expiry"><span>Expires</span><p>${activeCard.expiry}</p></div></div></div><div class="card-click-hint">👆 Нажмите на карту для деталей</div>` : `<div class="no-card-message">💳 Нет активных карт<br><button id="createCardBtn" class="create-card-btn">✨ Выпустить карту</button></div>`;
+        let cardHtml = '';
+        if (hasCard && activeCard) {
+            cardHtml = `<div id="clickableCard" class="bank-card" style="${cardEffect}">
+                <div class="card-chip"><div class="chip-icon"></div><div class="card-network">NCP</div></div>
+                <div class="card-number">${formatCardNumber(activeCard.cardNumber)}</div>
+                <div class="card-details">
+                    <div class="card-holder"><span>Card Holder</span><p>${escapeHtml(user.nickname.toUpperCase())}</p></div>
+                    <div class="card-expiry"><span>Expires</span><p>${activeCard.expiry}</p></div>
+                </div>
+            </div>
+            <div class="card-click-hint">👆 Нажмите на карту для деталей</div>`;
+        } else {
+            cardHtml = `<div class="no-card-message">💳 У вас ещё нет карты<br><button id="createCardBtn" class="create-card-btn">✨ Выпустить карту</button></div>`;
+        }
         
         let linkHtml = '';
-        if (currentLink) {
+        if (currentLink && hasCard) {
             linkHtml = `<div class="link-box"><div>📄 Договор: ${currentContract}</div>${currentNote ? `<div>📝 ${escapeHtml(currentNote)}</div>` : ''}<textarea rows="2" readonly id="transferLink">${currentLink}</textarea><button id="copyLinkBtn" class="copy-btn">📋 Копировать</button><button id="clearLinkBtn">Очистить</button></div>`;
         }
         
@@ -1040,6 +1079,7 @@
                 <div class="level-bar"><div class="level-progress" style="width:${status.progress}%"></div></div>
                 <div class="cards-switcher">${cardsListHtml}<div id="addCardBtn" class="add-card-btn">+ Новая карта</div></div>
                 ${cardHtml}
+                ${hasCard ? `
                 <div class="balance"><span>💰 Баланс</span><span class="balance-amount">${balance} ${symbol}</span></div>
                 <div class="transfer-section">
                     <div class="transfer-title">🔗 Перевод по ссылке</div>
@@ -1047,7 +1087,14 @@
                     <div class="input-group"><input type="text" id="transferNote" placeholder="Назначение"></div>
                     <button id="createLinkBtn">✨ Создать ссылку</button>
                     ${linkHtml}
+                    
+                    <div class="link-input-section">
+                        <div class="transfer-title">📎 Ввести готовую ссылку</div>
+                        <div class="input-group"><input type="text" id="manualLinkInput" placeholder="Вставьте ссылку на перевод"></div>
+                        <button id="submitLinkBtn" class="submit-link-btn">🔗 Получить перевод</button>
+                    </div>
                 </div>
+                ` : ''}
                 <div class="flex-buttons"><button id="settingsBtn" class="settings-btn">⚙️</button><button id="logoutBtn" class="logout-btn">🚪</button></div>
                 <div class="legal-footer"><a id="showAgreementBtn">📜 Договор</a></div>
                 <div class="privacy-badge">🔐 KC-KacKoin (-_-)</div>
@@ -1060,6 +1107,19 @@
         if (!user) return '';
         collectInvestmentIncome();
         
+        // Показываем инвестиции только если есть карта
+        const hasCard = user.cards && user.cards.length > 0;
+        if (!hasCard) {
+            return `
+                <div class="dashboard-card">
+                    <div class="back-to-main" id="backToMainBtn">← На главную</div>
+                    <div class="no-card-message">💳 Сначала выпустите карту, чтобы получить доступ к инвестициям<br><button id="createCardBtn" class="create-card-btn">✨ Выпустить карту</button></div>
+                </div>
+            `;
+        }
+        
+        const symbol = getCurrencySymbol();
+        
         return `
             <div class="dashboard-card">
                 <div class="back-to-main" id="backToMainBtn">← На главную</div>
@@ -1070,18 +1130,18 @@
                     ${INVESTMENTS.deposits.map(d => `
                         <div class="investment-row">
                             <span>${d.name} (${d.dailyPercent}%/день)</span>
-                            <span>${d.amount} ${getCurrencySymbol()}</span>
+                            <span>${d.amount} ${symbol}</span>
                             <button class="buy-deposit" data-id="${d.id}" data-amount="${d.amount}" style="width:auto; padding:4px 12px;">Открыть</button>
                         </div>
                     `).join('')}
-                    ${user.activeDeposit ? `<div class="investment-row" style="margin-top:8px; background:#334155; padding:8px; border-radius:12px; color:#f1f5f9;">📌 Активный счёт: ${user.activeDeposit.amount} ${getCurrencySymbol()}</div>` : ''}
+                    ${user.activeDeposit ? `<div class="investment-row" style="margin-top:8px; background:#334155; padding:8px; border-radius:12px; color:#f1f5f9;">📌 Активный счёт: ${user.activeDeposit.amount} ${symbol}</div>` : ''}
                 </div>
                 
                 <div class="investment-card">
                     <div class="investment-header">🏪 Бизнес-активы</div>
                     ${INVESTMENTS.assets.map(a => {
                         const owned = user.assets?.some(ass => ass.id === a.id);
-                        return `<div class="investment-row"><span>${a.name} (+${a.income} ${getCurrencySymbol()}/день)</span><span>${a.price} ${getCurrencySymbol()}</span><button class="buy-asset" data-id="${a.id}" data-price="${a.price}" ${owned ? 'disabled' : ''} style="width:auto; padding:4px 12px;">${owned ? '✅' : 'Купить'}</button></div>`;
+                        return `<div class="investment-row"><span>${a.name} (+${a.income} ${symbol}/день)</span><span>${a.price} ${symbol}</span><button class="buy-asset" data-id="${a.id}" data-price="${a.price}" ${owned ? 'disabled' : ''} style="width:auto; padding:4px 12px;">${owned ? '✅' : 'Купить'}</button></div>`;
                     }).join('')}
                 </div>
                 
@@ -1089,7 +1149,7 @@
                     <div class="investment-header">💻 Майнинг-фермы</div>
                     ${INVESTMENTS.mining.map(m => {
                         const owned = user.mining?.some(mn => mn.id === m.id);
-                        return `<div class="investment-row"><span>${m.name} (+${m.income} ${getCurrencySymbol()}/день)</span><span>${m.price} ${getCurrencySymbol()}</span><button class="buy-mining" data-id="${m.id}" data-price="${m.price}" ${owned ? 'disabled' : ''} style="width:auto; padding:4px 12px;">${owned ? '✅' : 'Купить'}</button></div>`;
+                        return `<div class="investment-row"><span>${m.name} (+${m.income} ${symbol}/день)</span><span>${m.price} ${symbol}</span><button class="buy-mining" data-id="${m.id}" data-price="${m.price}" ${owned ? 'disabled' : ''} style="width:auto; padding:4px 12px;">${owned ? '✅' : 'Купить'}</button></div>`;
                     }).join('')}
                 </div>
                 
@@ -1097,7 +1157,7 @@
                     <div class="investment-header">📈 Ценные бумаги</div>
                     ${INVESTMENTS.securities.map(s => {
                         const owned = user.securities?.some(sec => sec.id === s.id);
-                        return `<div class="investment-row"><span>${s.name} (+${s.dividend} ${getCurrencySymbol()}/день)</span><span>${s.price} ${getCurrencySymbol()}</span><button class="buy-security" data-id="${s.id}" data-price="${s.price}" ${owned ? 'disabled' : ''} style="width:auto; padding:4px 12px;">${owned ? '✅' : 'Купить'}</button></div>`;
+                        return `<div class="investment-row"><span>${s.name} (+${s.dividend} ${symbol}/день)</span><span>${s.price} ${symbol}</span><button class="buy-security" data-id="${s.id}" data-price="${s.price}" ${owned ? 'disabled' : ''} style="width:auto; padding:4px 12px;">${owned ? '✅' : 'Купить'}</button></div>`;
                     }).join('')}
                 </div>
                 
@@ -1105,7 +1165,7 @@
                     <div class="investment-header">🏠 Недвижимость</div>
                     ${INVESTMENTS.realty.map(r => {
                         const owned = user.realty?.some(re => re.id === r.id);
-                        return `<div class="investment-row"><span>${r.name} (+${r.rent} ${getCurrencySymbol()}/день)</span><span>${r.price} ${getCurrencySymbol()}</span><button class="buy-realty" data-id="${r.id}" data-price="${r.price}" ${owned ? 'disabled' : ''} style="width:auto; padding:4px 12px;">${owned ? '✅' : 'Инвестировать'}</button></div>`;
+                        return `<div class="investment-row"><span>${r.name} (+${r.rent} ${symbol}/день)</span><span>${r.price} ${symbol}</span><button class="buy-realty" data-id="${r.id}" data-price="${r.price}" ${owned ? 'disabled' : ''} style="width:auto; padding:4px 12px;">${owned ? '✅' : 'Инвестировать'}</button></div>`;
                     }).join('')}
                 </div>
                 <div id="investMsg"></div>
@@ -1118,6 +1178,17 @@
         if (!user) return '';
         const symbol = getCurrencySymbol();
         const topClients = getTopClients();
+        
+        // Показываем лояльность только если есть карта
+        const hasCard = user.cards && user.cards.length > 0;
+        if (!hasCard) {
+            return `
+                <div class="dashboard-card">
+                    <div class="back-to-main" id="backToMainBtn">← На главную</div>
+                    <div class="no-card-message">💳 Сначала выпустите карту, чтобы получить доступ к программе лояльности<br><button id="createCardBtn" class="create-card-btn">✨ Выпустить карту</button></div>
+                </div>
+            `;
+        }
         
         return `
             <div class="dashboard-card">
@@ -1233,7 +1304,7 @@
             users[nick] = {
                 nickname: nick,
                 passwordHash: await hashPassword(pass),
-                balance: 100,
+                balance: 0,
                 cards: [],
                 activeCardIndex: 0,
                 totalTransactions: 0,
@@ -1269,6 +1340,7 @@
         document.getElementById('addCardBtn')?.addEventListener('click', () => { showCreateCard = true; renderApp(); });
         document.querySelectorAll('.card-tab').forEach(el => { el.addEventListener('click', () => setActiveCard(parseInt(el.dataset.cardIdx))); });
         
+        // Создание ссылки
         document.getElementById('createLinkBtn')?.addEventListener('click', () => {
             const amount = parseFloat(document.getElementById('transferAmount')?.value);
             const note = document.getElementById('transferNote')?.value || '';
@@ -1285,6 +1357,35 @@
             if (ta) { ta.select(); document.execCommand('copy'); alert('✅ Ссылка скопирована'); }
         });
         
+        // РУЧНОЙ ВВОД ССЫЛКИ
+        document.getElementById('submitLinkBtn')?.addEventListener('click', () => {
+            const linkInput = document.getElementById('manualLinkInput')?.value.trim();
+            if (!linkInput) { alert('Введите ссылку'); return; }
+            try {
+                const url = new URL(linkInput);
+                const hash = url.hash;
+                if (hash && hash.startsWith('#transfer/')) {
+                    const parts = hash.split('/');
+                    if (parts.length >= 5) {
+                        const fromNick = decodeURIComponent(parts[1]);
+                        const contract = decodeURIComponent(parts[2]);
+                        const amount = parseFloat(parts[3]);
+                        const note = decodeURIComponent(parts[4] || '');
+                        const cur = getUserData();
+                        if (!cur) { alert('❌ Войдите в аккаунт'); return; }
+                        if (fromNick === cur.nickname) { alert('❌ Нельзя перевести самому себе'); return; }
+                        if (confirm(`📥 Получить перевод ${amount} ${getCurrencySymbol()} от ${fromNick}?`)) {
+                            const res = executeTransfer(fromNick, amount, contract, note);
+                            alert(res.success ? `✅ Получено ${res.amount} ${getCurrencySymbol()}` : `❌ ${res.error}`);
+                            document.getElementById('manualLinkInput').value = '';
+                            renderApp();
+                        }
+                    } else { alert('❌ Неверный формат ссылки'); }
+                } else { alert('❌ Это не ссылка на перевод NCPBANK'); }
+            } catch(e) { alert('❌ Неверная ссылка'); }
+        });
+        
+        // Обработка ссылки из URL при загрузке
         if (location.hash && location.hash.startsWith('#transfer/')) {
             const parts = location.hash.split('/');
             if (parts.length >= 5) {
@@ -1293,14 +1394,14 @@
                 const amount = parseFloat(parts[3]);
                 const note = decodeURIComponent(parts[4] || '');
                 const cur = getUserData();
-                if (!cur) alert('❌ Войдите в аккаунт');
-                else if (fromNick === cur.nickname) alert('❌ Нельзя себе');
-                else if (confirm(`📥 Получить ${amount} ${getCurrencySymbol()} от ${fromNick}?`)) {
-                    const res = executeTransfer(fromNick, amount, contract, note);
-                    alert(res.success ? `✅ Получено ${res.amount} ${getCurrencySymbol()}` : `❌ ${res.error}`);
-                    location.hash = '';
-                    renderApp();
-                } else location.hash = '';
+                if (cur && fromNick !== cur.nickname) {
+                    if (confirm(`📥 Получить перевод ${amount} ${getCurrencySymbol()} от ${fromNick}?`)) {
+                        const res = executeTransfer(fromNick, amount, contract, note);
+                        alert(res.success ? `✅ Получено ${res.amount} ${getCurrencySymbol()}` : `❌ ${res.error}`);
+                        location.hash = '';
+                        renderApp();
+                    } else { location.hash = ''; }
+                }
             }
         }
         
@@ -1439,7 +1540,7 @@
             if (!cvv || cvv.length !== 3 || !/^\d+$/.test(cvv)) { msg.innerHTML = '<div class="error-msg">❌ 3 цифры CVV</div>'; return; }
             const formatted = clean.replace(/(\d{4})(?=\d)/g, '$1 ');
             const res = addCard(selectedCardType, formatted, cvv);
-            if (res.success) { msg.innerHTML = '<div class="success-msg">✅ Карта создана</div>'; setTimeout(() => { showCreateCard = false; renderApp(); }, 1000); }
+            if (res.success) { msg.innerHTML = '<div class="success-msg">✅ Карта создана! На ваш счёт зачислено 100 -_-</div>'; setTimeout(() => { showCreateCard = false; renderApp(); }, 1500); }
             else msg.innerHTML = `<div class="error-msg">❌ ${res.error}</div>`;
         });
     }
