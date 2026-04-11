@@ -1,0 +1,7 @@
+# Если у вас установлен Vercel CLI
+vercel --prod
+
+# Или просто залейте через git push
+git add .
+git commit -m "Полноценное приложение NCPBANK"
+git push
