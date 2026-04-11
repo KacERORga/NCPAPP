@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>NCPBANK — Админка + Маркетплейс + Переводы</title>
+    <title>NCP BANK | Независимый Центр Решений</title>
     
     <!-- Яндекс.Метрика -->
     <script type="text/javascript">
@@ -25,10 +25,7 @@
             trackLinks: true
         });
     </script>
-    <noscript>
-        <div><img src="https://mc.yandex.ru/watch/108498118" style="position:absolute; left:-9999px;" alt="" /></div>
-    </noscript>
-    <!-- /Яндекс.Метрика -->
+    <noscript><div><img src="https://mc.yandex.ru/watch/108498118" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
     
     <style>
         * {
@@ -39,7 +36,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(145deg, #e0eafc 0%, #cfdef3 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -48,7 +45,7 @@
         }
 
         body.dark {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: linear-gradient(145deg, #0a0f1a 0%, #0f1722 100%);
         }
 
         .app-container {
@@ -59,36 +56,80 @@
 
         .ncp-logo {
             text-align: center;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
         .ncp-logo h1 {
             font-size: 2rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #fff, #f0f0f0);
+            background: linear-gradient(135deg, #1E2A3E, #3b82f6);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
+        body.dark .ncp-logo h1 {
+            background: linear-gradient(135deg, #fbbf24, #3b82f6);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
         .ncp-logo p {
             font-size: 0.7rem;
-            color: rgba(255,255,255,0.7);
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .nav-tab {
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(4px);
+            padding: 8px 16px;
+            border-radius: 60px;
+            color: #1e2a3e;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+        body.dark .nav-tab {
+            background: rgba(0,0,0,0.4);
+            color: #e2e8f0;
+        }
+        .nav-tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .nav-tab:hover {
+            background: rgba(255,255,255,0.9);
+            transform: translateY(-2px);
+        }
+        body.dark .nav-tab:hover {
+            background: rgba(255,255,255,0.2);
         }
 
         .online-counter {
-            background: rgba(0,0,0,0.5);
-            backdrop-filter: blur(4px);
+            background: rgba(255,255,255,0.9);
             border-radius: 60px;
             padding: 6px 16px;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            font-size: 0.8rem;
-            color: white;
+            font-size: 0.75rem;
+            color: #10b981;
             margin-bottom: 16px;
+            border: 1px solid #10b981;
+        }
+        body.dark .online-counter {
+            background: rgba(0,0,0,0.5);
+            color: #10b981;
         }
         .online-dot {
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             background: #10b981;
             border-radius: 50%;
             animation: pulse 1.5s infinite;
@@ -99,42 +140,60 @@
         }
 
         .admin-panel {
-            background: linear-gradient(135deg, #1e293b, #0f1722);
+            background: linear-gradient(135deg, #fff9e6, #fff3d4);
             border-radius: 24px;
             padding: 20px;
             margin: 20px 0;
-            color: white;
             border: 2px solid #fbbf24;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        body.dark .admin-panel {
+            background: linear-gradient(135deg, #1e293b, #0f1722);
+            border-color: #fbbf24;
         }
         .admin-title {
             display: flex;
             align-items: center;
             gap: 10px;
             margin-bottom: 16px;
-            font-size: 1.2rem;
+            font-size: 1rem;
+            color: #92400e;
+            font-weight: bold;
+        }
+        body.dark .admin-title {
+            color: #fbbf24;
         }
         .admin-stats {
-            background: rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.05);
             border-radius: 16px;
             padding: 12px;
             margin-bottom: 16px;
         }
         .admin-stats div {
-            margin: 8px 0;
-            font-size: 0.9rem;
+            margin: 6px 0;
+            font-size: 0.85rem;
+            color: #334155;
+        }
+        body.dark .admin-stats div {
+            color: #cbd5e1;
         }
         .give-money-form {
             display: flex;
             gap: 10px;
-            margin-top: 12px;
             flex-wrap: wrap;
         }
         .give-money-form input {
             flex: 1;
             padding: 10px;
             border-radius: 60px;
-            border: none;
+            border: 1px solid #e2e8f0;
+            background: white;
             outline: none;
+        }
+        body.dark .give-money-form input {
+            background: #1e293b;
+            border-color: #475569;
+            color: white;
         }
         .give-money-form button {
             width: auto;
@@ -143,15 +202,16 @@
             background: #10b981;
         }
 
-        .card, .login-card, .dashboard-card, .register-card, .settings-panel, .create-card-page, .legal-page {
-            background: rgba(255, 255, 255, 0.98);
-            border-radius: 32px;
-            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.3);
+        .card, .dashboard-card, .register-card, .login-card, .settings-panel, .create-card-page, .legal-page {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(2px);
+            border-radius: 40px;
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.2);
             padding: 28px 24px 32px;
         }
-        body.dark .card, body.dark .login-card, body.dark .dashboard-card, body.dark .register-card,
-        body.dark .settings-panel, body.dark .create-card-page, body.dark .legal-page {
-            background: rgba(30, 41, 59, 0.98);
+        body.dark .card, body.dark .dashboard-card, body.dark .register-card,
+        body.dark .login-card, body.dark .settings-panel, body.dark .create-card-page, body.dark .legal-page {
+            background: rgba(30, 41, 59, 0.96);
             color: #f1f5f9;
         }
 
@@ -185,37 +245,57 @@
             margin: 16px 0; 
             font-size: 0.85rem; 
         }
-        .legal-scroll p { margin-bottom: 12px; line-height: 1.4; }
         .modal-actions { display: flex; gap: 12px; margin-top: 20px; }
         .accept-btn { background: #10b981; }
         .decline-btn { background: #ef4444; }
 
         .bank-card {
             background: linear-gradient(135deg, #1E2A3E 0%, #0F1722 100%);
-            border-radius: 24px;
-            padding: 20px;
+            border-radius: 28px;
+            padding: 24px;
             color: white;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid rgba(255,255,255,0.2);
         }
-        .bank-card:hover { transform: translateY(-3px); }
-        .card-chip { display: flex; justify-content: space-between; margin-bottom: 24px; }
+        body.dark .bank-card {
+            background: linear-gradient(135deg, #2d3a5e 0%, #1e293b 100%);
+        }
+        .bank-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 30px -10px rgba(0,0,0,0.3);
+        }
+        .card-chip { display: flex; justify-content: space-between; margin-bottom: 28px; }
         .chip-icon {
             background: linear-gradient(145deg, #E9B35F, #D4A04A);
-            width: 45px; height: 35px;
-            border-radius: 8px;
+            width: 48px; height: 38px;
+            border-radius: 10px;
             position: relative;
         }
         .chip-icon:before {
             content: "";
             position: absolute;
-            width: 70%; height: 55%;
-            background: rgba(255,215,120,0.5);
-            top: 22%; left: 15%;
+            width: 70%;
+            height: 60%;
+            background: rgba(255,215,120,0.4);
+            top: 20%;
+            left: 15%;
             border-radius: 4px;
         }
-        .card-number { font-size: 1rem; letter-spacing: 1px; font-family: monospace; margin: 16px 0; }
+        .card-network {
+            font-size: 12px;
+            letter-spacing: 2px;
+            background: rgba(255,255,255,0.2);
+            padding: 6px 12px;
+            border-radius: 30px;
+        }
+        .card-number {
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            font-family: monospace;
+            margin: 20px 0;
+        }
         .card-details { display: flex; justify-content: space-between; font-size: 0.7rem; }
 
         .cards-switcher {
@@ -249,7 +329,7 @@
         .level-bar {
             background: #e2e8f0;
             border-radius: 60px;
-            height: 10px;
+            height: 8px;
             margin: 12px 0;
             overflow: hidden;
         }
@@ -272,7 +352,7 @@
         .input-group { margin-bottom: 18px; }
         label { font-weight: 600; font-size: 0.8rem; display: block; margin-bottom: 6px; color: #334155; }
         body.dark label { color: #cbd5e1; }
-        input {
+        input, select {
             width: 100%;
             padding: 12px 18px;
             border: 1.5px solid #e2e8f0;
@@ -280,9 +360,9 @@
             background: white;
             outline: none;
         }
-        body.dark input { background: #1e293b; border-color: #475569; color: #f1f5f9; }
+        body.dark input, body.dark select { background: #1e293b; border-color: #475569; color: #f1f5f9; }
         button {
-            background: #1f2937;
+            background: #0f1722;
             color: white;
             border: none;
             padding: 12px 20px;
@@ -291,24 +371,31 @@
             border-radius: 60px;
             cursor: pointer;
             margin-top: 8px;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: #2d3a4e;
+            transform: scale(0.98);
         }
         .danger-btn { background: #dc2626; }
         .back-btn { background: #64748b; margin-bottom: 20px; width: auto; padding: 10px 24px; display: inline-block; }
         .error-msg { background: #fee2e2; color: #b91c1c; padding: 10px; border-radius: 60px; font-size: 0.8rem; margin-top: 12px; text-align: center; }
         .success-msg { background: #dcfce7; color: #15803d; padding: 10px; border-radius: 60px; margin-top: 12px; text-align: center; }
-        .balance { background: #f1f5f9; padding: 16px 20px; border-radius: 24px; margin: 20px 0; display: flex; justify-content: space-between; align-items: center; }
+        .balance { background: #f8fafc; padding: 16px 20px; border-radius: 28px; margin: 20px 0; display: flex; justify-content: space-between; align-items: center; }
         body.dark .balance { background: #334155; }
-        .balance-amount { font-size: 1.8rem; font-weight: 800; }
+        .balance-amount { font-size: 1.8rem; font-weight: 800; color: #0f1722; }
         body.dark .balance-amount { color: #fbbf24; }
         .flex-buttons { display: flex; gap: 12px; margin-top: 12px; }
         .settings-btn { background: #8b5cf6; }
         .logout-btn { background: #475569; }
         .legal-footer { text-align: center; font-size: 0.7rem; margin-top: 20px; }
-        .legal-footer a { color: #667eea; cursor: pointer; margin: 0 8px; }
+        .legal-footer a { color: #3b82f6; cursor: pointer; margin: 0 8px; }
+        body.dark .legal-footer a { color: #60a5fa; }
         .privacy-badge { font-size: 0.65rem; text-align: center; margin-top: 16px; color: #64748b; }
-        .ncp-tag { font-size: 0.6rem; text-align: center; margin-top: 16px; color: rgba(255,255,255,0.5); }
+        .ncp-tag { font-size: 0.6rem; text-align: center; margin-top: 16px; color: #94a3b8; }
         .welcome-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-        .user-greeting { background: linear-gradient(135deg, #667eea, #764ba2); padding: 6px 14px; border-radius: 60px; font-size: 0.8rem; color: white; font-weight: 600; }
+        .user-greeting { background: #eef2ff; padding: 4px 12px; border-radius: 60px; font-size: 0.7rem; color: #1e40af; font-weight: 600; }
+        body.dark .user-greeting { background: #3b82f6; color: white; }
         .theme-toggle { width: 50px; height: 26px; background: #cbd5e1; border-radius: 30px; position: relative; cursor: pointer; }
         body.dark .theme-toggle { background: #3b82f6; }
         .theme-toggle:after { content: "☀️"; position: absolute; width: 22px; height: 22px; background: white; border-radius: 50%; top: 2px; left: 3px; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: 0.2s; }
@@ -317,7 +404,7 @@
         .card-type-option { background: linear-gradient(135deg, #1E2A3E, #0F1722); border-radius: 16px; padding: 12px; margin-bottom: 10px; cursor: pointer; border: 2px solid transparent; color: white; }
         .card-type-option.selected { border-color: #fbbf24; }
         .switch-mode { text-align: center; margin-top: 16px; }
-        .switch-mode a { color: #667eea; cursor: pointer; }
+        .switch-mode a { color: #3b82f6; cursor: pointer; }
         .transfer-section { background: #eef2ff; padding: 16px; border-radius: 24px; margin: 20px 0; }
         body.dark .transfer-section { background: #1e293b; }
         .transfer-title { font-weight: bold; margin-bottom: 12px; }
@@ -331,7 +418,6 @@
         .create-card-btn { background: #f59e0b; margin-top: 16px; }
         .card-click-hint { text-align: center; font-size: 0.65rem; margin-top: -12px; margin-bottom: 16px; opacity: 0.7; }
 
-        /* Маркетплейс */
         .market-balance {
             background: linear-gradient(135deg, #1E2A3E, #0F1722);
             border-radius: 20px;
@@ -342,11 +428,7 @@
             align-items: center;
             color: white;
         }
-        .market-balance span:last-child {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #fbbf24;
-        }
+        .market-balance span:last-child { font-size: 1.5rem; font-weight: bold; color: #fbbf24; }
         .marketplace-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -358,105 +440,93 @@
             border-radius: 20px;
             padding: 16px;
             transition: transform 0.2s;
+            border: 1px solid #e2e8f0;
         }
-        body.dark .shop-item {
-            background: #334155;
+        body.dark .shop-item { background: #334155; border-color: #475569; }
+        .shop-item:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .shop-item.owned { opacity: 0.7; background: #dcfce7; }
+        body.dark .shop-item.owned { background: #14532d; }
+        .shop-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .shop-item-icon { font-size: 1.8rem; }
+        .shop-item-price { font-size: 1.2rem; font-weight: bold; color: #f59e0b; }
+        .shop-item-title { font-size: 1rem; font-weight: bold; margin-bottom: 6px; }
+        .shop-item-desc { font-size: 0.7rem; color: #64748b; margin-bottom: 12px; }
+        .buy-btn { background: #10b981; padding: 8px; font-size: 0.8rem; margin-top: 0; }
+        .equip-btn { background: #3b82f6; padding: 8px; font-size: 0.8rem; margin-top: 0; }
+        .equipped-badge { background: #10b981; padding: 4px 12px; border-radius: 60px; font-size: 0.65rem; display: inline-block; margin-top: 8px; color: white; text-align: center; }
+        .section-title { font-size: 1.2rem; font-weight: bold; margin: 20px 0 12px 0; }
+        .demo-hint { font-size: 0.7rem; text-align: center; margin-top: 16px; color: #64748b; }
+
+        .investment-card {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 16px;
+            margin: 12px 0;
+            border: 1px solid #e2e8f0;
         }
-        .shop-item:hover {
-            transform: translateY(-3px);
+        body.dark .investment-card {
+            background: #1e293b;
+            border-color: #475569;
         }
-        .shop-item.owned {
-            opacity: 0.7;
-            background: #dcfce7;
+        .investment-header {
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #1e40af;
         }
-        body.dark .shop-item.owned {
-            background: #14532d;
+        body.dark .investment-header {
+            color: #a5b4fc;
         }
-        .shop-item-header {
+        .investment-row {
             display: flex;
             justify-content: space-between;
+            margin: 8px 0;
+            font-size: 0.85rem;
             align-items: center;
-            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
         }
-        .shop-item-icon {
-            font-size: 1.8rem;
-        }
-        .shop-item-price {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #f59e0b;
-        }
-        .shop-item-title {
-            font-size: 1rem;
-            font-weight: bold;
-            margin-bottom: 6px;
-        }
-        .shop-item-desc {
-            font-size: 0.7rem;
-            color: #64748b;
-            margin-bottom: 12px;
-        }
-        body.dark .shop-item-desc {
-            color: #94a3b8;
-        }
-        .buy-btn {
-            background: #10b981;
-            padding: 8px;
-            font-size: 0.8rem;
-            margin-top: 0;
-        }
-        .equip-btn {
-            background: #3b82f6;
-            padding: 8px;
-            font-size: 0.8rem;
-            margin-top: 0;
-        }
-        .equipped-badge {
-            background: #10b981;
-            padding: 4px 12px;
-            border-radius: 60px;
-            font-size: 0.65rem;
+        .back-to-main {
+            background: #e2e8f0;
+            margin-bottom: 20px;
+            width: auto;
+            padding: 8px 20px;
             display: inline-block;
-            margin-top: 8px;
-            text-align: center;
-            color: white;
+            border-radius: 60px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: #1e293b;
+            font-weight: 500;
         }
-        .section-title {
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin: 20px 0 12px 0;
-        }
-        .demo-hint {
-            font-size: 0.7rem;
-            text-align: center;
-            margin-top: 16px;
-            color: #64748b;
+        body.dark .back-to-main {
+            background: #334155;
+            color: #e2e8f0;
         }
     </style>
 </head>
 <body>
 <div class="app-container">
     <div class="ncp-logo">
-        <h1>🏦 NCPBANK</h1>
-        <p>Админ-панель + Маркетплейс + Переводы</p>
+        <h1>🏦 NCP BANK</h1>
+        <p>Независимый Центр Решений</p>
     </div>
     <div id="appRoot"></div>
     <div class="ncp-tag">⚡ Решения принимаются здесь. Где здесь — неизвестно.</div>
 </div>
 
 <script>
-    // ========== КЛЮЧИ ==========
-    const USERS_KEY = 'ncpbank_working_final';
-    const SESSION_KEY = 'ncpbank_session_working';
-    const CURRENT_USER_KEY = 'ncpbank_current_working';
-    const SETTINGS_KEY = 'ncpbank_settings_working';
-    const AGREEMENT_KEY = 'ncpbank_agreement_working';
+    // ========== ФИКСИРОВАННЫЕ КЛЮЧИ ==========
+    const USERS_KEY = 'ncpbank_official_v8';
+    const SESSION_KEY = 'ncpbank_session_official';
+    const CURRENT_USER_KEY = 'ncpbank_current_official';
+    const SETTINGS_KEY = 'ncpbank_settings_official';
+    const AGREEMENT_KEY = 'ncpbank_agreement_official';
     const ONLINE_KEY = 'ncpbank_online';
     const ADMIN_PASSWORD = '6369';
     const ADMIN_NICK = 'KacERORga';
+    const INFINITY_MONEY = 999999999;
 
-    // ========== УРОВНИ ==========
-    const LEVELS = [
+    // ========== СТАТУСЫ КЛИЕНТОВ ==========
+    const CLIENT_STATUSES = [
         { level: 1, name: 'Обычный', minTrans: 0, maxTrans: 0, emoji: '👤' },
         { level: 2, name: 'NовиCок', minTrans: 1, maxTrans: 4, emoji: '🌱' },
         { level: 3, name: 'Переводчик', minTrans: 5, maxTrans: 14, emoji: '🔄' },
@@ -469,50 +539,93 @@
         { level: 10, name: 'Супер пупер ультра супер тонкий Благодетель', minTrans: 500, maxTrans: Infinity, emoji: '🌟' }
     ];
 
-    // ========== ТОВАРЫ МАРКЕТПЛЕЙСА ==========
+    // ========== ПРЕМИУМ-УСЛУГИ МАРКЕТПЛЕЙСА ==========
     const MARKET_ITEMS = {
-        prefixes: [
-            { id: 'prefix_vip', name: '👑 VIP', desc: 'Префикс "VIP" перед ником', price: 500, type: 'prefix', value: '👑 VIP', emoji: '👑' },
-            { id: 'prefix_legend', name: '⭐ Легенда', desc: 'Префикс "Легенда" перед ником', price: 1000, type: 'prefix', value: '⭐ Легенда', emoji: '⭐' },
-            { id: 'prefix_whale', name: '🐋 Кит', desc: 'Префикс "Кит" перед ником', price: 2000, type: 'prefix', value: '🐋 Кит', emoji: '🐋' },
-            { id: 'prefix_god', name: '⚡ Бог NCP', desc: 'Префикс "Бог NCP" перед ником', price: 5000, type: 'prefix', value: '⚡ Бог NCP', emoji: '⚡' },
-            { id: 'prefix_kackoin', name: '💎 KacKoin King', desc: 'Префикс "KacKoin King" перед ником', price: 10000, type: 'prefix', value: '💎 KacKoin King', emoji: '💎' }
+        vipStatuses: [
+            { id: 'vip_silver', name: '🥈 Silver', desc: 'Серебряный статус', price: 500, type: 'prefix', value: '🥈 Silver', emoji: '🥈' },
+            { id: 'vip_gold', name: '🥇 Gold', desc: 'Золотой статус', price: 1000, type: 'prefix', value: '🥇 Gold', emoji: '🥇' },
+            { id: 'vip_platinum', name: '💎 Platinum', desc: 'Платиновый статус', price: 2000, type: 'prefix', value: '💎 Platinum', emoji: '💎' },
+            { id: 'vip_black', name: '🖤 Black Card', desc: 'Чёрная карта', price: 5000, type: 'prefix', value: '🖤 Black Card', emoji: '🖤' },
+            { id: 'vip_private', name: '🏦 Private', desc: 'Приватный банкинг', price: 10000, type: 'prefix', value: '🏦 Private', emoji: '🏦' }
         ],
-        cardSkins: [
-            { id: 'skin_gold', name: '🌟 Золотая', desc: 'Золотое сияние вокруг карты', price: 3000, type: 'skin', value: 'gold', effect: 'box-shadow: 0 0 20px gold;', emoji: '🌟' },
-            { id: 'skin_fire', name: '🔥 Огненная', desc: 'Пламя по краям карты', price: 5000, type: 'skin', value: 'fire', effect: 'box-shadow: 0 0 25px #ff4500;', emoji: '🔥' },
-            { id: 'skin_neon', name: '💜 Неоновая', desc: 'Неоновое свечение', price: 4000, type: 'skin', value: 'neon', effect: 'box-shadow: 0 0 20px #8b5cf6;', emoji: '💜' },
-            { id: 'skin_ice', name: '❄️ Ледяная', desc: 'Холодное свечение', price: 3500, type: 'skin', value: 'ice', effect: 'box-shadow: 0 0 20px #00bfff;', emoji: '❄️' }
+        cardDesigns: [
+            { id: 'design_gold', name: '✨ Gold Edition', desc: 'Золотое оформление', price: 3000, type: 'skin', value: 'gold', effect: 'box-shadow: 0 0 20px gold; border-color:#fbbf24;', emoji: '✨' },
+            { id: 'design_black', name: '🖤 Black Edition', desc: 'Чёрное оформление', price: 5000, type: 'skin', value: 'black', effect: 'box-shadow: 0 0 20px #6366f1; border-color:#818cf8;', emoji: '🖤' },
+            { id: 'design_carbon', name: '⚡ Carbon', desc: 'Карбоновое оформление', price: 4000, type: 'skin', value: 'carbon', effect: 'box-shadow: 0 0 20px #475569;', emoji: '⚡' }
         ],
-        effects: [
-            { id: 'effect_sparkles', name: '✨ Искры', desc: 'Искры вокруг карты', price: 2000, type: 'effect', value: 'sparkles', emoji: '✨' },
-            { id: 'effect_glow', name: '🌈 Радуга', desc: 'Радужное свечение', price: 3000, type: 'effect', value: 'rainbow', emoji: '🌈' },
-            { id: 'effect_stars', name: '⭐ Звёздная пыль', desc: 'Мерцающие звёзды', price: 4000, type: 'effect', value: 'stars', emoji: '⭐' }
+        tariffs: [
+            { id: 'tariff_plus', name: '📊 Тариф Плюс', desc: '+50% к доходам (24ч)', price: 1500, type: 'boost', value: '1.5', duration: 86400, emoji: '📊' },
+            { id: 'tariff_premium', name: '⭐ Тариф Премиум', desc: '+100% к доходам (24ч)', price: 3500, type: 'boost', value: '2', duration: 86400, emoji: '⭐' }
         ],
-        boosts: [
-            { id: 'boost_x2', name: '💪 Буст x2', desc: 'Удвоение дохода от переводов на 24ч', price: 1500, type: 'boost', value: 'x2', duration: 86400, emoji: '💪' },
-            { id: 'boost_x3', name: '🚀 Буст x3', desc: 'Тройной доход от переводов на 24ч', price: 3500, type: 'boost', value: 'x3', duration: 86400, emoji: '🚀' }
+        bonuses: [
+            { id: 'bonus_1000', name: '💰 Бонус 1 000', desc: '+1 000 NCP', price: 50000, type: 'money', value: 1000, emoji: '💰' },
+            { id: 'bonus_10000', name: '💰 Бонус 10 000', desc: '+10 000 NCP', price: 400000, type: 'money', value: 10000, emoji: '💰' },
+            { id: 'bonus_100000', name: '💰 Бонус 100 000', desc: '+100 000 NCP', price: 3500000, type: 'money', value: 100000, emoji: '💰' }
         ]
     };
 
-    const ALL_ITEMS = [...MARKET_ITEMS.prefixes, ...MARKET_ITEMS.cardSkins, ...MARKET_ITEMS.effects, ...MARKET_ITEMS.boosts];
+    const ALL_ITEMS = [...MARKET_ITEMS.vipStatuses, ...MARKET_ITEMS.cardDesigns, ...MARKET_ITEMS.tariffs, ...MARKET_ITEMS.bonuses];
+
+    // ========== ИНВЕСТИЦИОННЫЙ ПОРТФЕЛЬ ==========
+    const INVESTMENTS = {
+        deposits: [
+            { id: 'deposit_1000', name: '💰 Сберегательный счёт', amount: 1000, dailyPercent: 5, minDays: 1 },
+            { id: 'deposit_5000', name: '💰 Инвестиционный счёт', amount: 5000, dailyPercent: 5.5, minDays: 3 },
+            { id: 'deposit_10000', name: '💰 Премиум счёт', amount: 10000, dailyPercent: 6, minDays: 7 },
+            { id: 'deposit_50000', name: '💰 VIP счёт', amount: 50000, dailyPercent: 7, minDays: 14 },
+            { id: 'deposit_100000', name: '💰 Executive счёт', amount: 100000, dailyPercent: 8, minDays: 30 }
+        ],
+        assets: [
+            { id: 'asset_kiosk', name: '🏪 Киоск', price: 5000, income: 50 },
+            { id: 'asset_cafe', name: '☕ Кафе', price: 25000, income: 300 },
+            { id: 'asset_restaurant', name: '🍽️ Ресторан', price: 100000, income: 1500 },
+            { id: 'asset_hotel', name: '🏨 Отель', price: 500000, income: 8000 },
+            { id: 'asset_corporation', name: '🏢 Корпорация', price: 2000000, income: 35000 }
+        ],
+        mining: [
+            { id: 'mining_cpu', name: '💻 CPU ферма', price: 10000, income: 10 },
+            { id: 'mining_gpu', name: '🖥️ GPU ферма', price: 50000, income: 60 },
+            { id: 'mining_asics', name: '⚡ ASIC ферма', price: 250000, income: 350 },
+            { id: 'mining_quantum', name: '🌀 Квантовый майнинг', price: 1000000, income: 2000 }
+        ],
+        securities: [
+            { id: 'stock_ncp', name: '🏦 Акции NCPBANK', price: 10000, dividend: 50 },
+            { id: 'stock_tech', name: '💻 Акции TechCorp', price: 25000, dividend: 150 },
+            { id: 'stock_crypto', name: '🪙 Акции CryptoEx', price: 100000, dividend: 750 }
+        ],
+        realty: [
+            { id: 'realty_studio', name: '🏠 Студия', price: 50000, rent: 200 },
+            { id: 'realty_apartment', name: '🏢 Квартира', price: 200000, rent: 1000 },
+            { id: 'realty_house', name: '🏡 Дом', price: 800000, rent: 5000 },
+            { id: 'realty_mansion', name: '🏰 Особняк', price: 3000000, rent: 25000 }
+        ]
+    };
+
+    // ========== ПРОГРАММА ЛОЯЛЬНОСТИ ==========
+    const ACHIEVEMENTS = [
+        { id: 'first_transfer', name: 'Первый перевод', reward: 100, condition: (u) => u.totalTransactions >= 1 },
+        { id: 'ten_transfers', name: '10 переводов', reward: 500, condition: (u) => u.totalTransactions >= 10 },
+        { id: 'fifty_transfers', name: '50 переводов', reward: 2000, condition: (u) => u.totalTransactions >= 50 },
+        { id: 'hundred_transfers', name: '100 переводов', reward: 5000, condition: (u) => u.totalTransactions >= 100 },
+        { id: 'first_card', name: 'Первая карта', reward: 200, condition: (u) => u.cards?.length >= 1 },
+        { id: 'five_cards', name: '5 карт', reward: 1000, condition: (u) => u.cards?.length >= 5 },
+        { id: 'first_purchase', name: 'Первая покупка', reward: 300, condition: (u) => u.marketInventory?.length >= 1 },
+        { id: 'collector', name: 'Коллекционер', reward: 2000, condition: (u) => u.marketInventory?.length >= 10 },
+        { id: 'millionaire', name: 'Миллионер', reward: 10000, condition: (u) => u.balance >= 1000000 }
+    ];
 
     // ========== ОНЛАЙН-СЧЁТЧИК ==========
     let onlineCount = 0;
     function updateOnlineCounter() {
         const now = Date.now();
         const sessions = JSON.parse(localStorage.getItem(ONLINE_KEY) || '{}');
-        for (let id in sessions) {
-            if (now - sessions[id] > 5 * 60 * 1000) delete sessions[id];
-        }
+        for (let id in sessions) if (now - sessions[id] > 5 * 60 * 1000) delete sessions[id];
         const sessionId = sessionStorage.getItem('online_session_id');
         if (!sessionId) {
             const newId = Math.random().toString(36).substr(2, 9);
             sessionStorage.setItem('online_session_id', newId);
             sessions[newId] = now;
-        } else {
-            sessions[sessionId] = now;
-        }
+        } else sessions[sessionId] = now;
         localStorage.setItem(ONLINE_KEY, JSON.stringify(sessions));
         onlineCount = Object.keys(sessions).length;
         const counterEl = document.getElementById('onlineCounter');
@@ -545,7 +658,14 @@
     function getUserData() {
         const nick = loadSession();
         if (!nick) return null;
-        return loadUsers()[nick] || null;
+        const users = loadUsers();
+        const user = users[nick];
+        if (user && user.nickname === ADMIN_NICK && user.balance !== INFINITY_MONEY) {
+            user.balance = INFINITY_MONEY;
+            users[nick] = user;
+            saveUsers(users);
+        }
+        return users[nick] || null;
     }
     function updateUserData(data) {
         const nick = loadSession();
@@ -553,6 +673,7 @@
         const users = loadUsers();
         if (users[nick]) {
             users[nick] = { ...users[nick], ...data };
+            if (users[nick].nickname === ADMIN_NICK) users[nick].balance = INFINITY_MONEY;
             saveUsers(users);
             return true;
         }
@@ -560,52 +681,41 @@
     }
 
     function getCurrencySymbol() { return '-_-'; }
-    function getCurrencyName() { return 'KC-KacKoin'; }
+    function getCurrencyName() { return 'KacKoin'; }
 
-    function isAdmin() {
-        const user = getUserData();
-        return user && user.nickname === ADMIN_NICK;
-    }
-    
+    function isAdmin() { const user = getUserData(); return user && user.nickname === ADMIN_NICK; }
     function adminGiveMoney(toNick, amount) {
-        if (!isAdmin()) return { success: false, error: 'Доступ только у админа' };
+        if (!isAdmin()) return { success: false, error: 'Доступ только у администратора' };
         const users = loadUsers();
         const target = users[toNick];
-        if (!target) return { success: false, error: 'Пользователь не найден' };
+        if (!target) return { success: false, error: 'Клиент не найден' };
         target.balance = (target.balance || 0) + amount;
         saveUsers(users);
-        return { success: true, newBalance: target.balance };
+        return { success: true };
     }
 
-    // ========== МАРКЕТПЛЕЙС ФУНКЦИИ ==========
+    // ========== МАРКЕТПЛЕЙС ==========
     function purchaseItem(itemId) {
         const user = getUserData();
-        if (!user) return { success: false, error: 'Ошибка авторизации' };
-        
+        if (!user) return { success: false, error: 'Ошибка' };
         const item = ALL_ITEMS.find(i => i.id === itemId);
-        if (!item) return { success: false, error: 'Товар не найден' };
+        if (!item) return { success: false, error: 'Услуга не найдена' };
+        if (user.marketInventory?.includes(itemId)) return { success: false, error: 'Услуга уже активирована' };
+        if ((user.balance || 0) < item.price && user.nickname !== ADMIN_NICK) return { success: false, error: `Недостаточно средств` };
         
-        if (user.marketInventory?.includes(itemId)) {
-            return { success: false, error: 'Товар уже куплен' };
-        }
-        
-        if ((user.balance || 0) < item.price) {
-            return { success: false, error: `Недостаточно ${getCurrencyName()}. Нужно: ${item.price} ${getCurrencySymbol()}` };
-        }
-        
-        user.balance = (user.balance || 0) - item.price;
+        if (user.nickname !== ADMIN_NICK) user.balance -= item.price;
         if (!user.marketInventory) user.marketInventory = [];
         user.marketInventory.push(itemId);
         
         if (item.type === 'boost') {
             if (!user.activeBoosts) user.activeBoosts = [];
-            user.activeBoosts.push({
-                id: item.id,
-                value: item.value,
-                expiresAt: Date.now() + (item.duration * 1000)
-            });
+            user.activeBoosts.push({ id: item.id, value: parseFloat(item.value), expiresAt: Date.now() + (item.duration * 1000) });
+        }
+        if (item.type === 'money') {
+            user.balance += item.value;
         }
         
+        if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
         const users = loadUsers();
         users[user.nickname] = user;
         saveUsers(users);
@@ -618,14 +728,9 @@
         const item = ALL_ITEMS.find(i => i.id === itemId);
         if (!item) return false;
         if (!user.marketInventory?.includes(itemId)) return false;
-        
-        if (item.type === 'prefix') {
-            updateUserData({ equippedPrefix: itemId });
-        } else if (item.type === 'skin') {
-            updateUserData({ equippedSkin: itemId });
-        } else if (item.type === 'effect') {
-            updateUserData({ equippedEffect: itemId });
-        }
+        if (item.type === 'prefix') updateUserData({ equippedPrefix: itemId });
+        else if (item.type === 'skin') updateUserData({ equippedSkin: itemId });
+        else if (item.type === 'effect') updateUserData({ equippedEffect: itemId });
         return true;
     }
     
@@ -635,22 +740,129 @@
         const item = ALL_ITEMS.find(i => i.id === user.equippedPrefix);
         return item ? item.value : null;
     }
-    
     function getCardSkinEffect() {
         const user = getUserData();
         if (!user?.equippedSkin) return '';
         const item = ALL_ITEMS.find(i => i.id === user.equippedSkin);
         return item ? item.effect : '';
     }
+    function getActiveBoosts() {
+        const user = getUserData();
+        if (!user?.activeBoosts) return [];
+        const now = Date.now();
+        const active = user.activeBoosts.filter(b => b.expiresAt > now);
+        if (active.length !== user.activeBoosts.length) updateUserData({ activeBoosts: active });
+        return active;
+    }
+
+    // ========== ИНВЕСТИЦИИ ==========
+    function getDepositIncome(user) {
+        if (!user.activeDeposit) return 0;
+        const deposit = INVESTMENTS.deposits.find(d => d.id === user.activeDeposit.id);
+        if (!deposit) return 0;
+        const daysPassed = Math.floor((Date.now() - user.activeDeposit.startDate) / (1000 * 60 * 60 * 24));
+        if (daysPassed >= deposit.minDays) {
+            const income = user.activeDeposit.amount * (deposit.dailyPercent / 100) * daysPassed;
+            user.activeDeposit = null;
+            return income;
+        }
+        return 0;
+    }
+    
+    function getAssetsIncome(user) {
+        if (!user.assets) return 0;
+        let total = 0;
+        for (let a of user.assets) {
+            const asset = INVESTMENTS.assets.find(ast => ast.id === a.id);
+            if (asset) total += asset.income;
+        }
+        return total;
+    }
+    
+    function getMiningIncome(user) {
+        if (!user.mining) return 0;
+        let total = 0;
+        for (let m of user.mining) {
+            const mine = INVESTMENTS.mining.find(mn => mn.id === m.id);
+            if (mine) total += mine.income;
+        }
+        return total;
+    }
+    
+    function getSecuritiesIncome(user) {
+        if (!user.securities) return 0;
+        let total = 0;
+        for (let s of user.securities) {
+            const security = INVESTMENTS.securities.find(sec => sec.id === s.id);
+            if (security) total += security.dividend;
+        }
+        return total;
+    }
+    
+    function getRealtyIncome(user) {
+        if (!user.realty) return 0;
+        let total = 0;
+        for (let r of user.realty) {
+            const realty = INVESTMENTS.realty.find(re => re.id === r.id);
+            if (realty) total += realty.rent;
+        }
+        return total;
+    }
+    
+    function collectInvestmentIncome() {
+        const user = getUserData();
+        if (!user) return 0;
+        let totalIncome = 0;
+        totalIncome += getDepositIncome(user);
+        totalIncome += getAssetsIncome(user);
+        totalIncome += getMiningIncome(user);
+        totalIncome += getSecuritiesIncome(user);
+        totalIncome += getRealtyIncome(user);
+        if (totalIncome > 0) {
+            user.balance += totalIncome;
+            if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
+            updateUserData({ balance: user.balance, lastIncomeCollect: Date.now() });
+        }
+        return totalIncome;
+    }
+
+    // ========== ПРОГРАММА ЛОЯЛЬНОСТИ ==========
+    function checkAchievements() {
+        const user = getUserData();
+        if (!user) return;
+        if (!user.achievements) user.achievements = [];
+        let newReward = 0;
+        for (let a of ACHIEVEMENTS) {
+            if (!user.achievements.includes(a.id) && a.condition(user)) {
+                user.achievements.push(a.id);
+                newReward += a.reward;
+            }
+        }
+        if (newReward > 0) {
+            user.balance += newReward;
+            if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
+            updateUserData({ achievements: user.achievements, balance: user.balance });
+        }
+    }
+    
+    function getTopClients() {
+        const users = loadUsers();
+        const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+        const topUsers = Object.values(users).map(u => ({
+            nick: u.nickname,
+            weekTrans: (u.transactions || []).filter(t => t.date && new Date(t.date).getTime() > weekAgo && t.type === 'out').length
+        })).sort((a,b) => b.weekTrans - a.weekTrans).slice(0, 5);
+        return topUsers;
+    }
 
     // ========== КАРТЫ ==========
     const CARD_TYPES = [
-        { id: 'tooth', name: 'Зубодробительная', icons: '🦷💥🔨🩸', emoji: '🦷' },
-        { id: 'neuro', name: 'Нейрогоьная', icons: '🧠⚡💀🌀', emoji: '🧠' },
-        { id: 'black', name: 'NCP-BLACK', icons: '🖤🔪⬛🌑', emoji: '🖤' },
-        { id: 'solver', name: 'Решатель 3000', icons: '🤖⚙️🔧💡', emoji: '🤖' },
-        { id: 'crypto', name: 'Крипто-Колбаса', icons: '🌭📈🚀🌭', emoji: '🌭' },
-        { id: 'buro', name: 'Бюрократ Х2', icons: '📋📋🖊️📄', emoji: '📋' }
+        { id: 'classic', name: 'Classic', emoji: '💳' },
+        { id: 'gold', name: 'Gold', emoji: '🥇' },
+        { id: 'platinum', name: 'Platinum', emoji: '💎' },
+        { id: 'black', name: 'Black', emoji: '🖤' },
+        { id: 'corporate', name: 'Corporate', emoji: '🏢' },
+        { id: 'executive', name: 'Executive', emoji: '👑' }
     ];
     
     function addCard(cardTypeId, cardNumber, cvv) {
@@ -669,6 +881,7 @@
             expiry: '08/28'
         });
         if (user.cards.length === 1) user.activeCardIndex = 0;
+        if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
         const users = loadUsers();
         users[user.nickname] = user;
         saveUsers(users);
@@ -683,35 +896,31 @@
     
     function setActiveCard(index) {
         const user = getUserData();
-        if (user && user.cards[index]) {
-            updateUserData({ activeCardIndex: index });
-            renderApp();
-        }
+        if (user && user.cards[index]) updateUserData({ activeCardIndex: index });
+        renderApp();
     }
     
-    function getLevelInfo(transactions) {
-        for (let i = LEVELS.length - 1; i >= 0; i--) {
-            if (transactions >= LEVELS[i].minTrans) {
-                const current = LEVELS[i];
-                const next = LEVELS[i + 1] || null;
+    function getClientStatus(transactions) {
+        for (let i = CLIENT_STATUSES.length - 1; i >= 0; i--) {
+            if (transactions >= CLIENT_STATUSES[i].minTrans) {
+                const current = CLIENT_STATUSES[i];
+                const next = CLIENT_STATUSES[i + 1] || null;
                 const progress = next ? ((transactions - current.minTrans) / (next.minTrans - current.minTrans)) * 100 : 100;
                 return { current, next, progress: Math.min(100, progress) };
             }
         }
-        return { current: LEVELS[0], next: LEVELS[1], progress: 0 };
+        return { current: CLIENT_STATUSES[0], next: CLIENT_STATUSES[1], progress: 0 };
     }
 
-    // ========== ПЕРЕВОДЫ (РАБОЧИЕ) ==========
-    function generateContractNumber() {
-        return `NCP-${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}-${Math.floor(Math.random()*10000).toString().padStart(4,'0')}`;
-    }
+    // ========== ПЕРЕВОДЫ ==========
+    function generateContractNumber() { return `NCP-${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}-${Math.floor(Math.random()*10000).toString().padStart(4,'0')}`; }
     
     function createTransferLink(amount, note) {
         const user = getUserData();
         if (!user) return null;
-        if ((user.balance || 0) < amount) return { error: `Недостаточно ${getCurrencyName()}` };
+        if ((user.balance || 0) < amount && user.nickname !== ADMIN_NICK) return { error: `Недостаточно средств` };
         const contract = generateContractNumber();
-        const link = `${window.location.origin}${window.location.pathname}#transfer/${encodeURIComponent(user.nickname)}/${encodeURIComponent(contract)}/${amount}/${encodeURIComponent(note || '')}`;
+        const link = `${location.origin}${location.pathname}#transfer/${encodeURIComponent(user.nickname)}/${encodeURIComponent(contract)}/${amount}/${encodeURIComponent(note || '')}`;
         return { link, contractNumber: contract, note: note || '' };
     }
     
@@ -719,40 +928,36 @@
         const current = getUserData();
         if (!current) return { success: false, error: 'Ошибка авторизации' };
         if (fromNick === current.nickname) return { success: false, error: 'Нельзя перевести самому себе' };
-        
         const users = loadUsers();
         const fromUser = users[fromNick];
         if (!fromUser) return { success: false, error: 'Отправитель не найден' };
-        if ((fromUser.balance || 0) < amount) return { success: false, error: 'Недостаточно средств у отправителя' };
+        if ((fromUser.balance || 0) < amount && fromNick !== ADMIN_NICK) return { success: false, error: 'Недостаточно средств' };
         
-        const txFrom = { id: Date.now(), type: 'out', to: current.nickname, amount, date: new Date().toLocaleString(), method: 'link', contractNumber: contract, note };
-        const txTo = { id: Date.now(), type: 'in', from: fromUser.nickname, amount, date: new Date().toLocaleString(), method: 'link', contractNumber: contract, note };
+        const boosts = getActiveBoosts();
+        let multiplier = 1;
+        for (let b of boosts) multiplier *= b.value;
+        const hour = new Date().getHours();
+        if (hour >= 19 && hour < 20) multiplier *= 1.5;
+        const day = new Date().getDay();
+        if (day === 6 || day === 0) multiplier *= 2;
+        const boostedAmount = amount * multiplier;
         
-        fromUser.balance = (fromUser.balance || 0) - amount;
-        current.balance = (current.balance || 0) + amount;
+        if (fromNick !== ADMIN_NICK) fromUser.balance -= amount;
+        current.balance += boostedAmount;
         fromUser.totalTransactions = (fromUser.totalTransactions || 0) + 1;
         current.totalTransactions = (current.totalTransactions || 0) + 1;
         
-        fromUser.transactions = [txFrom, ...(fromUser.transactions || [])].slice(0, 50);
-        current.transactions = [txTo, ...(current.transactions || [])].slice(0, 50);
+        if (fromNick === ADMIN_NICK) fromUser.balance = INFINITY_MONEY;
+        if (current.nickname === ADMIN_NICK) current.balance = INFINITY_MONEY;
+        
+        fromUser.transactions = [{ id: Date.now(), type: 'out', to: current.nickname, amount, date: new Date().toLocaleString(), method: 'link', contractNumber: contract, note }, ...(fromUser.transactions || [])].slice(0,50);
+        current.transactions = [{ id: Date.now(), type: 'in', from: fromUser.nickname, amount: boostedAmount, date: new Date().toLocaleString(), method: 'link', contractNumber: contract, note }, ...(current.transactions || [])].slice(0,50);
         
         users[fromUser.nickname] = fromUser;
         users[current.nickname] = current;
         saveUsers(users);
-        
-        return { success: true, amount, from: fromUser.nickname, contract };
-    }
-
-    function completeTask() {
-        const user = getUserData();
-        if (!user || user.completedTasks?.visitNcp) return false;
-        window.open('https://ncpbank.vercel.app/', '_blank');
-        updateUserData({ 
-            balance: (user.balance || 0) + 10, 
-            completedTasks: { visitNcp: true } 
-        });
-        renderApp();
-        return true;
+        checkAchievements();
+        return { success: true, amount: boostedAmount, from: fromUser.nickname, contract };
     }
 
     function formatCardNumber(num) {
@@ -761,119 +966,41 @@
         return parts.length === 4 ? `${parts[0]} **** **** ${parts[3]}` : num;
     }
     
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;' }[m]));
-    }
+    function escapeHtml(str) { return str?.replace(/[&<>]/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;' }[m])) || ''; }
 
-    // ========== UI СОСТОЯНИЕ ==========
-    let currentPage = 'dashboard';
-    let showSettings = false, showCreateCard = false, showLegal = false;
+    // ========== UI ==========
+    let currentTab = 'dashboard';
+    let showSettings = false, showCreateCard = false, showAgreementModal = false;
     let currentView = 'login';
-    let showAgreementModal = false;
     let selectedCardType = CARD_TYPES[0].id;
     let currentLink = null, currentContract = null, currentNote = '';
-    let appSettings = { theme: 'light', currency: 'KACKOIN' };
+    let appSettings = { theme: 'light' };
     
-    function loadSettings() {
-        const saved = localStorage.getItem(SETTINGS_KEY);
-        if (saved) { appSettings = JSON.parse(saved); applyTheme(); }
-    }
+    function loadSettings() { const saved = localStorage.getItem(SETTINGS_KEY); if (saved) { appSettings = JSON.parse(saved); applyTheme(); } }
     function saveSettings() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(appSettings)); applyTheme(); }
-    function applyTheme() {
-        if (appSettings.theme === 'dark') document.body.classList.add('dark');
-        else document.body.classList.remove('dark');
-    }
+    function applyTheme() { if (appSettings.theme === 'dark') document.body.classList.add('dark'); else document.body.classList.remove('dark'); }
 
-    function getOnlineBadge() {
-        if (!isAdmin()) return '';
-        return `<div class="online-counter"><span class="online-dot"></span> 👥 Онлайн: <span id="onlineCounter">${onlineCount}</span></div>`;
-    }
+    function getOnlineBadge() { if (!isAdmin()) return ''; return `<div class="online-counter"><span class="online-dot"></span> 👥 Онлайн: <span id="onlineCounter">${onlineCount}</span></div>`; }
     
     function renderAdminPanel() {
         const users = loadUsers();
-        const userList = Object.values(users).map(u => u.nickname);
-        
-        return `
-            <div class="admin-panel">
-                <div class="admin-title">
-                    <span>👑</span> Админ-панель KacERORga
-                </div>
-                <div class="admin-stats">
-                    <div>📊 Всего пользователей: ${Object.keys(users).length}</div>
-                    <div>💰 Общий баланс: ${Object.values(users).reduce((sum, u) => sum + (u.balance || 0), 0).toFixed(2)} -_-</div>
-                    <div>💳 Всего карт: ${Object.values(users).reduce((sum, u) => sum + (u.cards?.length || 0), 0)}</div>
-                    <div>📜 Всего переводов: ${Object.values(users).reduce((sum, u) => sum + (u.totalTransactions || 0), 0)}</div>
-                </div>
-                <div style="font-weight:bold; margin-bottom:8px;">💰 Выдача денег пользователю</div>
-                <div class="give-money-form">
-                    <input type="text" id="adminGiveNick" placeholder="Ник пользователя" list="userList">
-                    <datalist id="userList">${userList.map(n => `<option value="${escapeHtml(n)}">`).join('')}</datalist>
-                    <input type="number" id="adminGiveAmount" placeholder="Сумма" step="0.01">
-                    <button id="adminGiveBtn">Выдать</button>
-                </div>
-                <div id="adminMsg"></div>
-            </div>
-        `;
-    }
-
-    function renderMarketplace() {
-        const user = getUserData();
-        if (!user) return '<div>Ошибка загрузки</div>';
-        
-        const inventory = user.marketInventory || [];
-        const balance = (user.balance || 0).toFixed(2);
-        const currencySymbol = getCurrencySymbol();
-        
-        function renderSection(title, items) {
-            if (!items.length) return '';
-            return `
-                <div class="section-title">${title}</div>
-                <div class="marketplace-grid">
-                    ${items.map(item => {
-                        const owned = inventory.includes(item.id);
-                        const isEquipped = (item.type === 'prefix' && user.equippedPrefix === item.id) ||
-                                          (item.type === 'skin' && user.equippedSkin === item.id) ||
-                                          (item.type === 'effect' && user.equippedEffect === item.id);
-                        return `
-                            <div class="shop-item ${owned ? 'owned' : ''}">
-                                <div class="shop-item-header">
-                                    <span class="shop-item-icon">${item.emoji}</span>
-                                    <span class="shop-item-price">${item.price} ${currencySymbol}</span>
-                                </div>
-                                <div class="shop-item-title">${item.name}</div>
-                                <div class="shop-item-desc">${item.desc}</div>
-                                ${!owned ? 
-                                    `<button class="buy-btn" data-id="${item.id}">Купить →</button>` :
-                                    `<button class="equip-btn" data-id="${item.id}">⚙️ Экипировать</button>
-                                     ${isEquipped ? '<div class="equipped-badge">✅ Экипировано</div>' : ''}`
-                                }
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-            `;
-        }
-        
         return `
             <div class="dashboard-card">
-                <button id="backToDashboardBtn" class="back-btn">← Назад в банк</button>
-                
-                <div class="market-balance">
-                    <span>💰 Твой баланс</span>
-                    <span>${balance} ${currencySymbol}</span>
-                </div>
-                
-                <h2>🛍️ Маркетплейс NCP</h2>
-                <p style="margin-bottom: 16px; color: #64748b;">Трать KacKoin на крутые штуки!</p>
-                
-                ${renderSection('👑 Префиксы', MARKET_ITEMS.prefixes)}
-                ${renderSection('💳 Скины карт', MARKET_ITEMS.cardSkins)}
-                ${renderSection('✨ Эффекты', MARKET_ITEMS.effects)}
-                ${renderSection('🚀 Бусты (24ч)', MARKET_ITEMS.boosts)}
-                
-                <div class="demo-hint">
-                    💡 Активные бусты удваивают/утраивают доход от переводов!
+                <div class="back-to-main" id="backToMainBtn">← На главную</div>
+                <div class="admin-panel">
+                    <div class="admin-title">👑 Админ-панель KacERORga</div>
+                    <div class="admin-stats">
+                        <div>📊 Всего клиентов: ${Object.keys(users).length}</div>
+                        <div>💰 Общий баланс: ${Object.values(users).reduce((s,u) => s + (u.balance||0), 0).toFixed(2)} -_-</div>
+                        <div>💳 Активных карт: ${Object.values(users).reduce((s,u) => s + (u.cards?.length||0), 0)}</div>
+                        <div>📜 Всего транзакций: ${Object.values(users).reduce((s,u) => s + (u.totalTransactions||0), 0)}</div>
+                    </div>
+                    <div class="give-money-form">
+                        <input type="text" id="adminGiveNick" placeholder="Ник клиента">
+                        <input type="number" id="adminGiveAmount" placeholder="Сумма">
+                        <button id="adminGiveBtn">Выдать средства</button>
+                    </div>
+                    <div id="adminMsg"></div>
                 </div>
             </div>
         `;
@@ -883,125 +1010,197 @@
         const user = getUserData();
         if (!user) return renderLoginScreen();
         
-        const currencySymbol = getCurrencySymbol();
+        const symbol = getCurrencySymbol();
         const balance = (user.balance || 0).toFixed(2);
         const activeCard = getActiveCard();
         const prefix = getEquippedPrefix();
         const displayName = prefix ? `${prefix} ${user.nickname}` : user.nickname;
         const cardEffect = getCardSkinEffect();
-        const levelInfo = getLevelInfo(user.totalTransactions || 0);
+        const status = getClientStatus(user.totalTransactions || 0);
+        const cardsListHtml = (user.cards || []).map((c, i) => `<div class="card-tab ${i === (user.activeCardIndex||0) ? 'active' : ''}" data-card-idx="${i}">${c.emoji} ${c.typeName}</div>`).join('');
         
-        const cardsListHtml = (user.cards || []).map((card, idx) => `<div class="card-tab ${idx === (user.activeCardIndex || 0) ? 'active' : ''}" data-card-idx="${idx}">${card.emoji} ${card.typeName}</div>`).join('');
+        let cardHtml = activeCard ? `<div id="clickableCard" class="bank-card" style="${cardEffect}"><div class="card-chip"><div class="chip-icon"></div><div class="card-network">NCP</div></div><div class="card-number">${formatCardNumber(activeCard.cardNumber)}</div><div class="card-details"><div class="card-holder"><span>Card Holder</span><p>${escapeHtml(user.nickname.toUpperCase())}</p></div><div class="card-expiry"><span>Expires</span><p>${activeCard.expiry}</p></div></div></div><div class="card-click-hint">👆 Нажмите на карту для деталей</div>` : `<div class="no-card-message">💳 Нет активных карт<br><button id="createCardBtn" class="create-card-btn">✨ Выпустить карту</button></div>`;
         
-        let cardHtml = '';
-        if (activeCard) {
-            cardHtml = `<div id="clickableCard" class="bank-card" style="${cardEffect}">
-                <div class="card-chip"><div class="chip-icon"></div><div class="card-network">NCP</div></div>
-                <div class="card-number">${formatCardNumber(activeCard.cardNumber)}</div>
-                <div class="card-details">
-                    <div class="card-holder"><span>Card Holder</span><p>${escapeHtml(user.nickname.toUpperCase())}</p></div>
-                    <div class="card-expiry"><span>Expires</span><p>${activeCard.expiry || '08/28'}</p></div>
-                </div>
-            </div>
-            <div class="card-click-hint">👆 Нажмите на карту для деталей</div>`;
-        } else {
-            cardHtml = `<div class="no-card-message">💳 Нет карт<br><button id="createCardBtn" class="create-card-btn">✨ Создать первую карту</button></div>`;
-        }
-        
-        let nextLevelHtml = '';
-        if (levelInfo.next) {
-            const needed = levelInfo.next.minTrans - (user.totalTransactions || 0);
-            nextLevelHtml = `<div style="font-size:0.65rem; color:#64748b; margin-top:4px;">📈 До следующего уровня: ${needed} переводов</div>`;
-        } else {
-            nextLevelHtml = `<div style="font-size:0.65rem; color:#10b981; margin-top:4px;">🏆 Максимальный уровень достигнут!</div>`;
-        }
-        
-        // Блок перевода (рабочий)
         let linkHtml = '';
         if (currentLink) {
-            linkHtml = `<div class="link-box">
-                <div>📄 Договор: ${currentContract}</div>
-                ${currentNote ? `<div>📝 Комментарий: ${escapeHtml(currentNote)}</div>` : ''}
-                <textarea rows="2" readonly id="transferLink">${currentLink}</textarea>
-                <button id="copyLinkBtn" class="copy-btn">📋 Копировать ссылку</button>
-                <button id="clearLinkBtn" style="background:#6b7280;">Очистить</button>
-            </div>`;
+            linkHtml = `<div class="link-box"><div>📄 Договор: ${currentContract}</div>${currentNote ? `<div>📝 ${escapeHtml(currentNote)}</div>` : ''}<textarea rows="2" readonly id="transferLink">${currentLink}</textarea><button id="copyLinkBtn" class="copy-btn">📋 Копировать</button><button id="clearLinkBtn">Очистить</button></div>`;
         }
-        
-        const adminHtml = isAdmin() ? renderAdminPanel() : '';
         
         return `
             <div class="dashboard-card">${getOnlineBadge()}
-                <div class="welcome-header">
-                    <h2>🏦 Привет, ${escapeHtml(displayName)}</h2>
-                    <div class="user-greeting"><span class="level-emoji">${levelInfo.current.emoji}</span> ${levelInfo.current.name}</div>
+                <div class="nav-tabs">
+                    <div class="nav-tab ${currentTab === 'dashboard' ? 'active' : ''}" data-tab="dashboard">🏦 Главная</div>
+                    <div class="nav-tab ${currentTab === 'investments' ? 'active' : ''}" data-tab="investments">📈 Инвестиции</div>
+                    <div class="nav-tab ${currentTab === 'loyalty' ? 'active' : ''}" data-tab="loyalty">🎯 Лояльность</div>
+                    <div class="nav-tab ${currentTab === 'market' ? 'active' : ''}" data-tab="market">🛍️ Маркетплейс</div>
+                    ${isAdmin() ? `<div class="nav-tab ${currentTab === 'admin' ? 'active' : ''}" data-tab="admin">👑 Админка</div>` : ''}
                 </div>
-                <div class="level-info">
-                    <span>⭐ Уровень ${levelInfo.current.level} из ${LEVELS.length}</span>
-                    <span>📊 ${user.totalTransactions || 0} переводов</span>
-                </div>
-                <div class="level-bar"><div class="level-progress" style="width:${levelInfo.progress}%"></div></div>
-                ${nextLevelHtml}
+                <div class="welcome-header"><h2>🏦 Привет, ${escapeHtml(displayName)}</h2><div class="user-greeting">${status.current.emoji} ${status.current.name}</div></div>
+                <div class="level-info"><span>⭐ Статус: ${status.current.name}</span><span>📊 ${user.totalTransactions || 0} транзакций</span></div>
+                <div class="level-bar"><div class="level-progress" style="width:${status.progress}%"></div></div>
                 <div class="cards-switcher">${cardsListHtml}<div id="addCardBtn" class="add-card-btn">+ Новая карта</div></div>
                 ${cardHtml}
-                <div class="balance">
-                    <span>💰 Баланс</span>
-                    <span class="balance-amount">${balance} ${currencySymbol}</span>
-                </div>
+                <div class="balance"><span>💰 Баланс</span><span class="balance-amount">${balance} ${symbol}</span></div>
                 <div class="transfer-section">
                     <div class="transfer-title">🔗 Перевод по ссылке</div>
                     <div class="input-group"><input type="number" id="transferAmount" placeholder="Сумма" step="0.01"></div>
-                    <div class="input-group"><input type="text" id="transferNote" placeholder="Комментарий"></div>
+                    <div class="input-group"><input type="text" id="transferNote" placeholder="Назначение"></div>
                     <button id="createLinkBtn">✨ Создать ссылку</button>
                     ${linkHtml}
                 </div>
-                <div class="flex-buttons">
-                    <button id="marketplaceBtn" style="background: #f59e0b;">🛍️ Маркетплейс</button>
-                    <button id="settingsBtn" class="settings-btn">⚙️</button>
-                    <button id="logoutBtn" class="logout-btn">🚪</button>
+                <div class="flex-buttons"><button id="settingsBtn" class="settings-btn">⚙️</button><button id="logoutBtn" class="logout-btn">🚪</button></div>
+                <div class="legal-footer"><a id="showAgreementBtn">📜 Договор</a></div>
+                <div class="privacy-badge">🔐 KC-KacKoin (-_-)</div>
+            </div>
+        `;
+    }
+
+    function renderInvestments() {
+        const user = getUserData();
+        if (!user) return '';
+        collectInvestmentIncome();
+        
+        return `
+            <div class="dashboard-card">
+                <div class="back-to-main" id="backToMainBtn">← На главную</div>
+                <h2>📈 Инвестиционный портфель</h2>
+                
+                <div class="investment-card">
+                    <div class="investment-header">💰 Сберегательные счета</div>
+                    ${INVESTMENTS.deposits.map(d => `
+                        <div class="investment-row">
+                            <span>${d.name} (${d.dailyPercent}%/день)</span>
+                            <span>${d.amount} ${getCurrencySymbol()}</span>
+                            <button class="buy-deposit" data-id="${d.id}" data-amount="${d.amount}" style="width:auto; padding:4px 12px;">Открыть</button>
+                        </div>
+                    `).join('')}
+                    ${user.activeDeposit ? `<div class="investment-row" style="margin-top:8px; background:#334155; padding:8px; border-radius:12px; color:#f1f5f9;">📌 Активный счёт: ${user.activeDeposit.amount} ${getCurrencySymbol()}</div>` : ''}
                 </div>
-                ${adminHtml}
-                <div class="legal-footer"><a id="showAgreementBtn">📜 Соглашение</a></div>
-                <div class="privacy-badge">🔐 Пароль в SHA-256 | KC-KacKoin (-_-)</div>
+                
+                <div class="investment-card">
+                    <div class="investment-header">🏪 Бизнес-активы</div>
+                    ${INVESTMENTS.assets.map(a => {
+                        const owned = user.assets?.some(ass => ass.id === a.id);
+                        return `<div class="investment-row"><span>${a.name} (+${a.income} ${getCurrencySymbol()}/день)</span><span>${a.price} ${getCurrencySymbol()}</span><button class="buy-asset" data-id="${a.id}" data-price="${a.price}" ${owned ? 'disabled' : ''} style="width:auto; padding:4px 12px;">${owned ? '✅' : 'Купить'}</button></div>`;
+                    }).join('')}
+                </div>
+                
+                <div class="investment-card">
+                    <div class="investment-header">💻 Майнинг-фермы</div>
+                    ${INVESTMENTS.mining.map(m => {
+                        const owned = user.mining?.some(mn => mn.id === m.id);
+                        return `<div class="investment-row"><span>${m.name} (+${m.income} ${getCurrencySymbol()}/день)</span><span>${m.price} ${getCurrencySymbol()}</span><button class="buy-mining" data-id="${m.id}" data-price="${m.price}" ${owned ? 'disabled' : ''} style="width:auto; padding:4px 12px;">${owned ? '✅' : 'Купить'}</button></div>`;
+                    }).join('')}
+                </div>
+                
+                <div class="investment-card">
+                    <div class="investment-header">📈 Ценные бумаги</div>
+                    ${INVESTMENTS.securities.map(s => {
+                        const owned = user.securities?.some(sec => sec.id === s.id);
+                        return `<div class="investment-row"><span>${s.name} (+${s.dividend} ${getCurrencySymbol()}/день)</span><span>${s.price} ${getCurrencySymbol()}</span><button class="buy-security" data-id="${s.id}" data-price="${s.price}" ${owned ? 'disabled' : ''} style="width:auto; padding:4px 12px;">${owned ? '✅' : 'Купить'}</button></div>`;
+                    }).join('')}
+                </div>
+                
+                <div class="investment-card">
+                    <div class="investment-header">🏠 Недвижимость</div>
+                    ${INVESTMENTS.realty.map(r => {
+                        const owned = user.realty?.some(re => re.id === r.id);
+                        return `<div class="investment-row"><span>${r.name} (+${r.rent} ${getCurrencySymbol()}/день)</span><span>${r.price} ${getCurrencySymbol()}</span><button class="buy-realty" data-id="${r.id}" data-price="${r.price}" ${owned ? 'disabled' : ''} style="width:auto; padding:4px 12px;">${owned ? '✅' : 'Инвестировать'}</button></div>`;
+                    }).join('')}
+                </div>
+                <div id="investMsg"></div>
+            </div>
+        `;
+    }
+
+    function renderLoyalty() {
+        const user = getUserData();
+        if (!user) return '';
+        const symbol = getCurrencySymbol();
+        const topClients = getTopClients();
+        
+        return `
+            <div class="dashboard-card">
+                <div class="back-to-main" id="backToMainBtn">← На главную</div>
+                <h2>🎯 Программа лояльности</h2>
+                
+                <div class="investment-card">
+                    <div class="investment-header">🏆 Достижения</div>
+                    ${ACHIEVEMENTS.map(a => `<div class="investment-row"><span>${a.name}</span><span>${user.achievements?.includes(a.id) ? '✅ +' + a.reward + ' ' + symbol : '🔒'}</span></div>`).join('')}
+                </div>
+                
+                <div class="investment-card">
+                    <div class="investment-header">📅 Ежедневный бонус</div>
+                    <div class="investment-row"><button id="claimDailyBonus" style="width:auto;">Получить бонус</button></div>
+                    <div class="investment-row"><span>Недельный квест: 10 переводов</span><span>Прогресс: ${user.weekTransfers || 0}/10</span>${user.weekTransfers >= 10 && !user.weekQuestClaimed ? '<button id="claimWeekQuestBtn" style="width:auto;">Забрать 2000</button>' : user.weekQuestClaimed ? '✅ Получено' : ''}</div>
+                </div>
+                
+                <div class="investment-card">
+                    <div class="investment-header">🏅 Топ клиентов недели</div>
+                    ${topClients.map((u,i) => `<div class="investment-row"><span>${i+1}. ${escapeHtml(u.nick)}</span><span>📤 ${u.weekTrans} переводов</span></div>`).join('')}
+                    ${topClients.length === 0 ? '<div>Нет данных</div>' : ''}
+                </div>
+                
+                <div class="investment-card">
+                    <div class="investment-header">🔗 Реферальная программа</div>
+                    <div style="background:#e2e8f0; padding:12px; border-radius:12px; word-break:break-all; color:#1e293b; font-family:monospace; font-size:0.75rem;">${location.origin}${location.pathname}?ref=${encodeURIComponent(user.nickname)}</div>
+                    <div class="investment-row" style="margin-top:8px;">Приглашайте друзей → 10% от их переводов</div>
+                </div>
+                
+                <div id="loyaltyMsg"></div>
+            </div>
+        `;
+    }
+
+    function renderMarketplace() {
+        const user = getUserData();
+        if (!user) return '';
+        const symbol = getCurrencySymbol();
+        const inventory = user.marketInventory || [];
+        
+        function renderSection(title, items) {
+            return `<div class="section-title">${title}</div><div class="marketplace-grid">${items.map(item => {
+                const owned = inventory.includes(item.id);
+                const isEquipped = (item.type === 'prefix' && user.equippedPrefix === item.id) || (item.type === 'skin' && user.equippedSkin === item.id);
+                return `<div class="shop-item ${owned ? 'owned' : ''}"><div class="shop-item-header"><span class="shop-item-icon">${item.emoji}</span><span class="shop-item-price">${item.price} ${symbol}</span></div><div class="shop-item-title">${item.name}</div><div class="shop-item-desc">${item.desc}</div>${!owned ? `<button class="buy-btn" data-id="${item.id}">Купить</button>` : `<button class="equip-btn" data-id="${item.id}">Экипировать</button>${isEquipped ? '<div class="equipped-badge">✅ Экипировано</div>' : ''}</div>`}</div>`;
+            }).join('')}</div>`;
+        }
+        
+        return `
+            <div class="dashboard-card">
+                <div class="back-to-main" id="backToMainBtn">← На главную</div>
+                <div class="market-balance"><span>💰 Доступно средств</span><span>${(user.balance || 0).toFixed(2)} ${symbol}</span></div>
+                <h2>🛍️ Маркетплейс NCP</h2>
+                ${renderSection('👑 Премиум-статусы', MARKET_ITEMS.vipStatuses)}
+                ${renderSection('💳 Оформление карт', MARKET_ITEMS.cardDesigns)}
+                ${renderSection('📊 Тарифные планы', MARKET_ITEMS.tariffs)}
+                ${renderSection('💰 Денежные бонусы', MARKET_ITEMS.bonuses)}
+                <div class="demo-hint">🏆 Приобретите все услуги для эксклюзивного статуса</div>
             </div>
         `;
     }
 
     function renderLoginScreen() {
-        return `<div class="login-card"><form id="loginForm"><div class="input-group"><label>👤 Ник</label><input type="text" id="loginNickname" maxlength="20"></div><div class="input-group"><label>🔒 Пароль</label><input type="password" id="loginPassword"></div><button type="submit">Войти →</button></form><div class="switch-mode"><a id="switchToRegister">📝 Регистрация</a></div><div class="legal-footer"><a id="showAgreementBtn">📜 Соглашение</a></div></div>`;
+        return `<div class="login-card"><form id="loginForm"><div class="input-group"><label>👤 Ник</label><input type="text" id="loginNickname"></div><div class="input-group"><label>🔒 Пароль</label><input type="password" id="loginPassword"></div><button type="submit">Войти →</button></form><div class="switch-mode"><a id="switchToRegister">📝 Регистрация</a></div><div class="legal-footer"><a id="showAgreementBtn">📜 Соглашение</a></div></div>`;
     }
 
     function renderRegisterScreen() {
-        return `<div class="register-card"><form id="registerForm"><div class="input-group"><label>👤 Ник (3-20)</label><input type="text" id="regNickname" maxlength="20"></div><div class="input-group"><label>🔒 Пароль (мин.3)</label><input type="password" id="regPassword"></div><button type="submit">Создать аккаунт →</button></form><div class="switch-mode"><a id="switchToLogin">🔙 Войти</a></div></div>`;
+        return `<div class="register-card"><form id="registerForm"><div class="input-group"><label>👤 Ник (3-20)</label><input type="text" id="regNickname"></div><div class="input-group"><label>🔒 Пароль (мин.3)</label><input type="password" id="regPassword"></div><button type="submit">Создать аккаунт →</button></form><div class="switch-mode"><a id="switchToLogin">🔙 Войти</a></div></div>`;
     }
 
     function renderAgreementModal() {
-        return `<div class="modal-overlay"><div class="modal-content"><h2>📜 Добро пожаловать в NCPBANK!</h2><div class="legal-scroll">
-            <p><strong>Правила NCPBANK:</strong></p>
-            <p>1. NCPBANK — это развлекательный мем-проект (шутка). Валюта KC-KacKoin (-_-) не имеет реальной денежной ценности. Вывод в реальные деньги невозможен.</p>
-            <p>2. Регистрация только с анонимным ником. Реальные имена (Александр, Дмитрий, Екатерина, Сергей и т.д.) и фамилии (Иванов, Петров и т.д.) ЗАПРЕЩЕНЫ для сохранения анонимности.</p>
-            <p>3. Пароли хранятся в зашифрованном виде (SHA-256). Восстановление пароля невозможно из-за анонимности сервиса.</p>
-            <p>4. Максимум 5 карт на одного пользователя. Номер карты и CVV вы придумываете сами при создании.</p>
-            <p>5. Уровни повышаются за количество переводов. Чем больше переводов — тем выше статус.</p>
-            <p>6. В Маркетплейсе можно покупать префиксы, скины карт, эффекты и бусты за внутреннюю валюту KacKoin (-_-).</p>
-            <p>7. Сервис предназначен для лиц старше 18 лет. Используя NCPBANK, вы подтверждаете, что достигли совершеннолетия.</p>
-            <p>8. Запрещено использование NCPBANK для любых противоправных действий, включая мошенничество.</p>
-            <p>9. Администрация NCPBANK оставляет за собой право изменять условия без предварительного уведомления.</p>
-            <p>10. Все данные хранятся локально в вашем браузере (localStorage). Никакие данные не передаются на сервер и не собираются (кроме анонимной статистики Яндекс.Метрики).</p>
-            <p>11. Вы можете удалить все свои данные в любой момент кнопкой «Сбросить данные».</p>
-            <p>12. Решения принимаются здесь. Где здесь — неизвестно.</p>
-        </div><div class="modal-actions"><button id="acceptBtn" class="accept-btn">✅ Принимаю условия</button><button id="declineBtn" class="decline-btn">❌ Отказаться</button></div></div></div>`;
+        return `<div class="modal-overlay"><div class="modal-content"><h2>📜 Добро пожаловать в NCPBANK!</h2><div class="legal-scroll"><p><strong>Правила NCPBANK:</strong></p><p>1. Мем-проект, валюта KC-KacKoin (-_-) без реальной ценности</p><p>2. Только анонимные ники, реальные имена запрещены</p><p>3. Пароли в SHA-256</p><p>4. Максимум 5 карт</p><p>5. Инвестиции приносят пассивный доход</p><p>6. Маркетплейс: премиум-статусы, оформление, бонусы</p><p>7. Программа лояльности: достижения, ежедневный бонус, квесты</p><p>8. Сервис для лиц 18+</p><p>9. Решения принимаются здесь. Где здесь — неизвестно.</p></div><div class="modal-actions"><button id="acceptBtn" class="accept-btn">✅ Принимаю</button><button id="declineBtn" class="decline-btn">❌ Отказаться</button></div></div></div>`;
     }
 
     function renderSettings() {
-        return `<div class="settings-panel"><div style="display:flex; justify-content:space-between;"><h2>⚙️ Настройки</h2><button id="closeSettingsBtn" class="back-btn" style="width:auto;">←</button></div><div class="setting-item"><span>🌙 Тёмная тема</span><div class="theme-toggle" id="themeToggle"></div></div><button id="resetAllDataBtn" class="danger-btn" style="margin-top:20px;">🗑️ Сбросить все данные</button><div class="legal-footer"><a id="showAgreementBtn">📜 Соглашение</a></div></div>`;
+        return `<div class="settings-panel"><div style="display:flex; justify-content:space-between;"><h2>⚙️ Настройки</h2><button id="closeSettingsBtn" class="back-btn">←</button></div><div class="setting-item"><span>🌙 Тёмная тема</span><div class="theme-toggle" id="themeToggle"></div></div><button id="resetAllDataBtn" class="danger-btn">🗑️ Сбросить данные</button><div class="legal-footer"><a id="showAgreementBtn">📜 Соглашение</a></div></div>`;
     }
 
     function renderCreateCardPage() {
-        return `<div class="create-card-page"><button id="backFromCreateBtn" class="back-btn">← Назад</button><h2>💳 Новая карта</h2><div style="margin-bottom:16px;"><label>🎨 Тип карты</label><div id="cardTypesList">${CARD_TYPES.map(c => `<div class="card-type-option ${selectedCardType === c.id ? 'selected' : ''}" data-card-id="${c.id}">${c.emoji} ${c.name}</div>`).join('')}</div></div>
-        <div class="input-group"><input type="text" id="cardNumberInput" placeholder="Номер карты (16 цифр)" maxlength="19"></div>
-        <div class="input-group"><input type="text" id="cvvInput" placeholder="CVV (3 цифры)" maxlength="3"></div>
-        <button id="confirmCreateCardBtn" style="background:#10b981;">✨ Создать карту</button><div id="createCardMsg"></div></div>`;
+        return `<div class="create-card-page"><button id="backFromCreateBtn" class="back-btn">← Назад</button><h2>💳 Новая карта</h2><div id="cardTypesList" style="display:flex; gap:8px; flex-wrap:wrap; margin:16px 0;">${CARD_TYPES.map(c => `<div class="card-type-option ${selectedCardType === c.id ? 'selected' : ''}" data-card-id="${c.id}">${c.emoji} ${c.name}</div>`).join('')}</div>
+        <div class="input-group"><input type="text" id="cardNumberInput" placeholder="Номер карты (16 цифр)"></div>
+        <div class="input-group"><input type="text" id="cvvInput" placeholder="CVV (3 цифры)"></div>
+        <button id="confirmCreateCardBtn">✨ Создать</button><div id="createCardMsg"></div></div>`;
     }
 
     // ========== ОБРАБОТЧИКИ ==========
@@ -1015,7 +1214,7 @@
             if (!user) { alert('❌ Пользователь не найден'); return; }
             if (user.passwordHash !== await hashPassword(pass)) { alert('❌ Неверный пароль'); return; }
             saveSession(nick);
-            currentPage = 'dashboard';
+            currentTab = 'dashboard';
             renderApp();
         });
         document.getElementById('switchToRegister')?.addEventListener('click', () => { currentView = 'register'; renderApp(); });
@@ -1027,10 +1226,10 @@
             e.preventDefault();
             const nick = document.getElementById('regNickname').value.trim();
             const pass = document.getElementById('regPassword').value;
-            if (nick.length < 3) { alert('❌ Ник минимум 3 символа'); return; }
-            if (pass.length < 3) { alert('❌ Пароль минимум 3 символа'); return; }
+            if (nick.length < 3) { alert('❌ Ник минимум 3'); return; }
+            if (pass.length < 3) { alert('❌ Пароль минимум 3'); return; }
             const users = loadUsers();
-            if (users[nick]) { alert('❌ Ник уже занят'); return; }
+            if (users[nick]) { alert('❌ Ник занят'); return; }
             users[nick] = {
                 nickname: nick,
                 passwordHash: await hashPassword(pass),
@@ -1040,126 +1239,189 @@
                 totalTransactions: 0,
                 marketInventory: [],
                 activeBoosts: [],
+                achievements: [],
+                assets: [],
+                mining: [],
+                securities: [],
+                realty: [],
+                streak: 0,
                 createdAt: Date.now(),
                 transactions: []
             };
             saveUsers(users);
             saveSession(nick);
-            currentPage = 'dashboard';
+            currentTab = 'dashboard';
             renderApp();
         });
         document.getElementById('switchToLogin')?.addEventListener('click', () => { currentView = 'login'; renderApp(); });
     }
     
     function attachDashboardHandlers() {
-        document.getElementById('logoutBtn')?.addEventListener('click', () => {
-            localStorage.removeItem(SESSION_KEY);
-            localStorage.removeItem(CURRENT_USER_KEY);
-            currentPage = 'dashboard';
-            renderApp();
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => { currentTab = tab.dataset.tab; renderApp(); });
         });
-        document.getElementById('marketplaceBtn')?.addEventListener('click', () => { currentPage = 'marketplace'; renderApp(); });
+        document.querySelectorAll('.back-to-main').forEach(btn => {
+            btn.addEventListener('click', () => { currentTab = 'dashboard'; renderApp(); });
+        });
+        document.getElementById('logoutBtn')?.addEventListener('click', () => { localStorage.removeItem(SESSION_KEY); localStorage.removeItem(CURRENT_USER_KEY); renderApp(); });
         document.getElementById('settingsBtn')?.addEventListener('click', () => { showSettings = true; renderApp(); });
         document.getElementById('createCardBtn')?.addEventListener('click', () => { showCreateCard = true; renderApp(); });
         document.getElementById('addCardBtn')?.addEventListener('click', () => { showCreateCard = true; renderApp(); });
-        document.getElementById('clickableCard')?.addEventListener('click', () => { alert('💳 Детали карты (в разработке)'); });
-        document.querySelectorAll('.card-tab').forEach(el => {
-            el.addEventListener('click', () => setActiveCard(parseInt(el.dataset.cardIdx)));
-        });
+        document.querySelectorAll('.card-tab').forEach(el => { el.addEventListener('click', () => setActiveCard(parseInt(el.dataset.cardIdx))); });
         
-        // СОЗДАНИЕ ССЫЛКИ НА ПЕРЕВОД
         document.getElementById('createLinkBtn')?.addEventListener('click', () => {
             const amount = parseFloat(document.getElementById('transferAmount')?.value);
             const note = document.getElementById('transferNote')?.value || '';
             if (!amount || amount <= 0) { alert('Введите сумму'); return; }
             const user = getUserData();
-            if ((user.balance || 0) < amount) { alert(`Недостаточно ${getCurrencyName()}`); return; }
+            if (user.balance < amount && user.nickname !== ADMIN_NICK) { alert(`Недостаточно средств`); return; }
             const res = createTransferLink(amount, note);
             if (res.error) alert(res.error);
-            else { 
-                currentLink = res.link; 
-                currentContract = res.contractNumber; 
-                currentNote = res.note; 
-                renderApp(); 
-            }
+            else { currentLink = res.link; currentContract = res.contractNumber; currentNote = res.note; renderApp(); }
         });
-        
-        document.getElementById('clearLinkBtn')?.addEventListener('click', () => { 
-            currentLink = null; 
-            currentContract = null; 
-            currentNote = ''; 
-            renderApp(); 
-        });
-        
+        document.getElementById('clearLinkBtn')?.addEventListener('click', () => { currentLink = null; currentContract = null; currentNote = ''; renderApp(); });
         document.getElementById('copyLinkBtn')?.addEventListener('click', () => {
             const ta = document.getElementById('transferLink');
-            if (ta) { ta.select(); document.execCommand('copy'); alert('✅ Ссылка скопирована! Отправь её другу.'); }
+            if (ta) { ta.select(); document.execCommand('copy'); alert('✅ Ссылка скопирована'); }
         });
         
-        // ОБРАБОТКА ПЕРЕХОДА ПО ССЫЛКЕ
-        if (window.location.hash && window.location.hash.startsWith('#transfer/')) {
-            const parts = window.location.hash.split('/');
+        if (location.hash && location.hash.startsWith('#transfer/')) {
+            const parts = location.hash.split('/');
             if (parts.length >= 5) {
                 const fromNick = decodeURIComponent(parts[1]);
                 const contract = decodeURIComponent(parts[2]);
                 const amount = parseFloat(parts[3]);
                 const note = decodeURIComponent(parts[4] || '');
                 const cur = getUserData();
-                if (!cur) alert('❌ Войдите в аккаунт, чтобы получить перевод');
-                else if (fromNick === cur.nickname) alert('❌ Нельзя перевести самому себе');
-                else if (confirm(`📥 Получить перевод ${amount} ${getCurrencySymbol()} от ${fromNick}? ${note ? `\n📝 ${note}` : ''}`)) {
+                if (!cur) alert('❌ Войдите в аккаунт');
+                else if (fromNick === cur.nickname) alert('❌ Нельзя себе');
+                else if (confirm(`📥 Получить ${amount} ${getCurrencySymbol()} от ${fromNick}?`)) {
                     const res = executeTransfer(fromNick, amount, contract, note);
-                    alert(res.success ? `✅ Получено ${res.amount} ${getCurrencySymbol()} от ${res.from}` : `❌ ${res.error}`);
-                    window.location.hash = '';
+                    alert(res.success ? `✅ Получено ${res.amount} ${getCurrencySymbol()}` : `❌ ${res.error}`);
+                    location.hash = '';
                     renderApp();
-                } else window.location.hash = '';
+                } else location.hash = '';
             }
         }
         
+        // Инвестиции
+        document.querySelectorAll('.buy-deposit')?.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const user = getUserData();
+                const amount = parseInt(btn.dataset.amount);
+                if (user.balance >= amount || user.nickname === ADMIN_NICK) {
+                    if (user.nickname !== ADMIN_NICK) user.balance -= amount;
+                    if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
+                    user.activeDeposit = { id: btn.dataset.id, amount: amount, startDate: Date.now() };
+                    updateUserData({ balance: user.balance, activeDeposit: user.activeDeposit });
+                    renderApp();
+                } else alert('Недостаточно средств');
+            });
+        });
+        document.querySelectorAll('.buy-asset')?.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const user = getUserData();
+                const price = parseInt(btn.dataset.price);
+                if (user.balance >= price || user.nickname === ADMIN_NICK) {
+                    if (user.nickname !== ADMIN_NICK) user.balance -= price;
+                    if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
+                    if (!user.assets) user.assets = [];
+                    user.assets.push({ id: btn.dataset.id });
+                    updateUserData({ balance: user.balance, assets: user.assets });
+                    renderApp();
+                } else alert('Недостаточно средств');
+            });
+        });
+        document.querySelectorAll('.buy-mining')?.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const user = getUserData();
+                const price = parseInt(btn.dataset.price);
+                if (user.balance >= price || user.nickname === ADMIN_NICK) {
+                    if (user.nickname !== ADMIN_NICK) user.balance -= price;
+                    if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
+                    if (!user.mining) user.mining = [];
+                    user.mining.push({ id: btn.dataset.id });
+                    updateUserData({ balance: user.balance, mining: user.mining });
+                    renderApp();
+                } else alert('Недостаточно средств');
+            });
+        });
+        document.querySelectorAll('.buy-security')?.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const user = getUserData();
+                const price = parseInt(btn.dataset.price);
+                if (user.balance >= price || user.nickname === ADMIN_NICK) {
+                    if (user.nickname !== ADMIN_NICK) user.balance -= price;
+                    if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
+                    if (!user.securities) user.securities = [];
+                    user.securities.push({ id: btn.dataset.id });
+                    updateUserData({ balance: user.balance, securities: user.securities });
+                    renderApp();
+                } else alert('Недостаточно средств');
+            });
+        });
+        document.querySelectorAll('.buy-realty')?.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const user = getUserData();
+                const price = parseInt(btn.dataset.price);
+                if (user.balance >= price || user.nickname === ADMIN_NICK) {
+                    if (user.nickname !== ADMIN_NICK) user.balance -= price;
+                    if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
+                    if (!user.realty) user.realty = [];
+                    user.realty.push({ id: btn.dataset.id });
+                    updateUserData({ balance: user.balance, realty: user.realty });
+                    renderApp();
+                } else alert('Недостаточно средств');
+            });
+        });
+        
+        // Лояльность
+        document.getElementById('claimDailyBonus')?.addEventListener('click', () => {
+            const user = getUserData();
+            const lastBonus = user.lastBonusDate;
+            const today = new Date().toDateString();
+            if (lastBonus === today) { alert('Бонус уже получен сегодня'); return; }
+            const bonus = Math.floor(Math.random() * 500) + 50;
+            user.balance += bonus;
+            if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
+            user.lastBonusDate = today;
+            updateUserData({ balance: user.balance, lastBonusDate: user.lastBonusDate });
+            alert(`✅ Получено ${bonus} ${getCurrencySymbol()}`);
+            renderApp();
+        });
+        document.getElementById('claimWeekQuestBtn')?.addEventListener('click', () => {
+            const user = getUserData();
+            if (user.weekTransfers >= 10 && !user.weekQuestClaimed) {
+                user.balance += 2000;
+                if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
+                user.weekQuestClaimed = true;
+                updateUserData({ balance: user.balance, weekQuestClaimed: true });
+                alert('✅ Получено 2000 -_- за квест недели!');
+                renderApp();
+            }
+        });
+        
+        // Маркетплейс
+        document.querySelectorAll('.buy-btn')?.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const result = purchaseItem(btn.dataset.id);
+                if (result.success) alert(`✅ Куплено: ${result.item.name}`);
+                else alert(`❌ ${result.error}`);
+                renderApp();
+            });
+        });
+        document.querySelectorAll('.equip-btn')?.forEach(btn => {
+            btn.addEventListener('click', () => { equipItem(btn.dataset.id); renderApp(); });
+        });
+        
+        // Админка
         document.getElementById('adminGiveBtn')?.addEventListener('click', () => {
             const nick = document.getElementById('adminGiveNick')?.value.trim();
             const amount = parseFloat(document.getElementById('adminGiveAmount')?.value);
-            if (!nick || !amount || amount <= 0) {
-                document.getElementById('adminMsg').innerHTML = '<div class="error-msg">❌ Введите ник и сумму</div>';
-                return;
-            }
+            if (!nick || !amount) { alert('Введите данные'); return; }
             const res = adminGiveMoney(nick, amount);
-            if (res.success) {
-                document.getElementById('adminMsg').innerHTML = `<div class="success-msg">✅ Выдано ${amount} ${getCurrencySymbol()} пользователю ${escapeHtml(nick)}</div>`;
-                document.getElementById('adminGiveNick').value = '';
-                document.getElementById('adminGiveAmount').value = '';
-                renderApp();
-            } else {
-                document.getElementById('adminMsg').innerHTML = `<div class="error-msg">❌ ${res.error}</div>`;
-            }
-            setTimeout(() => { const msg = document.getElementById('adminMsg'); if(msg) msg.innerHTML = ''; }, 3000);
-        });
-    }
-    
-    function attachMarketplaceHandlers() {
-        document.getElementById('backToDashboardBtn')?.addEventListener('click', () => { currentPage = 'dashboard'; renderApp(); });
-        
-        document.querySelectorAll('.buy-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const itemId = btn.dataset.id;
-                const result = purchaseItem(itemId);
-                if (result.success) {
-                    alert(`✅ Куплено: ${result.item.name}!`);
-                    renderApp();
-                } else {
-                    alert(`❌ ${result.error}`);
-                }
-            });
-        });
-        
-        document.querySelectorAll('.equip-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const itemId = btn.dataset.id;
-                if (equipItem(itemId)) {
-                    alert('✅ Экипировано!');
-                    renderApp();
-                }
-            });
+            alert(res.success ? `✅ Выдано ${amount} ${getCurrencySymbol()}` : `❌ ${res.error}`);
+            renderApp();
         });
     }
     
@@ -1177,28 +1439,15 @@
             if (!cvv || cvv.length !== 3 || !/^\d+$/.test(cvv)) { msg.innerHTML = '<div class="error-msg">❌ 3 цифры CVV</div>'; return; }
             const formatted = clean.replace(/(\d{4})(?=\d)/g, '$1 ');
             const res = addCard(selectedCardType, formatted, cvv);
-            if (res.success) {
-                msg.innerHTML = '<div class="success-msg">✅ Карта создана!</div>';
-                setTimeout(() => { showCreateCard = false; renderApp(); }, 1000);
-            } else {
-                msg.innerHTML = `<div class="error-msg">❌ ${res.error}</div>`;
-            }
+            if (res.success) { msg.innerHTML = '<div class="success-msg">✅ Карта создана</div>'; setTimeout(() => { showCreateCard = false; renderApp(); }, 1000); }
+            else msg.innerHTML = `<div class="error-msg">❌ ${res.error}</div>`;
         });
     }
     
     function attachSettingsHandlers() {
         document.getElementById('closeSettingsBtn')?.addEventListener('click', () => { showSettings = false; renderApp(); });
-        document.getElementById('themeToggle')?.addEventListener('click', () => {
-            appSettings.theme = appSettings.theme === 'light' ? 'dark' : 'light';
-            saveSettings();
-            renderApp();
-        });
-        document.getElementById('resetAllDataBtn')?.addEventListener('click', () => {
-            if (confirm('⚠️ Удалить ВСЕ данные?')) {
-                localStorage.clear();
-                location.reload();
-            }
-        });
+        document.getElementById('themeToggle')?.addEventListener('click', () => { appSettings.theme = appSettings.theme === 'light' ? 'dark' : 'light'; saveSettings(); renderApp(); });
+        document.getElementById('resetAllDataBtn')?.addEventListener('click', () => { if(confirm('Удалить все данные?')) { localStorage.clear(); location.reload(); } });
         document.getElementById('showAgreementBtn')?.addEventListener('click', () => { showAgreementModal = true; renderApp(); });
     }
     
@@ -1213,18 +1462,23 @@
             users[ADMIN_NICK] = {
                 nickname: ADMIN_NICK,
                 passwordHash: await hashPassword(ADMIN_PASSWORD),
-                balance: 999999,
+                balance: INFINITY_MONEY,
                 cards: [],
                 activeCardIndex: 0,
-                totalTransactions: 999,
+                totalTransactions: 1000,
                 marketInventory: [],
+                achievements: [],
+                assets: [],
+                mining: [],
+                securities: [],
+                realty: [],
                 activeBoosts: [],
-                completedTasks: { visitNcp: true },
+                streak: 100,
                 createdAt: Date.now(),
                 transactions: []
             };
             saveUsers(users);
-            console.log('✅ Админ KacERORga создан с паролем 6369');
+            console.log('✅ Админ KacERORga создан с бесконечными деньгами и максимальным уровнем');
         }
     }
 
@@ -1246,9 +1500,18 @@
             } else if (showCreateCard) {
                 root.innerHTML = renderCreateCardPage();
                 attachCreateCardHandlers();
-            } else if (currentPage === 'marketplace') {
+            } else if (currentTab === 'investments') {
+                root.innerHTML = renderInvestments();
+                attachDashboardHandlers();
+            } else if (currentTab === 'loyalty') {
+                root.innerHTML = renderLoyalty();
+                attachDashboardHandlers();
+            } else if (currentTab === 'market') {
                 root.innerHTML = renderMarketplace();
-                attachMarketplaceHandlers();
+                attachDashboardHandlers();
+            } else if (currentTab === 'admin' && isAdmin()) {
+                root.innerHTML = renderAdminPanel();
+                attachDashboardHandlers();
             } else {
                 root.innerHTML = renderDashboard();
                 attachDashboardHandlers();
@@ -1267,14 +1530,10 @@
         if (counterEl) counterEl.textContent = onlineCount;
     }
 
-    // Инициализация
     loadSettings();
     if (!localStorage.getItem(AGREEMENT_KEY)) showAgreementModal = true;
     ensureAdminExists().then(() => renderApp());
-    setInterval(() => {
-        const counterEl = document.getElementById('onlineCounter');
-        if (counterEl) counterEl.textContent = onlineCount;
-    }, 1000);
+    setInterval(() => { const ce = document.getElementById('onlineCounter'); if(ce) ce.textContent = onlineCount; }, 1000);
 </script>
 </body>
 </html>
