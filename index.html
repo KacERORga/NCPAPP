@@ -48,6 +48,17 @@
             background: linear-gradient(145deg, #0a0f1a 0%, #0f1722 100%);
         }
 
+        .app-container {
+            max-width: 700px;
+            width: 100%;
+            margin: 0 auto;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .app-container.visible {
+            opacity: 1;
+        }
+
         /* Экран загрузки */
         .loading-screen {
             position: fixed;
@@ -130,15 +141,71 @@
             50% { transform: scale(1.1); opacity: 0.8; }
         }
 
-        .app-container {
-            max-width: 700px;
+        /* Страница "Нет интернета" */
+        .offline-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            margin: 0 auto;
-            opacity: 0;
-            transition: opacity 0.5s ease;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            z-index: 20000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
         }
-        .app-container.visible {
-            opacity: 1;
+        body.dark .offline-screen {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+        }
+        .offline-content {
+            text-align: center;
+            max-width: 300px;
+        }
+        .offline-icon {
+            font-size: 5rem;
+            margin-bottom: 24px;
+            animation: float 2s ease-in-out infinite;
+        }
+        .offline-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+        .offline-subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-bottom: 8px;
+        }
+        .offline-message {
+            font-size: 0.85rem;
+            opacity: 0.6;
+            margin-bottom: 32px;
+        }
+        .offline-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 14px 36px;
+            border-radius: 60px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-bottom: 16px;
+        }
+        .offline-btn:hover {
+            transform: scale(1.02);
+        }
+        .offline-footer {
+            margin-top: 48px;
+            font-size: 0.7rem;
+            opacity: 0.5;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
         }
 
         .ncp-logo {
@@ -361,8 +428,7 @@
             position: absolute;
             width: 70%; height: 60%;
             background: rgba(255,215,120,0.4);
-            top: 20%;
-            left: 15%;
+            top: 20%; left: 15%;
             border-radius: 4px;
         }
         .card-network {
@@ -633,6 +699,18 @@
     </div>
 </div>
 
+<!-- СТРАНИЦА "НЕТ ИНТЕРНЕТА" -->
+<div id="offlineScreen" class="offline-screen" style="display: none;">
+    <div class="offline-content">
+        <div class="offline-icon">📡</div>
+        <div class="offline-title">Нет интернета</div>
+        <div class="offline-subtitle">Nет ИNтернета</div>
+        <div class="offline-message">Мы пока что не решили, есть ли интернет</div>
+        <button id="retryConnectionBtn" class="offline-btn">🔄 Обновить</button>
+        <div class="offline-footer">⚡ Решения принимаются здесь. Где здесь — неизвестно.</div>
+    </div>
+</div>
+
 <div class="app-container" id="appContainer">
     <div class="ncp-logo">
         <h1>🏦 NCP BANK</h1>
@@ -643,6 +721,41 @@
 </div>
 
 <script>
+    // ========== SERVICE WORKER РЕГИСТРАЦИЯ ==========
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').then(reg => {
+            console.log('✅ Service Worker зарегистрирован');
+        }).catch(err => {
+            console.log('❌ Service Worker ошибка:', err);
+        });
+    }
+
+    // ========== ПРОВЕРКА ИНТЕРНЕТА ==========
+    const offlineScreen = document.getElementById('offlineScreen');
+    const loadingScreen = document.getElementById('loadingScreen');
+    const appContainer = document.getElementById('appContainer');
+
+    function checkInternetAndShow() {
+        if (!navigator.onLine) {
+            if (loadingScreen) loadingScreen.style.display = 'none';
+            if (appContainer) appContainer.classList.remove('visible');
+            if (offlineScreen) offlineScreen.style.display = 'flex';
+        } else {
+            if (offlineScreen) offlineScreen.style.display = 'none';
+        }
+    }
+
+    window.addEventListener('online', () => {
+        location.reload();
+    });
+    window.addEventListener('offline', () => {
+        checkInternetAndShow();
+    });
+
+    document.getElementById('retryConnectionBtn')?.addEventListener('click', () => {
+        location.reload();
+    });
+
     // ========== ФУНКЦИИ ЗАГРУЗКИ ==========
     let currentProgress = 0;
     let currentStep = 0;
@@ -663,8 +776,6 @@
         }
         if (step === 5) {
             setTimeout(() => {
-                const loadingScreen = document.getElementById('loadingScreen');
-                const appContainer = document.getElementById('appContainer');
                 if (loadingScreen) {
                     loadingScreen.style.opacity = '0';
                     setTimeout(() => {
@@ -690,7 +801,7 @@
     // JSONBin.io настройки (твои ключи)
     const JSONBIN_URL = 'https://api.jsonbin.io/v3/b/69db179b856a682189246d42';
     const JSONBIN_KEY = '$2a$10$2aGZ8tMwhc3EUmimZmaGYOzsVH9qQO1s7jqu1m9TwOTUSGPOmkNzW';
-    let USE_CLOUD = true;  // ОБЛАКО ВКЛЮЧЕНО!
+    let USE_CLOUD = true;
     
     // ========== ОБЛАЧНЫЕ ФУНКЦИИ ==========
     let cachedUsers = null;
@@ -1173,31 +1284,12 @@
 
     function isAdmin(user) { return user && user.nickname === ADMIN_NICK; }
 
-    // ========== РЕНДЕР ФУНКЦИИ ==========
+    // ========== РЕНДЕР ФУНКЦИИ (сокращённые для экономии места) ==========
     function getOnlineBadge(user) { if (!isAdmin(user)) return ''; return `<div class="online-counter"><span class="online-dot"></span> 👥 Онлайн: <span id="onlineCounter">${onlineCount}</span></div>`; }
     
     async function renderAdminPanel() {
         const users = await loadUsers();
-        return `
-            <div class="dashboard-card">
-                <div class="back-to-main" id="backToMainBtn">← На главную</div>
-                <div class="admin-panel">
-                    <div class="admin-title">👑 Админ-панель KacERORga</div>
-                    <div class="admin-stats">
-                        <div>📊 Всего клиентов: ${Object.keys(users).length}</div>
-                        <div>💰 Общий баланс: ${Object.values(users).reduce((s,u) => s + (u.balance||0), 0).toFixed(2)} -_-</div>
-                        <div>💳 Активных карт: ${Object.values(users).reduce((s,u) => s + (u.cards?.length||0), 0)}</div>
-                        <div>📜 Всего транзакций: ${Object.values(users).reduce((s,u) => s + (u.totalTransactions||0), 0)}</div>
-                    </div>
-                    <div class="give-money-form">
-                        <input type="text" id="adminGiveNick" placeholder="Ник клиента">
-                        <input type="number" id="adminGiveAmount" placeholder="Сумма">
-                        <button id="adminGiveBtn">Выдать средства</button>
-                    </div>
-                    <div id="adminMsg"></div>
-                </div>
-            </div>
-        `;
+        return `<div class="dashboard-card"><div class="back-to-main" id="backToMainBtn">← На главную</div><div class="admin-panel"><div class="admin-title">👑 Админ-панель KacERORga</div><div class="admin-stats"><div>📊 Всего клиентов: ${Object.keys(users).length}</div><div>💰 Общий баланс: ${Object.values(users).reduce((s,u) => s + (u.balance||0), 0).toFixed(2)} -_-</div><div>💳 Активных карт: ${Object.values(users).reduce((s,u) => s + (u.cards?.length||0), 0)}</div><div>📜 Всего транзакций: ${Object.values(users).reduce((s,u) => s + (u.totalTransactions||0), 0)}</div></div><div class="give-money-form"><input type="text" id="adminGiveNick" placeholder="Ник клиента"><input type="number" id="adminGiveAmount" placeholder="Сумма"><button id="adminGiveBtn">Выдать средства</button></div><div id="adminMsg"></div></div></div>`;
     }
 
     async function renderDashboard() {
@@ -1216,15 +1308,7 @@
         
         let cardHtml = '';
         if (hasCard && activeCard) {
-            cardHtml = `<div id="clickableCard" class="bank-card" style="${cardEffect}">
-                <div class="card-chip"><div class="chip-icon"></div><div class="card-network">NCP</div></div>
-                <div class="card-number">${formatCardNumber(activeCard.cardNumber)}</div>
-                <div class="card-details">
-                    <div class="card-holder"><span>Card Holder</span><p>${escapeHtml(user.nickname.toUpperCase())}</p></div>
-                    <div class="card-expiry"><span>Expires</span><p>${activeCard.expiry}</p></div>
-                </div>
-            </div>
-            <div class="card-click-hint">👆 Нажмите на карту для деталей</div>`;
+            cardHtml = `<div id="clickableCard" class="bank-card" style="${cardEffect}"><div class="card-chip"><div class="chip-icon"></div><div class="card-network">NCP</div></div><div class="card-number">${formatCardNumber(activeCard.cardNumber)}</div><div class="card-details"><div class="card-holder"><span>Card Holder</span><p>${escapeHtml(user.nickname.toUpperCase())}</p></div><div class="card-expiry"><span>Expires</span><p>${activeCard.expiry}</p></div></div></div><div class="card-click-hint">👆 Нажмите на карту для деталей</div>`;
         } else {
             cardHtml = `<div class="no-card-message">💳 У вас ещё нет карты<br><button id="createCardBtn" class="create-card-btn">✨ Выпустить карту</button></div>`;
         }
@@ -1256,166 +1340,29 @@
             }, 500);
         }
         
-        return `
-            <div class="dashboard-card">${getOnlineBadge(user)}
-                <div class="nav-tabs">
-                    <div class="nav-tab ${currentTab === 'dashboard' ? 'active' : ''}" data-tab="dashboard">🏦 Главная</div>
-                    <div class="nav-tab ${currentTab === 'investments' ? 'active' : ''}" data-tab="investments">📈 Инвестиции</div>
-                    <div class="nav-tab ${currentTab === 'loyalty' ? 'active' : ''}" data-tab="loyalty">🎯 Лояльность</div>
-                    <div class="nav-tab ${currentTab === 'market' ? 'active' : ''}" data-tab="market">🛍️ Маркетплейс</div>
-                    ${isAdmin(user) ? `<div class="nav-tab ${currentTab === 'admin' ? 'active' : ''}" data-tab="admin">👑 Админка</div>` : ''}
-                </div>
-                <div class="welcome-header"><h2>🏦 Привет, ${escapeHtml(displayName)}</h2><div class="user-greeting">${status.current.emoji} ${status.current.name}</div></div>
-                <div class="level-info"><span>⭐ Статус: ${status.current.name}</span><span>📊 ${user.totalTransactions || 0} транзакций</span></div>
-                <div class="level-bar"><div class="level-progress" style="width:${status.progress}%"></div></div>
-                <div class="cards-switcher">${cardsListHtml}<div id="addCardBtn" class="add-card-btn">+ Новая карта</div></div>
-                ${cardHtml}
-                ${hasCard ? `
-                <div class="balance"><span>💰 Баланс</span><span class="balance-amount">${balance} ${symbol}</span></div>
-                <div class="transfer-section">
-                    <div class="transfer-title">🔗 Перевод по ссылке</div>
-                    <div class="input-group"><input type="number" id="transferAmount" placeholder="Сумма" step="0.01"></div>
-                    <div class="input-group"><input type="text" id="transferNote" placeholder="Назначение"></div>
-                    <button id="createLinkBtn">✨ Создать ссылку</button>
-                    ${linkHtml}
-                    
-                    <div class="link-input-section">
-                        <div class="transfer-title">📎 Ввести готовую ссылку</div>
-                        <div class="input-group"><input type="text" id="manualLinkInput" placeholder="Вставьте ссылку на перевод"></div>
-                        <button id="submitLinkBtn" class="submit-link-btn">🔗 Получить перевод</button>
-                    </div>
-                </div>
-                ` : ''}
-                <div class="flex-buttons"><button id="settingsBtn" class="settings-btn">⚙️</button><button id="logoutBtn" class="logout-btn">🚪</button></div>
-                <div class="legal-footer"><a id="showAgreementBtn">📜 Договор</a></div>
-                <div class="privacy-badge">🔐 KC-KacKoin (-_-)</div>
-            </div>
-        `;
+        return `<div class="dashboard-card">${getOnlineBadge(user)}<div class="nav-tabs"><div class="nav-tab ${currentTab === 'dashboard' ? 'active' : ''}" data-tab="dashboard">🏦 Главная</div><div class="nav-tab ${currentTab === 'investments' ? 'active' : ''}" data-tab="investments">📈 Инвестиции</div><div class="nav-tab ${currentTab === 'loyalty' ? 'active' : ''}" data-tab="loyalty">🎯 Лояльность</div><div class="nav-tab ${currentTab === 'market' ? 'active' : ''}" data-tab="market">🛍️ Маркетплейс</div>${isAdmin(user) ? `<div class="nav-tab ${currentTab === 'admin' ? 'active' : ''}" data-tab="admin">👑 Админка</div>` : ''}</div><div class="welcome-header"><h2>🏦 Привет, ${escapeHtml(displayName)}</h2><div class="user-greeting">${status.current.emoji} ${status.current.name}</div></div><div class="level-info"><span>⭐ Статус: ${status.current.name}</span><span>📊 ${user.totalTransactions || 0} транзакций</span></div><div class="level-bar"><div class="level-progress" style="width:${status.progress}%"></div></div><div class="cards-switcher">${cardsListHtml}<div id="addCardBtn" class="add-card-btn">+ Новая карта</div></div>${cardHtml}${hasCard ? `<div class="balance"><span>💰 Баланс</span><span class="balance-amount">${balance} ${symbol}</span></div><div class="transfer-section"><div class="transfer-title">🔗 Перевод по ссылке</div><div class="input-group"><input type="number" id="transferAmount" placeholder="Сумма" step="0.01"></div><div class="input-group"><input type="text" id="transferNote" placeholder="Назначение"></div><button id="createLinkBtn">✨ Создать ссылку</button>${linkHtml}<div class="link-input-section"><div class="transfer-title">📎 Ввести готовую ссылку</div><div class="input-group"><input type="text" id="manualLinkInput" placeholder="Вставьте ссылку на перевод"></div><button id="submitLinkBtn" class="submit-link-btn">🔗 Получить перевод</button></div></div>` : ''}<div class="flex-buttons"><button id="settingsBtn" class="settings-btn">⚙️</button><button id="logoutBtn" class="logout-btn">🚪</button></div><div class="legal-footer"><a id="showAgreementBtn">📜 Договор</a></div><div class="privacy-badge">🔐 KC-KacKoin (-_-)</div></div>`;
     }
 
     async function renderInvestments() {
         const user = await getUserData();
         if (!user) return '';
         await collectInvestmentIncome(user);
-        
         const hasCard = user.cards && user.cards.length > 0;
-        if (!hasCard) {
-            return `
-                <div class="dashboard-card">
-                    <div class="back-to-main" id="backToMainBtn">← На главную</div>
-                    <div class="no-card-message">💳 Сначала выпустите карту, чтобы получить доступ к инвестициям<br><button id="createCardBtn" class="create-card-btn">✨ Выпустить карту</button></div>
-                </div>
-            `;
-        }
-        
+        if (!hasCard) return `<div class="dashboard-card"><div class="back-to-main" id="backToMainBtn">← На главную</div><div class="no-card-message">💳 Сначала выпустите карту, чтобы получить доступ к инвестициям<br><button id="createCardBtn" class="create-card-btn">✨ Выпустить карту</button></div></div>`;
         const symbol = getCurrencySymbol();
-        
-        return `
-            <div class="dashboard-card">
-                <div class="back-to-main" id="backToMainBtn">← На главную</div>
-                <h2>📈 Инвестиционный портфель</h2>
-                
-                <div class="investment-card">
-                    <div class="investment-header">💰 Сберегательные счета</div>
-                    ${INVESTMENTS.deposits.map(d => `
-                        <div class="investment-row">
-                            <span>${d.name} (${d.dailyPercent}%/день)</span>
-                            <span>${d.amount} ${symbol}</span>
-                            <button class="buy-deposit" data-id="${d.id}" data-amount="${d.amount}" style="width:auto; padding:4px 12px;">Открыть</button>
-                        </div>
-                    `).join('')}
-                    ${user.activeDeposit ? `<div class="investment-row" style="margin-top:8px; background:#334155; padding:8px; border-radius:12px; color:#f1f5f9;">📌 Активный счёт: ${user.activeDeposit.amount} ${symbol}</div>` : ''}
-                </div>
-                
-                <div class="investment-card">
-                    <div class="investment-header">🏪 Бизнес-активы</div>
-                    ${INVESTMENTS.assets.map(a => {
-                        const owned = user.assets?.some(ass => ass.id === a.id);
-                        return `<div class="investment-row"><span>${a.name} (+${a.income} ${symbol}/день)</span><span>${a.price} ${symbol}</span><button class="buy-asset" data-id="${a.id}" data-price="${a.price}" ${owned ? 'disabled' : ''} style="width:auto; padding:4px 12px;">${owned ? '✅' : 'Купить'}</button></div>`;
-                    }).join('')}
-                </div>
-                
-                <div class="investment-card">
-                    <div class="investment-header">💻 Майнинг-фермы</div>
-                    ${INVESTMENTS.mining.map(m => {
-                        const owned = user.mining?.some(mn => mn.id === m.id);
-                        return `<div class="investment-row"><span>${m.name} (+${m.income} ${symbol}/день)</span><span>${m.price} ${symbol}</span><button class="buy-mining" data-id="${m.id}" data-price="${m.price}" ${owned ? 'disabled' : ''} style="width:auto; padding:4px 12px;">${owned ? '✅' : 'Купить'}</button></div>`;
-                    }).join('')}
-                </div>
-                
-                <div class="investment-card">
-                    <div class="investment-header">📈 Ценные бумаги</div>
-                    ${INVESTMENTS.securities.map(s => {
-                        const owned = user.securities?.some(sec => sec.id === s.id);
-                        return `<div class="investment-row"><span>${s.name} (+${s.dividend} ${symbol}/день)</span><span>${s.price} ${symbol}</span><button class="buy-security" data-id="${s.id}" data-price="${s.price}" ${owned ? 'disabled' : ''} style="width:auto; padding:4px 12px;">${owned ? '✅' : 'Купить'}</button></div>`;
-                    }).join('')}
-                </div>
-                
-                <div class="investment-card">
-                    <div class="investment-header">🏠 Недвижимость</div>
-                    ${INVESTMENTS.realty.map(r => {
-                        const owned = user.realty?.some(re => re.id === r.id);
-                        return `<div class="investment-row"><span>${r.name} (+${r.rent} ${symbol}/день)</span><span>${r.price} ${symbol}</span><button class="buy-realty" data-id="${r.id}" data-price="${r.price}" ${owned ? 'disabled' : ''} style="width:auto; padding:4px 12px;">${owned ? '✅' : 'Инвестировать'}</button></div>`;
-                    }).join('')}
-                </div>
-                <div id="investMsg"></div>
-            </div>
-        `;
+        return `<div class="dashboard-card"><div class="back-to-main" id="backToMainBtn">← На главную</div><h2>📈 Инвестиционный портфель</h2><div class="investment-card"><div class="investment-header">💰 Сберегательные счета</div>${INVESTMENTS.deposits.map(d => `<div class="investment-row"><span>${d.name} (${d.dailyPercent}%/день)</span><span>${d.amount} ${symbol}</span><button class="buy-deposit" data-id="${d.id}" data-amount="${d.amount}" style="width:auto; padding:4px 12px;">Открыть</button></div>`).join('')}${user.activeDeposit ? `<div class="investment-row" style="margin-top:8px; background:#334155; padding:8px; border-radius:12px; color:#f1f5f9;">📌 Активный счёт: ${user.activeDeposit.amount} ${symbol}</div>` : ''}</div><div class="investment-card"><div class="investment-header">🏪 Бизнес-активы</div>${INVESTMENTS.assets.map(a => { const owned = user.assets?.some(ass => ass.id === a.id); return `<div class="investment-row"><span>${a.name} (+${a.income} ${symbol}/день)</span><span>${a.price} ${symbol}</span><button class="buy-asset" data-id="${a.id}" data-price="${a.price}" ${owned ? 'disabled' : ''} style="width:auto; padding:4px 12px;">${owned ? '✅' : 'Купить'}</button></div>`; }).join('')}</div><div class="investment-card"><div class="investment-header">💻 Майнинг-фермы</div>${INVESTMENTS.mining.map(m => { const owned = user.mining?.some(mn => mn.id === m.id); return `<div class="investment-row"><span>${m.name} (+${m.income} ${symbol}/день)</span><span>${m.price} ${symbol}</span><button class="buy-mining" data-id="${m.id}" data-price="${m.price}" ${owned ? 'disabled' : ''} style="width:auto; padding:4px 12px;">${owned ? '✅' : 'Купить'}</button></div>`; }).join('')}</div><div class="investment-card"><div class="investment-header">📈 Ценные бумаги</div>${INVESTMENTS.securities.map(s => { const owned = user.securities?.some(sec => sec.id === s.id); return `<div class="investment-row"><span>${s.name} (+${s.dividend} ${symbol}/день)</span><span>${s.price} ${symbol}</span><button class="buy-security" data-id="${s.id}" data-price="${s.price}" ${owned ? 'disabled' : ''} style="width:auto; padding:4px 12px;">${owned ? '✅' : 'Купить'}</button></div>`; }).join('')}</div><div class="investment-card"><div class="investment-header">🏠 Недвижимость</div>${INVESTMENTS.realty.map(r => { const owned = user.realty?.some(re => re.id === r.id); return `<div class="investment-row"><span>${r.name} (+${r.rent} ${symbol}/день)</span><span>${r.price} ${symbol}</span><button class="buy-realty" data-id="${r.id}" data-price="${r.price}" ${owned ? 'disabled' : ''} style="width:auto; padding:4px 12px;">${owned ? '✅' : 'Инвестировать'}</button></div>`; }).join('')}</div><div id="investMsg"></div></div>`;
     }
 
     async function renderLoyalty() {
         const user = await getUserData();
         if (!user) return '';
         const symbol = getCurrencySymbol();
-        
         const hasCard = user.cards && user.cards.length > 0;
-        if (!hasCard) {
-            return `
-                <div class="dashboard-card">
-                    <div class="back-to-main" id="backToMainBtn">← На главную</div>
-                    <div class="no-card-message">💳 Сначала выпустите карту, чтобы получить доступ к программе лояльности<br><button id="createCardBtn" class="create-card-btn">✨ Выпустить карту</button></div>
-                </div>
-            `;
-        }
-        
+        if (!hasCard) return `<div class="dashboard-card"><div class="back-to-main" id="backToMainBtn">← На главную</div><div class="no-card-message">💳 Сначала выпустите карту, чтобы получить доступ к программе лояльности<br><button id="createCardBtn" class="create-card-btn">✨ Выпустить карту</button></div></div>`;
         const users = await loadUsers();
         const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-        const topClients = Object.values(users).map(u => ({
-            nick: u.nickname,
-            weekTrans: (u.transactions || []).filter(t => t.date && new Date(t.date).getTime() > weekAgo && t.type === 'out').length
-        })).sort((a,b) => b.weekTrans - a.weekTrans).slice(0, 5);
-        
-        return `
-            <div class="dashboard-card">
-                <div class="back-to-main" id="backToMainBtn">← На главную</div>
-                <h2>🎯 Программа лояльности</h2>
-                
-                <div class="investment-card">
-                    <div class="investment-header">🏆 Достижения</div>
-                    ${ACHIEVEMENTS.map(a => `<div class="investment-row"><span>${a.name}</span><span>${user.achievements?.includes(a.id) ? '✅ +' + a.reward + ' ' + symbol : '🔒'}</span></div>`).join('')}
-                </div>
-                
-                <div class="investment-card">
-                    <div class="investment-header">📅 Ежедневный бонус</div>
-                    <div class="investment-row"><button id="claimDailyBonus" style="width:auto;">Получить бонус</button></div>
-                    <div class="investment-row"><span>Недельный квест: 10 переводов</span><span>Прогресс: ${user.weekTransfers || 0}/10</span>${user.weekTransfers >= 10 && !user.weekQuestClaimed ? '<button id="claimWeekQuestBtn" style="width:auto;">Забрать 2000</button>' : user.weekQuestClaimed ? '✅ Получено' : ''}</div>
-                </div>
-                
-                <div class="investment-card">
-                    <div class="investment-header">🏅 Топ клиентов недели</div>
-                    ${topClients.map((u,i) => `<div class="investment-row"><span>${i+1}. ${escapeHtml(u.nick)}</span><span>📤 ${u.weekTrans} переводов</span></div>`).join('')}
-                    ${topClients.length === 0 ? '<div>Нет данных</div>' : ''}
-                </div>
-                
-                <div class="investment-card">
-                    <div class="investment-header">🔗 Реферальная программа</div>
-                    <div style="background:#e2e8f0; padding:12px; border-radius:12px; word-break:break-all; color:#1e293b; font-family:monospace; font-size:0.75rem;">${location.origin}${location.pathname}?ref=${encodeURIComponent(user.nickname)}</div>
-                    <div class="investment-row" style="margin-top:8px;">Приглашайте друзей → 10% от их переводов</div>
-                </div>
-                
-                <div id="loyaltyMsg"></div>
-            </div>
-        `;
+        const topClients = Object.values(users).map(u => ({ nick: u.nickname, weekTrans: (u.transactions || []).filter(t => t.date && new Date(t.date).getTime() > weekAgo && t.type === 'out').length })).sort((a,b) => b.weekTrans - a.weekTrans).slice(0, 5);
+        return `<div class="dashboard-card"><div class="back-to-main" id="backToMainBtn">← На главную</div><h2>🎯 Программа лояльности</h2><div class="investment-card"><div class="investment-header">🏆 Достижения</div>${ACHIEVEMENTS.map(a => `<div class="investment-row"><span>${a.name}</span><span>${user.achievements?.includes(a.id) ? '✅ +' + a.reward + ' ' + symbol : '🔒'}</span></div>`).join('')}</div><div class="investment-card"><div class="investment-header">📅 Ежедневный бонус</div><div class="investment-row"><button id="claimDailyBonus" style="width:auto;">Получить бонус</button></div><div class="investment-row"><span>Недельный квест: 10 переводов</span><span>Прогресс: ${user.weekTransfers || 0}/10</span>${user.weekTransfers >= 10 && !user.weekQuestClaimed ? '<button id="claimWeekQuestBtn" style="width:auto;">Забрать 2000</button>' : user.weekQuestClaimed ? '✅ Получено' : ''}</div></div><div class="investment-card"><div class="investment-header">🏅 Топ клиентов недели</div>${topClients.map((u,i) => `<div class="investment-row"><span>${i+1}. ${escapeHtml(u.nick)}</span><span>📤 ${u.weekTrans} переводов</span></div>`).join('')}${topClients.length === 0 ? '<div>Нет данных</div>' : ''}</div><div class="investment-card"><div class="investment-header">🔗 Реферальная программа</div><div style="background:#e2e8f0; padding:12px; border-radius:12px; word-break:break-all; color:#1e293b; font-family:monospace; font-size:0.75rem;">${location.origin}${location.pathname}?ref=${encodeURIComponent(user.nickname)}</div><div class="investment-row" style="margin-top:8px;">Приглашайте друзей → 10% от их переводов</div></div><div id="loyaltyMsg"></div></div>`;
     }
 
     async function renderMarketplace() {
@@ -1423,27 +1370,10 @@
         if (!user) return '';
         const symbol = getCurrencySymbol();
         const inventory = user.marketInventory || [];
-        
         function renderSection(title, items) {
-            return `<div class="section-title">${title}</div><div class="marketplace-grid">${items.map(item => {
-                const owned = inventory.includes(item.id);
-                const isEquipped = (item.type === 'prefix' && user.equippedPrefix === item.id) || (item.type === 'skin' && user.equippedSkin === item.id);
-                return `<div class="shop-item ${owned ? 'owned' : ''}"><div class="shop-item-header"><span class="shop-item-icon">${item.emoji}</span><span class="shop-item-price">${item.price} ${symbol}</span></div><div class="shop-item-title">${item.name}</div><div class="shop-item-desc">${item.desc}</div>${!owned ? `<button class="buy-btn" data-id="${item.id}">Купить</button>` : `<button class="equip-btn" data-id="${item.id}">Экипировать</button>${isEquipped ? '<div class="equipped-badge">✅ Экипировано</div>' : ''}</div>`}</div>`;
-            }).join('')}</div>`;
+            return `<div class="section-title">${title}</div><div class="marketplace-grid">${items.map(item => { const owned = inventory.includes(item.id); const isEquipped = (item.type === 'prefix' && user.equippedPrefix === item.id) || (item.type === 'skin' && user.equippedSkin === item.id); return `<div class="shop-item ${owned ? 'owned' : ''}"><div class="shop-item-header"><span class="shop-item-icon">${item.emoji}</span><span class="shop-item-price">${item.price} ${symbol}</span></div><div class="shop-item-title">${item.name}</div><div class="shop-item-desc">${item.desc}</div>${!owned ? `<button class="buy-btn" data-id="${item.id}">Купить</button>` : `<button class="equip-btn" data-id="${item.id}">Экипировать</button>${isEquipped ? '<div class="equipped-badge">✅ Экипировано</div>' : ''}</div>`}</div>`; }).join('')}</div>`;
         }
-        
-        return `
-            <div class="dashboard-card">
-                <div class="back-to-main" id="backToMainBtn">← На главную</div>
-                <div class="market-balance"><span>💰 Доступно средств</span><span>${(user.balance || 0).toFixed(2)} ${symbol}</span></div>
-                <h2>🛍️ Маркетплейс NCP</h2>
-                ${renderSection('👑 Премиум-статусы', MARKET_ITEMS.vipStatuses)}
-                ${renderSection('💳 Оформление карт', MARKET_ITEMS.cardDesigns)}
-                ${renderSection('📊 Тарифные планы', MARKET_ITEMS.tariffs)}
-                ${renderSection('💰 Денежные бонусы', MARKET_ITEMS.bonuses)}
-                <div class="demo-hint">🏆 Приобретите все услуги для эксклюзивного статуса</div>
-            </div>
-        `;
+        return `<div class="dashboard-card"><div class="back-to-main" id="backToMainBtn">← На главную</div><div class="market-balance"><span>💰 Доступно средств</span><span>${(user.balance || 0).toFixed(2)} ${symbol}</span></div><h2>🛍️ Маркетплейс NCP</h2>${renderSection('👑 Премиум-статусы', MARKET_ITEMS.vipStatuses)}${renderSection('💳 Оформление карт', MARKET_ITEMS.cardDesigns)}${renderSection('📊 Тарифные планы', MARKET_ITEMS.tariffs)}${renderSection('💰 Денежные бонусы', MARKET_ITEMS.bonuses)}<div class="demo-hint">🏆 Приобретите все услуги для эксклюзивного статуса</div></div>`;
     }
 
     function renderLoginScreen() {
@@ -1463,10 +1393,7 @@
     }
 
     function renderCreateCardPage() {
-        return `<div class="create-card-page"><button id="backFromCreateBtn" class="back-btn">← Назад</button><h2>💳 Новая карта</h2><div id="cardTypesList" style="display:flex; gap:8px; flex-wrap:wrap; margin:16px 0;">${CARD_TYPES.map(c => `<div class="card-type-option ${selectedCardType === c.id ? 'selected' : ''}" data-card-id="${c.id}">${c.emoji} ${c.name}</div>`).join('')}</div>
-        <div class="input-group"><input type="text" id="cardNumberInput" placeholder="Номер карты (16 цифр)"></div>
-        <div class="input-group"><input type="text" id="cvvInput" placeholder="CVV (3 цифры)"></div>
-        <button id="confirmCreateCardBtn">✨ Создать</button><div id="createCardMsg"></div></div>`;
+        return `<div class="create-card-page"><button id="backFromCreateBtn" class="back-btn">← Назад</button><h2>💳 Новая карта</h2><div id="cardTypesList" style="display:flex; gap:8px; flex-wrap:wrap; margin:16px 0;">${CARD_TYPES.map(c => `<div class="card-type-option ${selectedCardType === c.id ? 'selected' : ''}" data-card-id="${c.id}">${c.emoji} ${c.name}</div>`).join('')}</div><div class="input-group"><input type="text" id="cardNumberInput" placeholder="Номер карты (16 цифр)"></div><div class="input-group"><input type="text" id="cvvInput" placeholder="CVV (3 цифры)"></div><button id="confirmCreateCardBtn">✨ Создать</button><div id="createCardMsg"></div></div>`;
     }
 
     // ========== ОБРАБОТЧИКИ ==========
@@ -1476,12 +1403,7 @@
             const nick = document.getElementById('loginNickname').value.trim();
             const pass = document.getElementById('loginPassword').value;
             const res = await loginUser(nick, pass);
-            if (res.success) {
-                currentTab = 'dashboard';
-                renderApp();
-            } else {
-                alert(`❌ ${res.error}`);
-            }
+            if (res.success) { currentTab = 'dashboard'; renderApp(); } else { alert(`❌ ${res.error}`); }
         });
         document.getElementById('switchToRegister')?.addEventListener('click', () => { currentView = 'register'; renderApp(); });
         document.getElementById('showAgreementBtn')?.addEventListener('click', () => { showAgreementModal = true; renderApp(); });
@@ -1493,37 +1415,19 @@
             const nick = document.getElementById('regNickname').value.trim();
             const pass = document.getElementById('regPassword').value;
             const res = await registerUser(nick, pass);
-            if (res.success) {
-                currentTab = 'dashboard';
-                renderApp();
-            } else {
-                alert(`❌ ${res.error}`);
-            }
+            if (res.success) { currentTab = 'dashboard'; renderApp(); } else { alert(`❌ ${res.error}`); }
         });
         document.getElementById('switchToLogin')?.addEventListener('click', () => { currentView = 'login'; renderApp(); });
     }
     
     function attachDashboardHandlers() {
-        document.querySelectorAll('.nav-tab').forEach(tab => {
-            tab.addEventListener('click', () => { currentTab = tab.dataset.tab; renderApp(); });
-        });
-        document.querySelectorAll('.back-to-main').forEach(btn => {
-            btn.addEventListener('click', () => { currentTab = 'dashboard'; renderApp(); });
-        });
-        document.getElementById('logoutBtn')?.addEventListener('click', async () => { 
-            localStorage.removeItem(SESSION_KEY); 
-            localStorage.removeItem(CURRENT_USER_KEY); 
-            renderApp(); 
-        });
+        document.querySelectorAll('.nav-tab').forEach(tab => { tab.addEventListener('click', () => { currentTab = tab.dataset.tab; renderApp(); }); });
+        document.querySelectorAll('.back-to-main').forEach(btn => { btn.addEventListener('click', () => { currentTab = 'dashboard'; renderApp(); }); });
+        document.getElementById('logoutBtn')?.addEventListener('click', async () => { localStorage.removeItem(SESSION_KEY); localStorage.removeItem(CURRENT_USER_KEY); renderApp(); });
         document.getElementById('settingsBtn')?.addEventListener('click', () => { showSettings = true; renderApp(); });
         document.getElementById('createCardBtn')?.addEventListener('click', () => { showCreateCard = true; renderApp(); });
         document.getElementById('addCardBtn')?.addEventListener('click', () => { showCreateCard = true; renderApp(); });
-        document.querySelectorAll('.card-tab').forEach(el => { 
-            el.addEventListener('click', async () => { 
-                await setActiveCard(parseInt(el.dataset.cardIdx)); 
-                renderApp(); 
-            }); 
-        });
+        document.querySelectorAll('.card-tab').forEach(el => { el.addEventListener('click', async () => { await setActiveCard(parseInt(el.dataset.cardIdx)); renderApp(); }); });
         
         document.getElementById('createLinkBtn')?.addEventListener('click', async () => {
             const amount = parseFloat(document.getElementById('transferAmount')?.value);
@@ -1536,10 +1440,7 @@
             else { currentLink = res.link; currentContract = res.contractNumber; currentNote = res.note; renderApp(); }
         });
         document.getElementById('clearLinkBtn')?.addEventListener('click', () => { currentLink = null; currentContract = null; currentNote = ''; renderApp(); });
-        document.getElementById('copyLinkBtn')?.addEventListener('click', () => {
-            const ta = document.getElementById('transferLink');
-            if (ta) { ta.select(); document.execCommand('copy'); alert('✅ Ссылка скопирована'); }
-        });
+        document.getElementById('copyLinkBtn')?.addEventListener('click', () => { const ta = document.getElementById('transferLink'); if (ta) { ta.select(); document.execCommand('copy'); alert('✅ Ссылка скопирована'); } });
         
         document.getElementById('submitLinkBtn')?.addEventListener('click', async () => {
             const linkInput = document.getElementById('manualLinkInput')?.value.trim();
@@ -1691,9 +1592,7 @@
     
     function attachCreateCardHandlers() {
         document.getElementById('backFromCreateBtn')?.addEventListener('click', () => { showCreateCard = false; renderApp(); });
-        document.querySelectorAll('.card-type-option').forEach(el => {
-            el.addEventListener('click', () => { selectedCardType = el.dataset.cardId; renderApp(); });
-        });
+        document.querySelectorAll('.card-type-option').forEach(el => { el.addEventListener('click', () => { selectedCardType = el.dataset.cardId; renderApp(); }); });
         document.getElementById('confirmCreateCardBtn')?.addEventListener('click', async () => {
             const number = document.getElementById('cardNumberInput').value.trim();
             const cvv = document.getElementById('cvvInput').value.trim();
@@ -1711,13 +1610,7 @@
     function attachSettingsHandlers() {
         document.getElementById('closeSettingsBtn')?.addEventListener('click', () => { showSettings = false; renderApp(); });
         document.getElementById('themeToggle')?.addEventListener('click', () => { appSettings.theme = appSettings.theme === 'light' ? 'dark' : 'light'; saveSettings(); renderApp(); });
-        document.getElementById('resetAllDataBtn')?.addEventListener('click', async () => { 
-            if(confirm('Удалить все данные? (Это действие необратимо)')) { 
-                localStorage.clear(); 
-                await saveUsers({});
-                location.reload(); 
-            } 
-        });
+        document.getElementById('resetAllDataBtn')?.addEventListener('click', async () => { if(confirm('Удалить все данные? (Это действие необратимо)')) { localStorage.clear(); await saveUsers({}); location.reload(); } });
         document.getElementById('showAgreementBtn')?.addEventListener('click', () => { showAgreementModal = true; renderApp(); });
     }
     
@@ -1754,9 +1647,7 @@
 
     async function setActiveCard(index) {
         const user = await getUserData();
-        if (user && user.cards[index]) {
-            await updateUserData({ activeCardIndex: index });
-        }
+        if (user && user.cards[index]) await updateUserData({ activeCardIndex: index });
     }
     
     async function equipItem(itemId) {
@@ -1774,47 +1665,21 @@
     async function renderApp() {
         const root = document.getElementById('appRoot');
         if (!root) return;
-        
-        if (showAgreementModal) {
-            root.innerHTML = renderAgreementModal();
-            attachAgreementHandlers();
-            return;
-        }
-        
+        checkInternetAndShow();
+        if (showAgreementModal) { root.innerHTML = renderAgreementModal(); attachAgreementHandlers(); return; }
         const session = await loadSession();
         if (session) {
-            if (showSettings) {
-                root.innerHTML = renderSettings();
-                attachSettingsHandlers();
-            } else if (showCreateCard) {
-                root.innerHTML = renderCreateCardPage();
-                attachCreateCardHandlers();
-            } else if (currentTab === 'investments') {
-                root.innerHTML = await renderInvestments();
-                attachDashboardHandlers();
-            } else if (currentTab === 'loyalty') {
-                root.innerHTML = await renderLoyalty();
-                attachDashboardHandlers();
-            } else if (currentTab === 'market') {
-                root.innerHTML = await renderMarketplace();
-                attachDashboardHandlers();
-            } else if (currentTab === 'admin' && isAdmin(await getUserData())) {
-                root.innerHTML = await renderAdminPanel();
-                attachDashboardHandlers();
-            } else {
-                root.innerHTML = await renderDashboard();
-                attachDashboardHandlers();
-            }
+            if (showSettings) { root.innerHTML = renderSettings(); attachSettingsHandlers(); }
+            else if (showCreateCard) { root.innerHTML = renderCreateCardPage(); attachCreateCardHandlers(); }
+            else if (currentTab === 'investments') { root.innerHTML = await renderInvestments(); attachDashboardHandlers(); }
+            else if (currentTab === 'loyalty') { root.innerHTML = await renderLoyalty(); attachDashboardHandlers(); }
+            else if (currentTab === 'market') { root.innerHTML = await renderMarketplace(); attachDashboardHandlers(); }
+            else if (currentTab === 'admin' && isAdmin(await getUserData())) { root.innerHTML = await renderAdminPanel(); attachDashboardHandlers(); }
+            else { root.innerHTML = await renderDashboard(); attachDashboardHandlers(); }
         } else {
-            if (currentView === 'register') {
-                root.innerHTML = renderRegisterScreen();
-                attachRegisterHandlers();
-            } else {
-                root.innerHTML = renderLoginScreen();
-                attachLoginHandlers();
-            }
+            if (currentView === 'register') { root.innerHTML = renderRegisterScreen(); attachRegisterHandlers(); }
+            else { root.innerHTML = renderLoginScreen(); attachLoginHandlers(); }
         }
-        
         const counterEl = document.getElementById('onlineCounter');
         if (counterEl) counterEl.textContent = onlineCount;
     }
@@ -1836,6 +1701,42 @@
     }, 200);
     
     setInterval(() => { const ce = document.getElementById('onlineCounter'); if(ce) ce.textContent = onlineCount; }, 1000);
+</script>
+
+<script>
+    // ========== SERVICE WORKER (кэширование сайта) ==========
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW error:', err));
+    }
+    
+    // Создаём sw.js на лету, если его нет
+    if (!window.swRegistered) {
+        window.swRegistered = true;
+        const swCode = `const CACHE_NAME = 'ncpbank-v1';
+const urlsToCache = [
+    '/',
+    '/index.html'
+];
+
+self.addEventListener('install', event => {
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then(cache => cache.addAll(urlsToCache))
+    );
+});
+
+self.addEventListener('fetch', event => {
+    event.respondWith(
+        caches.match(event.request)
+            .then(response => response || fetch(event.request))
+    );
+});`;
+        
+        const blob = new Blob([swCode], { type: 'application/javascript' });
+        const url = URL.createObjectURL(blob);
+        navigator.serviceWorker.register(url).catch(e => console.log('SW fallback:', e));
+        URL.revokeObjectURL(url);
+    }
 </script>
 </body>
 </html>
