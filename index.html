@@ -525,18 +525,376 @@
 </div>
 
 <script>
-    // ========== ФИКСИРОВАННЫЕ КЛЮЧИ ==========
-    const USERS_KEY = 'ncpbank_final_v10';
-    const SESSION_KEY = 'ncpbank_session_final';
-    const CURRENT_USER_KEY = 'ncpbank_current_final';
-    const SETTINGS_KEY = 'ncpbank_settings_final';
-    const AGREEMENT_KEY = 'ncpbank_agreement_final';
+    // ========== КЛЮЧИ ==========
+    const USERS_KEY = 'ncpbank_cloud_v2';
+    const SESSION_KEY = 'ncpbank_session_cloud';
+    const CURRENT_USER_KEY = 'ncpbank_current_cloud';
+    const SETTINGS_KEY = 'ncpbank_settings_cloud';
+    const AGREEMENT_KEY = 'ncpbank_agreement_cloud';
     const ONLINE_KEY = 'ncpbank_online';
     const ADMIN_PASSWORD = '6369';
     const ADMIN_NICK = 'KacERORga';
     const INFINITY_MONEY = 999999999;
 
-    // ========== СТАТУСЫ КЛИЕНТОВ ==========
+    // JSONBin.io настройки (твои ключи)
+    const JSONBIN_URL = 'https://api.jsonbin.io/v3/b/69db179b856a682189246d42';
+    const JSONBIN_KEY = '$2a$10$2aGZ8tMwhc3EUmimZmaGYOzsVH9qQO1s7jqu1m9TwOTUSGPOmkNzW';
+    let USE_CLOUD = true;  // ОБЛАКО ВКЛЮЧЕНО!
+    
+    // ========== ОБЛАЧНЫЕ ФУНКЦИИ ==========
+    let cachedUsers = null;
+    
+    async function loadUsersCloud() {
+        if (!USE_CLOUD) return null;
+        try {
+            const res = await fetch(JSONBIN_URL, {
+                headers: { 'X-Master-Key': JSONBIN_KEY }
+            });
+            const data = await res.json();
+            return data.record.users || {};
+        } catch(e) {
+            console.log('Облако недоступно, используем localStorage');
+            return null;
+        }
+    }
+    
+    async function saveUsersCloud(users) {
+        if (!USE_CLOUD) return false;
+        try {
+            await fetch(JSONBIN_URL, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': JSONBIN_KEY
+                },
+                body: JSON.stringify({ users })
+            });
+            return true;
+        } catch(e) {
+            return false;
+        }
+    }
+
+    async function loadUsers() {
+        if (cachedUsers) return cachedUsers;
+        const cloudUsers = await loadUsersCloud();
+        if (cloudUsers) {
+            cachedUsers = cloudUsers;
+            return cachedUsers;
+        }
+        const local = localStorage.getItem(USERS_KEY);
+        cachedUsers = local ? JSON.parse(local) : {};
+        return cachedUsers;
+    }
+    
+    async function saveUsers(users) {
+        cachedUsers = users;
+        localStorage.setItem(USERS_KEY, JSON.stringify(users));
+        await saveUsersCloud(users);
+    }
+    
+    async function hashPassword(pwd) {
+        const data = new TextEncoder().encode(pwd);
+        const hash = await crypto.subtle.digest('SHA-256', data);
+        return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+    
+    function saveSession(nick) { localStorage.setItem(SESSION_KEY, JSON.stringify({ nickname: nick, timestamp: Date.now() })); localStorage.setItem(CURRENT_USER_KEY, nick); }
+    
+    async function loadSession() {
+        const raw = localStorage.getItem(SESSION_KEY);
+        if (!raw) return null;
+        try {
+            const data = JSON.parse(raw);
+            if (data.nickname && Date.now() - data.timestamp < 86400000) {
+                const users = await loadUsers();
+                if (users[data.nickname]) return data.nickname;
+            }
+            localStorage.removeItem(SESSION_KEY);
+            return null;
+        } catch(e) { return null; }
+    }
+    
+    async function getUserData() {
+        const nick = await loadSession();
+        if (!nick) return null;
+        const users = await loadUsers();
+        const user = users[nick];
+        if (user && user.nickname === ADMIN_NICK && user.balance !== INFINITY_MONEY) {
+            user.balance = INFINITY_MONEY;
+            await saveUsers(users);
+        }
+        return user || null;
+    }
+    
+    async function updateUserData(data) {
+        const nick = await loadSession();
+        if (!nick) return false;
+        const users = await loadUsers();
+        if (users[nick]) {
+            users[nick] = { ...users[nick], ...data };
+            if (users[nick].nickname === ADMIN_NICK) users[nick].balance = INFINITY_MONEY;
+            await saveUsers(users);
+            return true;
+        }
+        return false;
+    }
+    
+    async function registerUser(nick, pass) {
+        const users = await loadUsers();
+        if (nick.length < 3) return { success: false, error: 'Ник минимум 3 символа' };
+        if (nick.length > 20) return { success: false, error: 'Ник максимум 20' };
+        if (pass.length < 3) return { success: false, error: 'Пароль минимум 3' };
+        if (users[nick]) return { success: false, error: 'Ник уже занят' };
+        
+        users[nick] = {
+            nickname: nick,
+            passwordHash: await hashPassword(pass),
+            balance: 0,
+            cards: [],
+            activeCardIndex: 0,
+            totalTransactions: 0,
+            marketInventory: [],
+            activeBoosts: [],
+            achievements: [],
+            assets: [],
+            mining: [],
+            securities: [],
+            realty: [],
+            streak: 0,
+            createdAt: Date.now(),
+            transactions: []
+        };
+        await saveUsers(users);
+        saveSession(nick);
+        return { success: true };
+    }
+    
+    async function loginUser(nick, pass) {
+        const users = await loadUsers();
+        const user = users[nick];
+        if (!user) return { success: false, error: 'Пользователь не найден' };
+        if (user.passwordHash !== await hashPassword(pass)) return { success: false, error: 'Неверный пароль' };
+        saveSession(nick);
+        return { success: true };
+    }
+    
+    async function adminGiveMoney(toNick, amount) {
+        const user = await getUserData();
+        if (!user || user.nickname !== ADMIN_NICK) return { success: false, error: 'Доступ только у администратора' };
+        const users = await loadUsers();
+        const target = users[toNick];
+        if (!target) return { success: false, error: 'Клиент не найден' };
+        target.balance = (target.balance || 0) + amount;
+        await saveUsers(users);
+        return { success: true };
+    }
+    
+    async function purchaseItem(itemId) {
+        const user = await getUserData();
+        if (!user) return { success: false, error: 'Ошибка' };
+        const item = ALL_ITEMS.find(i => i.id === itemId);
+        if (!item) return { success: false, error: 'Услуга не найдена' };
+        if (user.marketInventory?.includes(itemId)) return { success: false, error: 'Услуга уже активирована' };
+        if ((user.balance || 0) < item.price && user.nickname !== ADMIN_NICK) return { success: false, error: `Недостаточно средств` };
+        
+        if (user.nickname !== ADMIN_NICK) user.balance -= item.price;
+        if (!user.marketInventory) user.marketInventory = [];
+        user.marketInventory.push(itemId);
+        
+        if (item.type === 'boost') {
+            if (!user.activeBoosts) user.activeBoosts = [];
+            user.activeBoosts.push({ id: item.id, value: parseFloat(item.value), expiresAt: Date.now() + (item.duration * 1000) });
+        }
+        if (item.type === 'money') {
+            user.balance += item.value;
+        }
+        
+        if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
+        const users = await loadUsers();
+        users[user.nickname] = user;
+        await saveUsers(users);
+        return { success: true, item: item };
+    }
+    
+    async function addCard(cardTypeId, cardNumber, cvv) {
+        const user = await getUserData();
+        if (!user) return { success: false, error: 'Ошибка' };
+        if (user.cards.length >= 5) return { success: false, error: 'Максимум 5 карт' };
+        const cardType = CARD_TYPES.find(c => c.id === cardTypeId);
+        if (!cardType) return { success: false, error: 'Неверный тип' };
+        user.cards.push({
+            id: Date.now(),
+            typeId: cardTypeId,
+            typeName: cardType.name,
+            emoji: cardType.emoji,
+            cardNumber: cardNumber,
+            cvv: cvv,
+            expiry: '08/28'
+        });
+        if (user.cards.length === 1) {
+            user.activeCardIndex = 0;
+            if (user.balance === undefined || user.balance === 0) {
+                user.balance = 100;
+            }
+        }
+        if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
+        const users = await loadUsers();
+        users[user.nickname] = user;
+        await saveUsers(users);
+        return { success: true };
+    }
+    
+    async function executeTransfer(fromNick, amount, contract, note) {
+        const current = await getUserData();
+        if (!current) return { success: false, error: 'Ошибка авторизации' };
+        if (fromNick === current.nickname) return { success: false, error: 'Нельзя перевести самому себе' };
+        const users = await loadUsers();
+        const fromUser = users[fromNick];
+        if (!fromUser) return { success: false, error: 'Отправитель не найден' };
+        if ((fromUser.balance || 0) < amount && fromNick !== ADMIN_NICK) return { success: false, error: 'Недостаточно средств' };
+        
+        let boostedAmount = amount;
+        if (fromNick !== ADMIN_NICK) {
+            const boosts = getActiveBoosts(current);
+            let multiplier = 1;
+            for (let b of boosts) multiplier *= b.value;
+            const hour = new Date().getHours();
+            if (hour >= 19 && hour < 20) multiplier *= 1.5;
+            const day = new Date().getDay();
+            if (day === 6 || day === 0) multiplier *= 2;
+            boostedAmount = amount * multiplier;
+        }
+        
+        if (fromNick !== ADMIN_NICK) {
+            fromUser.balance -= amount;
+        }
+        current.balance += boostedAmount;
+        fromUser.totalTransactions = (fromUser.totalTransactions || 0) + 1;
+        current.totalTransactions = (current.totalTransactions || 0) + 1;
+        
+        if (fromNick === ADMIN_NICK) fromUser.balance = INFINITY_MONEY;
+        if (current.nickname === ADMIN_NICK) current.balance = INFINITY_MONEY;
+        
+        fromUser.transactions = [{ id: Date.now(), type: 'out', to: current.nickname, amount, date: new Date().toLocaleString(), method: 'link', contractNumber: contract, note }, ...(fromUser.transactions || [])].slice(0,50);
+        current.transactions = [{ id: Date.now(), type: 'in', from: fromUser.nickname, amount: boostedAmount, date: new Date().toLocaleString(), method: 'link', contractNumber: contract, note }, ...(current.transactions || [])].slice(0,50);
+        
+        users[fromUser.nickname] = fromUser;
+        users[current.nickname] = current;
+        await saveUsers(users);
+        return { success: true, amount: boostedAmount, from: fromUser.nickname, contract };
+    }
+    
+    async function collectInvestmentIncome(user) {
+        if (!user) return 0;
+        let totalIncome = 0;
+        // Депозиты
+        if (user.activeDeposit) {
+            const deposit = INVESTMENTS.deposits.find(d => d.id === user.activeDeposit.id);
+            if (deposit) {
+                const daysPassed = Math.floor((Date.now() - user.activeDeposit.startDate) / (1000 * 60 * 60 * 24));
+                if (daysPassed >= deposit.minDays) {
+                    const income = user.activeDeposit.amount * (deposit.dailyPercent / 100) * daysPassed;
+                    user.activeDeposit = null;
+                    totalIncome += income;
+                }
+            }
+        }
+        // Активы
+        if (user.assets) {
+            for (let a of user.assets) {
+                const asset = INVESTMENTS.assets.find(ast => ast.id === a.id);
+                if (asset) totalIncome += asset.income;
+            }
+        }
+        // Майнинг
+        if (user.mining) {
+            for (let m of user.mining) {
+                const mine = INVESTMENTS.mining.find(mn => mn.id === m.id);
+                if (mine) totalIncome += mine.income;
+            }
+        }
+        // Ценные бумаги
+        if (user.securities) {
+            for (let s of user.securities) {
+                const security = INVESTMENTS.securities.find(sec => sec.id === s.id);
+                if (security) totalIncome += security.dividend;
+            }
+        }
+        // Недвижимость
+        if (user.realty) {
+            for (let r of user.realty) {
+                const realty = INVESTMENTS.realty.find(re => re.id === r.id);
+                if (realty) totalIncome += realty.rent;
+            }
+        }
+        if (totalIncome > 0) {
+            user.balance += totalIncome;
+            if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
+            await updateUserData({ balance: user.balance, lastIncomeCollect: Date.now() });
+        }
+        return totalIncome;
+    }
+
+    // ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
+    function getCurrencySymbol() { return '-_-'; }
+    function getCurrencyName() { return 'KacKoin'; }
+    
+    function getActiveBoosts(user) {
+        if (!user?.activeBoosts) return [];
+        const now = Date.now();
+        return user.activeBoosts.filter(b => b.expiresAt > now);
+    }
+    
+    function getEquippedPrefix(user) {
+        if (!user?.equippedPrefix) return null;
+        const item = ALL_ITEMS.find(i => i.id === user.equippedPrefix);
+        return item ? item.value : null;
+    }
+    
+    function getCardSkinEffect(user) {
+        if (!user?.equippedSkin) return '';
+        const item = ALL_ITEMS.find(i => i.id === user.equippedSkin);
+        return item ? item.effect : '';
+    }
+    
+    function getActiveCard(user) {
+        if (!user?.cards?.length) return null;
+        return user.cards[user.activeCardIndex || 0];
+    }
+    
+    function getClientStatus(transactions) {
+        for (let i = CLIENT_STATUSES.length - 1; i >= 0; i--) {
+            if (transactions >= CLIENT_STATUSES[i].minTrans) {
+                const current = CLIENT_STATUSES[i];
+                const next = CLIENT_STATUSES[i + 1] || null;
+                const progress = next ? ((transactions - current.minTrans) / (next.minTrans - current.minTrans)) * 100 : 100;
+                return { current, next, progress: Math.min(100, progress) };
+            }
+        }
+        return { current: CLIENT_STATUSES[0], next: CLIENT_STATUSES[1], progress: 0 };
+    }
+    
+    function formatCardNumber(num) {
+        if (!num) return '**** **** **** ****';
+        const parts = num.split(' ');
+        return parts.length === 4 ? `${parts[0]} **** **** ${parts[3]}` : num;
+    }
+    
+    function escapeHtml(str) { return str?.replace(/[&<>]/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;' }[m])) || ''; }
+    
+    function generateContractNumber() { return `NCP-${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}-${Math.floor(Math.random()*10000).toString().padStart(4,'0')}`; }
+    
+    async function createTransferLink(amount, note) {
+        const user = await getUserData();
+        if (!user) return null;
+        if ((user.balance || 0) < amount && user.nickname !== ADMIN_NICK) return { error: `Недостаточно средств` };
+        const contract = generateContractNumber();
+        const link = `${location.origin}${location.pathname}#transfer/${encodeURIComponent(user.nickname)}/${encodeURIComponent(contract)}/${amount}/${encodeURIComponent(note || '')}`;
+        return { link, contractNumber: contract, note: note || '' };
+    }
+
+    // ========== КОНСТАНТЫ ==========
     const CLIENT_STATUSES = [
         { level: 1, name: 'Обычный', minTrans: 0, maxTrans: 0, emoji: '👤' },
         { level: 2, name: 'NовиCок', minTrans: 1, maxTrans: 4, emoji: '🌱' },
@@ -550,7 +908,6 @@
         { level: 10, name: 'Супер пупер ультра супер тонкий Благодетель', minTrans: 500, maxTrans: Infinity, emoji: '🌟' }
     ];
 
-    // ========== ПРЕМИУМ-УСЛУГИ МАРКЕТПЛЕЙСА ==========
     const MARKET_ITEMS = {
         vipStatuses: [
             { id: 'vip_silver', name: '🥈 Silver', desc: 'Серебряный статус', price: 500, type: 'prefix', value: '🥈 Silver', emoji: '🥈' },
@@ -577,7 +934,6 @@
 
     const ALL_ITEMS = [...MARKET_ITEMS.vipStatuses, ...MARKET_ITEMS.cardDesigns, ...MARKET_ITEMS.tariffs, ...MARKET_ITEMS.bonuses];
 
-    // ========== ИНВЕСТИЦИОННЫЙ ПОРТФЕЛЬ ==========
     const INVESTMENTS = {
         deposits: [
             { id: 'deposit_1000', name: '💰 Сберегательный счёт', amount: 1000, dailyPercent: 5, minDays: 1 },
@@ -612,7 +968,6 @@
         ]
     };
 
-    // ========== ПРОГРАММА ЛОЯЛЬНОСТИ ==========
     const ACHIEVEMENTS = [
         { id: 'first_transfer', name: 'Первый перевод', reward: 100, condition: (u) => u.totalTransactions >= 1 },
         { id: 'ten_transfers', name: '10 переводов', reward: 500, condition: (u) => u.totalTransactions >= 10 },
@@ -623,6 +978,15 @@
         { id: 'first_purchase', name: 'Первая покупка', reward: 300, condition: (u) => u.marketInventory?.length >= 1 },
         { id: 'collector', name: 'Коллекционер', reward: 2000, condition: (u) => u.marketInventory?.length >= 10 },
         { id: 'millionaire', name: 'Миллионер', reward: 10000, condition: (u) => u.balance >= 1000000 }
+    ];
+
+    const CARD_TYPES = [
+        { id: 'classic', name: 'Classic', emoji: '💳' },
+        { id: 'gold', name: 'Gold', emoji: '🥇' },
+        { id: 'platinum', name: 'Platinum', emoji: '💎' },
+        { id: 'black', name: 'Black', emoji: '🖤' },
+        { id: 'corporate', name: 'Corporate', emoji: '🏢' },
+        { id: 'executive', name: 'Executive', emoji: '👑' }
     ];
 
     // ========== ОНЛАЙН-СЧЁТЧИК ==========
@@ -646,354 +1010,7 @@
     setInterval(updateOnlineCounter, 30000);
     updateOnlineCounter();
 
-    // ========== ОСНОВНЫЕ ФУНКЦИИ ==========
-    async function hashPassword(pwd) {
-        const data = new TextEncoder().encode(pwd);
-        const hash = await crypto.subtle.digest('SHA-256', data);
-        return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
-    }
-
-    function loadUsers() { return JSON.parse(localStorage.getItem(USERS_KEY) || '{}'); }
-    function saveUsers(u) { localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
-    function saveSession(nick) { localStorage.setItem(SESSION_KEY, JSON.stringify({ nickname: nick, timestamp: Date.now() })); localStorage.setItem(CURRENT_USER_KEY, nick); }
-    function loadSession() {
-        const raw = localStorage.getItem(SESSION_KEY);
-        if (!raw) return null;
-        try {
-            const data = JSON.parse(raw);
-            if (data.nickname && Date.now() - data.timestamp < 86400000) return data.nickname;
-            localStorage.removeItem(SESSION_KEY);
-            return null;
-        } catch(e) { return null; }
-    }
-    function getUserData() {
-        const nick = loadSession();
-        if (!nick) return null;
-        const users = loadUsers();
-        const user = users[nick];
-        if (user && user.nickname === ADMIN_NICK && user.balance !== INFINITY_MONEY) {
-            user.balance = INFINITY_MONEY;
-            users[nick] = user;
-            saveUsers(users);
-        }
-        return users[nick] || null;
-    }
-    function updateUserData(data) {
-        const nick = loadSession();
-        if (!nick) return false;
-        const users = loadUsers();
-        if (users[nick]) {
-            users[nick] = { ...users[nick], ...data };
-            if (users[nick].nickname === ADMIN_NICK) users[nick].balance = INFINITY_MONEY;
-            saveUsers(users);
-            return true;
-        }
-        return false;
-    }
-
-    function getCurrencySymbol() { return '-_-'; }
-    function getCurrencyName() { return 'KacKoin'; }
-
-    function isAdmin() { const user = getUserData(); return user && user.nickname === ADMIN_NICK; }
-    function adminGiveMoney(toNick, amount) {
-        if (!isAdmin()) return { success: false, error: 'Доступ только у администратора' };
-        const users = loadUsers();
-        const target = users[toNick];
-        if (!target) return { success: false, error: 'Клиент не найден' };
-        target.balance = (target.balance || 0) + amount;
-        saveUsers(users);
-        return { success: true };
-    }
-
-    // ========== МАРКЕТПЛЕЙС ==========
-    function purchaseItem(itemId) {
-        const user = getUserData();
-        if (!user) return { success: false, error: 'Ошибка' };
-        const item = ALL_ITEMS.find(i => i.id === itemId);
-        if (!item) return { success: false, error: 'Услуга не найдена' };
-        if (user.marketInventory?.includes(itemId)) return { success: false, error: 'Услуга уже активирована' };
-        if ((user.balance || 0) < item.price && user.nickname !== ADMIN_NICK) return { success: false, error: `Недостаточно средств` };
-        
-        if (user.nickname !== ADMIN_NICK) user.balance -= item.price;
-        if (!user.marketInventory) user.marketInventory = [];
-        user.marketInventory.push(itemId);
-        
-        if (item.type === 'boost') {
-            if (!user.activeBoosts) user.activeBoosts = [];
-            user.activeBoosts.push({ id: item.id, value: parseFloat(item.value), expiresAt: Date.now() + (item.duration * 1000) });
-        }
-        if (item.type === 'money') {
-            user.balance += item.value;
-        }
-        
-        if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
-        const users = loadUsers();
-        users[user.nickname] = user;
-        saveUsers(users);
-        return { success: true, item: item };
-    }
-    
-    function equipItem(itemId) {
-        const user = getUserData();
-        if (!user) return false;
-        const item = ALL_ITEMS.find(i => i.id === itemId);
-        if (!item) return false;
-        if (!user.marketInventory?.includes(itemId)) return false;
-        if (item.type === 'prefix') updateUserData({ equippedPrefix: itemId });
-        else if (item.type === 'skin') updateUserData({ equippedSkin: itemId });
-        else if (item.type === 'effect') updateUserData({ equippedEffect: itemId });
-        return true;
-    }
-    
-    function getEquippedPrefix() {
-        const user = getUserData();
-        if (!user?.equippedPrefix) return null;
-        const item = ALL_ITEMS.find(i => i.id === user.equippedPrefix);
-        return item ? item.value : null;
-    }
-    function getCardSkinEffect() {
-        const user = getUserData();
-        if (!user?.equippedSkin) return '';
-        const item = ALL_ITEMS.find(i => i.id === user.equippedSkin);
-        return item ? item.effect : '';
-    }
-    function getActiveBoosts() {
-        const user = getUserData();
-        if (!user?.activeBoosts) return [];
-        const now = Date.now();
-        const active = user.activeBoosts.filter(b => b.expiresAt > now);
-        if (active.length !== user.activeBoosts.length) updateUserData({ activeBoosts: active });
-        return active;
-    }
-
-    // ========== ИНВЕСТИЦИИ ==========
-    function getDepositIncome(user) {
-        if (!user.activeDeposit) return 0;
-        const deposit = INVESTMENTS.deposits.find(d => d.id === user.activeDeposit.id);
-        if (!deposit) return 0;
-        const daysPassed = Math.floor((Date.now() - user.activeDeposit.startDate) / (1000 * 60 * 60 * 24));
-        if (daysPassed >= deposit.minDays) {
-            const income = user.activeDeposit.amount * (deposit.dailyPercent / 100) * daysPassed;
-            user.activeDeposit = null;
-            return income;
-        }
-        return 0;
-    }
-    
-    function getAssetsIncome(user) {
-        if (!user.assets) return 0;
-        let total = 0;
-        for (let a of user.assets) {
-            const asset = INVESTMENTS.assets.find(ast => ast.id === a.id);
-            if (asset) total += asset.income;
-        }
-        return total;
-    }
-    
-    function getMiningIncome(user) {
-        if (!user.mining) return 0;
-        let total = 0;
-        for (let m of user.mining) {
-            const mine = INVESTMENTS.mining.find(mn => mn.id === m.id);
-            if (mine) total += mine.income;
-        }
-        return total;
-    }
-    
-    function getSecuritiesIncome(user) {
-        if (!user.securities) return 0;
-        let total = 0;
-        for (let s of user.securities) {
-            const security = INVESTMENTS.securities.find(sec => sec.id === s.id);
-            if (security) total += security.dividend;
-        }
-        return total;
-    }
-    
-    function getRealtyIncome(user) {
-        if (!user.realty) return 0;
-        let total = 0;
-        for (let r of user.realty) {
-            const realty = INVESTMENTS.realty.find(re => re.id === r.id);
-            if (realty) total += realty.rent;
-        }
-        return total;
-    }
-    
-    function collectInvestmentIncome() {
-        const user = getUserData();
-        if (!user) return 0;
-        let totalIncome = 0;
-        totalIncome += getDepositIncome(user);
-        totalIncome += getAssetsIncome(user);
-        totalIncome += getMiningIncome(user);
-        totalIncome += getSecuritiesIncome(user);
-        totalIncome += getRealtyIncome(user);
-        if (totalIncome > 0) {
-            user.balance += totalIncome;
-            if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
-            updateUserData({ balance: user.balance, lastIncomeCollect: Date.now() });
-        }
-        return totalIncome;
-    }
-
-    // ========== ПРОГРАММА ЛОЯЛЬНОСТИ ==========
-    function checkAchievements() {
-        const user = getUserData();
-        if (!user) return;
-        if (!user.achievements) user.achievements = [];
-        let newReward = 0;
-        for (let a of ACHIEVEMENTS) {
-            if (!user.achievements.includes(a.id) && a.condition(user)) {
-                user.achievements.push(a.id);
-                newReward += a.reward;
-            }
-        }
-        if (newReward > 0) {
-            user.balance += newReward;
-            if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
-            updateUserData({ achievements: user.achievements, balance: user.balance });
-        }
-    }
-    
-    function getTopClients() {
-        const users = loadUsers();
-        const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-        const topUsers = Object.values(users).map(u => ({
-            nick: u.nickname,
-            weekTrans: (u.transactions || []).filter(t => t.date && new Date(t.date).getTime() > weekAgo && t.type === 'out').length
-        })).sort((a,b) => b.weekTrans - a.weekTrans).slice(0, 5);
-        return topUsers;
-    }
-
-    // ========== КАРТЫ ==========
-    const CARD_TYPES = [
-        { id: 'classic', name: 'Classic', emoji: '💳' },
-        { id: 'gold', name: 'Gold', emoji: '🥇' },
-        { id: 'platinum', name: 'Platinum', emoji: '💎' },
-        { id: 'black', name: 'Black', emoji: '🖤' },
-        { id: 'corporate', name: 'Corporate', emoji: '🏢' },
-        { id: 'executive', name: 'Executive', emoji: '👑' }
-    ];
-    
-    function addCard(cardTypeId, cardNumber, cvv) {
-        const user = getUserData();
-        if (!user) return { success: false, error: 'Ошибка' };
-        if (user.cards.length >= 5) return { success: false, error: 'Максимум 5 карт' };
-        const cardType = CARD_TYPES.find(c => c.id === cardTypeId);
-        if (!cardType) return { success: false, error: 'Неверный тип' };
-        user.cards.push({
-            id: Date.now(),
-            typeId: cardTypeId,
-            typeName: cardType.name,
-            emoji: cardType.emoji,
-            cardNumber: cardNumber,
-            cvv: cvv,
-            expiry: '08/28'
-        });
-        if (user.cards.length === 1) {
-            user.activeCardIndex = 0;
-            // При создании первой карты даём стартовый баланс 100
-            if (user.balance === undefined || user.balance === 0) {
-                user.balance = 100;
-            }
-        }
-        if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
-        const users = loadUsers();
-        users[user.nickname] = user;
-        saveUsers(users);
-        return { success: true };
-    }
-    
-    function getActiveCard() {
-        const user = getUserData();
-        if (!user?.cards?.length) return null;
-        return user.cards[user.activeCardIndex || 0];
-    }
-    
-    function setActiveCard(index) {
-        const user = getUserData();
-        if (user && user.cards[index]) updateUserData({ activeCardIndex: index });
-        renderApp();
-    }
-    
-    function getClientStatus(transactions) {
-        for (let i = CLIENT_STATUSES.length - 1; i >= 0; i--) {
-            if (transactions >= CLIENT_STATUSES[i].minTrans) {
-                const current = CLIENT_STATUSES[i];
-                const next = CLIENT_STATUSES[i + 1] || null;
-                const progress = next ? ((transactions - current.minTrans) / (next.minTrans - current.minTrans)) * 100 : 100;
-                return { current, next, progress: Math.min(100, progress) };
-            }
-        }
-        return { current: CLIENT_STATUSES[0], next: CLIENT_STATUSES[1], progress: 0 };
-    }
-
-    // ========== ПЕРЕВОДЫ ==========
-    function generateContractNumber() { return `NCP-${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}-${Math.floor(Math.random()*10000).toString().padStart(4,'0')}`; }
-    
-    function createTransferLink(amount, note) {
-        const user = getUserData();
-        if (!user) return null;
-        if ((user.balance || 0) < amount && user.nickname !== ADMIN_NICK) return { error: `Недостаточно средств` };
-        const contract = generateContractNumber();
-        const link = `${location.origin}${location.pathname}#transfer/${encodeURIComponent(user.nickname)}/${encodeURIComponent(contract)}/${amount}/${encodeURIComponent(note || '')}`;
-        return { link, contractNumber: contract, note: note || '' };
-    }
-    
-    function executeTransfer(fromNick, amount, contract, note) {
-        const current = getUserData();
-        if (!current) return { success: false, error: 'Ошибка авторизации' };
-        if (fromNick === current.nickname) return { success: false, error: 'Нельзя перевести самому себе' };
-        const users = loadUsers();
-        const fromUser = users[fromNick];
-        if (!fromUser) return { success: false, error: 'Отправитель не найден' };
-        if ((fromUser.balance || 0) < amount && fromNick !== ADMIN_NICK) return { success: false, error: 'Недостаточно средств' };
-        
-        // Множители применяются ТОЛЬКО если отправитель НЕ админ
-        let boostedAmount = amount;
-        if (fromNick !== ADMIN_NICK) {
-            const boosts = getActiveBoosts();
-            let multiplier = 1;
-            for (let b of boosts) multiplier *= b.value;
-            const hour = new Date().getHours();
-            if (hour >= 19 && hour < 20) multiplier *= 1.5;
-            const day = new Date().getDay();
-            if (day === 6 || day === 0) multiplier *= 2;
-            boostedAmount = amount * multiplier;
-        }
-        
-        // Списание у отправителя (админ не теряет деньги)
-        if (fromNick !== ADMIN_NICK) {
-            fromUser.balance -= amount;
-        }
-        current.balance += boostedAmount;
-        fromUser.totalTransactions = (fromUser.totalTransactions || 0) + 1;
-        current.totalTransactions = (current.totalTransactions || 0) + 1;
-        
-        // Восстанавливаем баланс админа до бесконечности
-        if (fromNick === ADMIN_NICK) fromUser.balance = INFINITY_MONEY;
-        if (current.nickname === ADMIN_NICK) current.balance = INFINITY_MONEY;
-        
-        fromUser.transactions = [{ id: Date.now(), type: 'out', to: current.nickname, amount, date: new Date().toLocaleString(), method: 'link', contractNumber: contract, note }, ...(fromUser.transactions || [])].slice(0,50);
-        current.transactions = [{ id: Date.now(), type: 'in', from: fromUser.nickname, amount: boostedAmount, date: new Date().toLocaleString(), method: 'link', contractNumber: contract, note }, ...(current.transactions || [])].slice(0,50);
-        
-        users[fromUser.nickname] = fromUser;
-        users[current.nickname] = current;
-        saveUsers(users);
-        checkAchievements();
-        return { success: true, amount: boostedAmount, from: fromUser.nickname, contract };
-    }
-
-    function formatCardNumber(num) {
-        if (!num) return '**** **** **** ****';
-        const parts = num.split(' ');
-        return parts.length === 4 ? `${parts[0]} **** **** ${parts[3]}` : num;
-    }
-    
-    function escapeHtml(str) { return str?.replace(/[&<>]/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;' }[m])) || ''; }
-
-    // ========== UI ==========
+    // ========== UI СОСТОЯНИЕ ==========
     let currentTab = 'dashboard';
     let showSettings = false, showCreateCard = false, showAgreementModal = false;
     let currentView = 'login';
@@ -1005,10 +1022,13 @@
     function saveSettings() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(appSettings)); applyTheme(); }
     function applyTheme() { if (appSettings.theme === 'dark') document.body.classList.add('dark'); else document.body.classList.remove('dark'); }
 
-    function getOnlineBadge() { if (!isAdmin()) return ''; return `<div class="online-counter"><span class="online-dot"></span> 👥 Онлайн: <span id="onlineCounter">${onlineCount}</span></div>`; }
+    function isAdmin(user) { return user && user.nickname === ADMIN_NICK; }
+
+    // ========== РЕНДЕР ФУНКЦИИ ==========
+    function getOnlineBadge(user) { if (!isAdmin(user)) return ''; return `<div class="online-counter"><span class="online-dot"></span> 👥 Онлайн: <span id="onlineCounter">${onlineCount}</span></div>`; }
     
-    function renderAdminPanel() {
-        const users = loadUsers();
+    async function renderAdminPanel() {
+        const users = await loadUsers();
         return `
             <div class="dashboard-card">
                 <div class="back-to-main" id="backToMainBtn">← На главную</div>
@@ -1031,17 +1051,17 @@
         `;
     }
 
-    function renderDashboard() {
-        const user = getUserData();
+    async function renderDashboard() {
+        const user = await getUserData();
         if (!user) return renderLoginScreen();
         
         const hasCard = user.cards && user.cards.length > 0;
         const symbol = getCurrencySymbol();
         const balance = (user.balance || 0).toFixed(2);
-        const activeCard = getActiveCard();
-        const prefix = getEquippedPrefix();
+        const activeCard = getActiveCard(user);
+        const prefix = getEquippedPrefix(user);
         const displayName = prefix ? `${prefix} ${user.nickname}` : user.nickname;
-        const cardEffect = getCardSkinEffect();
+        const cardEffect = getCardSkinEffect(user);
         const status = getClientStatus(user.totalTransactions || 0);
         const cardsListHtml = (user.cards || []).map((c, i) => `<div class="card-tab ${i === (user.activeCardIndex||0) ? 'active' : ''}" data-card-idx="${i}">${c.emoji} ${c.typeName}</div>`).join('');
         
@@ -1065,14 +1085,37 @@
             linkHtml = `<div class="link-box"><div>📄 Договор: ${currentContract}</div>${currentNote ? `<div>📝 ${escapeHtml(currentNote)}</div>` : ''}<textarea rows="2" readonly id="transferLink">${currentLink}</textarea><button id="copyLinkBtn" class="copy-btn">📋 Копировать</button><button id="clearLinkBtn">Очистить</button></div>`;
         }
         
+        // Обработка перехода по ссылке при загрузке
+        if (window.location.hash && window.location.hash.startsWith('#transfer/') && !window._transferProcessed) {
+            window._transferProcessed = true;
+            setTimeout(async () => {
+                const parts = window.location.hash.split('/');
+                if (parts.length >= 5) {
+                    const fromNick = decodeURIComponent(parts[1]);
+                    const contract = decodeURIComponent(parts[2]);
+                    const amount = parseFloat(parts[3]);
+                    const note = decodeURIComponent(parts[4] || '');
+                    const cur = await getUserData();
+                    if (cur && fromNick !== cur.nickname) {
+                        if (confirm(`📥 Получить перевод ${amount} ${getCurrencySymbol()} от ${fromNick}?`)) {
+                            const res = await executeTransfer(fromNick, amount, contract, note);
+                            alert(res.success ? `✅ Получено ${res.amount} ${getCurrencySymbol()}` : `❌ ${res.error}`);
+                            window.location.hash = '';
+                            renderApp();
+                        } else { window.location.hash = ''; }
+                    }
+                }
+            }, 500);
+        }
+        
         return `
-            <div class="dashboard-card">${getOnlineBadge()}
+            <div class="dashboard-card">${getOnlineBadge(user)}
                 <div class="nav-tabs">
                     <div class="nav-tab ${currentTab === 'dashboard' ? 'active' : ''}" data-tab="dashboard">🏦 Главная</div>
                     <div class="nav-tab ${currentTab === 'investments' ? 'active' : ''}" data-tab="investments">📈 Инвестиции</div>
                     <div class="nav-tab ${currentTab === 'loyalty' ? 'active' : ''}" data-tab="loyalty">🎯 Лояльность</div>
                     <div class="nav-tab ${currentTab === 'market' ? 'active' : ''}" data-tab="market">🛍️ Маркетплейс</div>
-                    ${isAdmin() ? `<div class="nav-tab ${currentTab === 'admin' ? 'active' : ''}" data-tab="admin">👑 Админка</div>` : ''}
+                    ${isAdmin(user) ? `<div class="nav-tab ${currentTab === 'admin' ? 'active' : ''}" data-tab="admin">👑 Админка</div>` : ''}
                 </div>
                 <div class="welcome-header"><h2>🏦 Привет, ${escapeHtml(displayName)}</h2><div class="user-greeting">${status.current.emoji} ${status.current.name}</div></div>
                 <div class="level-info"><span>⭐ Статус: ${status.current.name}</span><span>📊 ${user.totalTransactions || 0} транзакций</span></div>
@@ -1102,12 +1145,11 @@
         `;
     }
 
-    function renderInvestments() {
-        const user = getUserData();
+    async function renderInvestments() {
+        const user = await getUserData();
         if (!user) return '';
-        collectInvestmentIncome();
+        await collectInvestmentIncome(user);
         
-        // Показываем инвестиции только если есть карта
         const hasCard = user.cards && user.cards.length > 0;
         if (!hasCard) {
             return `
@@ -1173,13 +1215,11 @@
         `;
     }
 
-    function renderLoyalty() {
-        const user = getUserData();
+    async function renderLoyalty() {
+        const user = await getUserData();
         if (!user) return '';
         const symbol = getCurrencySymbol();
-        const topClients = getTopClients();
         
-        // Показываем лояльность только если есть карта
         const hasCard = user.cards && user.cards.length > 0;
         if (!hasCard) {
             return `
@@ -1189,6 +1229,14 @@
                 </div>
             `;
         }
+        
+        // Получаем топ клиентов (асинхронно)
+        const users = await loadUsers();
+        const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+        const topClients = Object.values(users).map(u => ({
+            nick: u.nickname,
+            weekTrans: (u.transactions || []).filter(t => t.date && new Date(t.date).getTime() > weekAgo && t.type === 'out').length
+        })).sort((a,b) => b.weekTrans - a.weekTrans).slice(0, 5);
         
         return `
             <div class="dashboard-card">
@@ -1223,8 +1271,8 @@
         `;
     }
 
-    function renderMarketplace() {
-        const user = getUserData();
+    async function renderMarketplace() {
+        const user = await getUserData();
         if (!user) return '';
         const symbol = getCurrencySymbol();
         const inventory = user.marketInventory || [];
@@ -1280,13 +1328,13 @@
             e.preventDefault();
             const nick = document.getElementById('loginNickname').value.trim();
             const pass = document.getElementById('loginPassword').value;
-            const users = loadUsers();
-            const user = users[nick];
-            if (!user) { alert('❌ Пользователь не найден'); return; }
-            if (user.passwordHash !== await hashPassword(pass)) { alert('❌ Неверный пароль'); return; }
-            saveSession(nick);
-            currentTab = 'dashboard';
-            renderApp();
+            const res = await loginUser(nick, pass);
+            if (res.success) {
+                currentTab = 'dashboard';
+                renderApp();
+            } else {
+                alert(`❌ ${res.error}`);
+            }
         });
         document.getElementById('switchToRegister')?.addEventListener('click', () => { currentView = 'register'; renderApp(); });
         document.getElementById('showAgreementBtn')?.addEventListener('click', () => { showAgreementModal = true; renderApp(); });
@@ -1297,32 +1345,13 @@
             e.preventDefault();
             const nick = document.getElementById('regNickname').value.trim();
             const pass = document.getElementById('regPassword').value;
-            if (nick.length < 3) { alert('❌ Ник минимум 3'); return; }
-            if (pass.length < 3) { alert('❌ Пароль минимум 3'); return; }
-            const users = loadUsers();
-            if (users[nick]) { alert('❌ Ник занят'); return; }
-            users[nick] = {
-                nickname: nick,
-                passwordHash: await hashPassword(pass),
-                balance: 0,
-                cards: [],
-                activeCardIndex: 0,
-                totalTransactions: 0,
-                marketInventory: [],
-                activeBoosts: [],
-                achievements: [],
-                assets: [],
-                mining: [],
-                securities: [],
-                realty: [],
-                streak: 0,
-                createdAt: Date.now(),
-                transactions: []
-            };
-            saveUsers(users);
-            saveSession(nick);
-            currentTab = 'dashboard';
-            renderApp();
+            const res = await registerUser(nick, pass);
+            if (res.success) {
+                currentTab = 'dashboard';
+                renderApp();
+            } else {
+                alert(`❌ ${res.error}`);
+            }
         });
         document.getElementById('switchToLogin')?.addEventListener('click', () => { currentView = 'login'; renderApp(); });
     }
@@ -1334,20 +1363,29 @@
         document.querySelectorAll('.back-to-main').forEach(btn => {
             btn.addEventListener('click', () => { currentTab = 'dashboard'; renderApp(); });
         });
-        document.getElementById('logoutBtn')?.addEventListener('click', () => { localStorage.removeItem(SESSION_KEY); localStorage.removeItem(CURRENT_USER_KEY); renderApp(); });
+        document.getElementById('logoutBtn')?.addEventListener('click', async () => { 
+            localStorage.removeItem(SESSION_KEY); 
+            localStorage.removeItem(CURRENT_USER_KEY); 
+            renderApp(); 
+        });
         document.getElementById('settingsBtn')?.addEventListener('click', () => { showSettings = true; renderApp(); });
         document.getElementById('createCardBtn')?.addEventListener('click', () => { showCreateCard = true; renderApp(); });
         document.getElementById('addCardBtn')?.addEventListener('click', () => { showCreateCard = true; renderApp(); });
-        document.querySelectorAll('.card-tab').forEach(el => { el.addEventListener('click', () => setActiveCard(parseInt(el.dataset.cardIdx))); });
+        document.querySelectorAll('.card-tab').forEach(el => { 
+            el.addEventListener('click', async () => { 
+                await setActiveCard(parseInt(el.dataset.cardIdx)); 
+                renderApp(); 
+            }); 
+        });
         
         // Создание ссылки
-        document.getElementById('createLinkBtn')?.addEventListener('click', () => {
+        document.getElementById('createLinkBtn')?.addEventListener('click', async () => {
             const amount = parseFloat(document.getElementById('transferAmount')?.value);
             const note = document.getElementById('transferNote')?.value || '';
             if (!amount || amount <= 0) { alert('Введите сумму'); return; }
-            const user = getUserData();
+            const user = await getUserData();
             if (user.balance < amount && user.nickname !== ADMIN_NICK) { alert(`Недостаточно средств`); return; }
-            const res = createTransferLink(amount, note);
+            const res = await createTransferLink(amount, note);
             if (res.error) alert(res.error);
             else { currentLink = res.link; currentContract = res.contractNumber; currentNote = res.note; renderApp(); }
         });
@@ -1358,7 +1396,7 @@
         });
         
         // РУЧНОЙ ВВОД ССЫЛКИ
-        document.getElementById('submitLinkBtn')?.addEventListener('click', () => {
+        document.getElementById('submitLinkBtn')?.addEventListener('click', async () => {
             const linkInput = document.getElementById('manualLinkInput')?.value.trim();
             if (!linkInput) { alert('Введите ссылку'); return; }
             try {
@@ -1371,11 +1409,11 @@
                         const contract = decodeURIComponent(parts[2]);
                         const amount = parseFloat(parts[3]);
                         const note = decodeURIComponent(parts[4] || '');
-                        const cur = getUserData();
+                        const cur = await getUserData();
                         if (!cur) { alert('❌ Войдите в аккаунт'); return; }
                         if (fromNick === cur.nickname) { alert('❌ Нельзя перевести самому себе'); return; }
                         if (confirm(`📥 Получить перевод ${amount} ${getCurrencySymbol()} от ${fromNick}?`)) {
-                            const res = executeTransfer(fromNick, amount, contract, note);
+                            const res = await executeTransfer(fromNick, amount, contract, note);
                             alert(res.success ? `✅ Получено ${res.amount} ${getCurrencySymbol()}` : `❌ ${res.error}`);
                             document.getElementById('manualLinkInput').value = '';
                             renderApp();
@@ -1385,100 +1423,80 @@
             } catch(e) { alert('❌ Неверная ссылка'); }
         });
         
-        // Обработка ссылки из URL при загрузке
-        if (location.hash && location.hash.startsWith('#transfer/')) {
-            const parts = location.hash.split('/');
-            if (parts.length >= 5) {
-                const fromNick = decodeURIComponent(parts[1]);
-                const contract = decodeURIComponent(parts[2]);
-                const amount = parseFloat(parts[3]);
-                const note = decodeURIComponent(parts[4] || '');
-                const cur = getUserData();
-                if (cur && fromNick !== cur.nickname) {
-                    if (confirm(`📥 Получить перевод ${amount} ${getCurrencySymbol()} от ${fromNick}?`)) {
-                        const res = executeTransfer(fromNick, amount, contract, note);
-                        alert(res.success ? `✅ Получено ${res.amount} ${getCurrencySymbol()}` : `❌ ${res.error}`);
-                        location.hash = '';
-                        renderApp();
-                    } else { location.hash = ''; }
-                }
-            }
-        }
-        
         // Инвестиции
         document.querySelectorAll('.buy-deposit')?.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const user = getUserData();
+            btn.addEventListener('click', async () => {
+                const user = await getUserData();
                 const amount = parseInt(btn.dataset.amount);
                 if (user.balance >= amount || user.nickname === ADMIN_NICK) {
                     if (user.nickname !== ADMIN_NICK) user.balance -= amount;
                     if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
                     user.activeDeposit = { id: btn.dataset.id, amount: amount, startDate: Date.now() };
-                    updateUserData({ balance: user.balance, activeDeposit: user.activeDeposit });
+                    await updateUserData({ balance: user.balance, activeDeposit: user.activeDeposit });
                     renderApp();
                 } else alert('Недостаточно средств');
             });
         });
         document.querySelectorAll('.buy-asset')?.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const user = getUserData();
+            btn.addEventListener('click', async () => {
+                const user = await getUserData();
                 const price = parseInt(btn.dataset.price);
                 if (user.balance >= price || user.nickname === ADMIN_NICK) {
                     if (user.nickname !== ADMIN_NICK) user.balance -= price;
                     if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
                     if (!user.assets) user.assets = [];
                     user.assets.push({ id: btn.dataset.id });
-                    updateUserData({ balance: user.balance, assets: user.assets });
+                    await updateUserData({ balance: user.balance, assets: user.assets });
                     renderApp();
                 } else alert('Недостаточно средств');
             });
         });
         document.querySelectorAll('.buy-mining')?.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const user = getUserData();
+            btn.addEventListener('click', async () => {
+                const user = await getUserData();
                 const price = parseInt(btn.dataset.price);
                 if (user.balance >= price || user.nickname === ADMIN_NICK) {
                     if (user.nickname !== ADMIN_NICK) user.balance -= price;
                     if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
                     if (!user.mining) user.mining = [];
                     user.mining.push({ id: btn.dataset.id });
-                    updateUserData({ balance: user.balance, mining: user.mining });
+                    await updateUserData({ balance: user.balance, mining: user.mining });
                     renderApp();
                 } else alert('Недостаточно средств');
             });
         });
         document.querySelectorAll('.buy-security')?.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const user = getUserData();
+            btn.addEventListener('click', async () => {
+                const user = await getUserData();
                 const price = parseInt(btn.dataset.price);
                 if (user.balance >= price || user.nickname === ADMIN_NICK) {
                     if (user.nickname !== ADMIN_NICK) user.balance -= price;
                     if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
                     if (!user.securities) user.securities = [];
                     user.securities.push({ id: btn.dataset.id });
-                    updateUserData({ balance: user.balance, securities: user.securities });
+                    await updateUserData({ balance: user.balance, securities: user.securities });
                     renderApp();
                 } else alert('Недостаточно средств');
             });
         });
         document.querySelectorAll('.buy-realty')?.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const user = getUserData();
+            btn.addEventListener('click', async () => {
+                const user = await getUserData();
                 const price = parseInt(btn.dataset.price);
                 if (user.balance >= price || user.nickname === ADMIN_NICK) {
                     if (user.nickname !== ADMIN_NICK) user.balance -= price;
                     if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
                     if (!user.realty) user.realty = [];
                     user.realty.push({ id: btn.dataset.id });
-                    updateUserData({ balance: user.balance, realty: user.realty });
+                    await updateUserData({ balance: user.balance, realty: user.realty });
                     renderApp();
                 } else alert('Недостаточно средств');
             });
         });
         
         // Лояльность
-        document.getElementById('claimDailyBonus')?.addEventListener('click', () => {
-            const user = getUserData();
+        document.getElementById('claimDailyBonus')?.addEventListener('click', async () => {
+            const user = await getUserData();
             const lastBonus = user.lastBonusDate;
             const today = new Date().toDateString();
             if (lastBonus === today) { alert('Бонус уже получен сегодня'); return; }
@@ -1486,17 +1504,17 @@
             user.balance += bonus;
             if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
             user.lastBonusDate = today;
-            updateUserData({ balance: user.balance, lastBonusDate: user.lastBonusDate });
+            await updateUserData({ balance: user.balance, lastBonusDate: user.lastBonusDate });
             alert(`✅ Получено ${bonus} ${getCurrencySymbol()}`);
             renderApp();
         });
-        document.getElementById('claimWeekQuestBtn')?.addEventListener('click', () => {
-            const user = getUserData();
+        document.getElementById('claimWeekQuestBtn')?.addEventListener('click', async () => {
+            const user = await getUserData();
             if (user.weekTransfers >= 10 && !user.weekQuestClaimed) {
                 user.balance += 2000;
                 if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
                 user.weekQuestClaimed = true;
-                updateUserData({ balance: user.balance, weekQuestClaimed: true });
+                await updateUserData({ balance: user.balance, weekQuestClaimed: true });
                 alert('✅ Получено 2000 -_- за квест недели!');
                 renderApp();
             }
@@ -1504,23 +1522,27 @@
         
         // Маркетплейс
         document.querySelectorAll('.buy-btn')?.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const result = purchaseItem(btn.dataset.id);
+            btn.addEventListener('click', async () => {
+                const result = await purchaseItem(btn.dataset.id);
                 if (result.success) alert(`✅ Куплено: ${result.item.name}`);
                 else alert(`❌ ${result.error}`);
                 renderApp();
             });
         });
         document.querySelectorAll('.equip-btn')?.forEach(btn => {
-            btn.addEventListener('click', () => { equipItem(btn.dataset.id); renderApp(); });
+            btn.addEventListener('click', async () => {
+                const result = await equipItem(btn.dataset.id);
+                if (result) alert('✅ Экипировано!');
+                renderApp();
+            });
         });
         
         // Админка
-        document.getElementById('adminGiveBtn')?.addEventListener('click', () => {
+        document.getElementById('adminGiveBtn')?.addEventListener('click', async () => {
             const nick = document.getElementById('adminGiveNick')?.value.trim();
             const amount = parseFloat(document.getElementById('adminGiveAmount')?.value);
             if (!nick || !amount) { alert('Введите данные'); return; }
-            const res = adminGiveMoney(nick, amount);
+            const res = await adminGiveMoney(nick, amount);
             alert(res.success ? `✅ Выдано ${amount} ${getCurrencySymbol()}` : `❌ ${res.error}`);
             renderApp();
         });
@@ -1531,7 +1553,7 @@
         document.querySelectorAll('.card-type-option').forEach(el => {
             el.addEventListener('click', () => { selectedCardType = el.dataset.cardId; renderApp(); });
         });
-        document.getElementById('confirmCreateCardBtn')?.addEventListener('click', () => {
+        document.getElementById('confirmCreateCardBtn')?.addEventListener('click', async () => {
             const number = document.getElementById('cardNumberInput').value.trim();
             const cvv = document.getElementById('cvvInput').value.trim();
             const msg = document.getElementById('createCardMsg');
@@ -1539,7 +1561,7 @@
             if (!clean || clean.length !== 16 || !/^\d+$/.test(clean)) { msg.innerHTML = '<div class="error-msg">❌ 16 цифр номера</div>'; return; }
             if (!cvv || cvv.length !== 3 || !/^\d+$/.test(cvv)) { msg.innerHTML = '<div class="error-msg">❌ 3 цифры CVV</div>'; return; }
             const formatted = clean.replace(/(\d{4})(?=\d)/g, '$1 ');
-            const res = addCard(selectedCardType, formatted, cvv);
+            const res = await addCard(selectedCardType, formatted, cvv);
             if (res.success) { msg.innerHTML = '<div class="success-msg">✅ Карта создана! На ваш счёт зачислено 100 -_-</div>'; setTimeout(() => { showCreateCard = false; renderApp(); }, 1500); }
             else msg.innerHTML = `<div class="error-msg">❌ ${res.error}</div>`;
         });
@@ -1548,7 +1570,13 @@
     function attachSettingsHandlers() {
         document.getElementById('closeSettingsBtn')?.addEventListener('click', () => { showSettings = false; renderApp(); });
         document.getElementById('themeToggle')?.addEventListener('click', () => { appSettings.theme = appSettings.theme === 'light' ? 'dark' : 'light'; saveSettings(); renderApp(); });
-        document.getElementById('resetAllDataBtn')?.addEventListener('click', () => { if(confirm('Удалить все данные?')) { localStorage.clear(); location.reload(); } });
+        document.getElementById('resetAllDataBtn')?.addEventListener('click', async () => { 
+            if(confirm('Удалить все данные? (Это действие необратимо)')) { 
+                localStorage.clear(); 
+                await saveUsers({});
+                location.reload(); 
+            } 
+        });
         document.getElementById('showAgreementBtn')?.addEventListener('click', () => { showAgreementModal = true; renderApp(); });
     }
     
@@ -1558,7 +1586,7 @@
     }
 
     async function ensureAdminExists() {
-        const users = loadUsers();
+        const users = await loadUsers();
         if (!users[ADMIN_NICK]) {
             users[ADMIN_NICK] = {
                 nickname: ADMIN_NICK,
@@ -1578,12 +1606,31 @@
                 createdAt: Date.now(),
                 transactions: []
             };
-            saveUsers(users);
+            await saveUsers(users);
             console.log('✅ Админ KacERORga создан с бесконечными деньгами и максимальным уровнем');
         }
     }
 
-    function renderApp() {
+    async function setActiveCard(index) {
+        const user = await getUserData();
+        if (user && user.cards[index]) {
+            await updateUserData({ activeCardIndex: index });
+        }
+    }
+    
+    async function equipItem(itemId) {
+        const user = await getUserData();
+        if (!user) return false;
+        const item = ALL_ITEMS.find(i => i.id === itemId);
+        if (!item) return false;
+        if (!user.marketInventory?.includes(itemId)) return false;
+        if (item.type === 'prefix') await updateUserData({ equippedPrefix: itemId });
+        else if (item.type === 'skin') await updateUserData({ equippedSkin: itemId });
+        else if (item.type === 'effect') await updateUserData({ equippedEffect: itemId });
+        return true;
+    }
+
+    async function renderApp() {
         const root = document.getElementById('appRoot');
         if (!root) return;
         
@@ -1593,7 +1640,7 @@
             return;
         }
         
-        const session = loadSession();
+        const session = await loadSession();
         if (session) {
             if (showSettings) {
                 root.innerHTML = renderSettings();
@@ -1602,19 +1649,19 @@
                 root.innerHTML = renderCreateCardPage();
                 attachCreateCardHandlers();
             } else if (currentTab === 'investments') {
-                root.innerHTML = renderInvestments();
+                root.innerHTML = await renderInvestments();
                 attachDashboardHandlers();
             } else if (currentTab === 'loyalty') {
-                root.innerHTML = renderLoyalty();
+                root.innerHTML = await renderLoyalty();
                 attachDashboardHandlers();
             } else if (currentTab === 'market') {
-                root.innerHTML = renderMarketplace();
+                root.innerHTML = await renderMarketplace();
                 attachDashboardHandlers();
-            } else if (currentTab === 'admin' && isAdmin()) {
-                root.innerHTML = renderAdminPanel();
+            } else if (currentTab === 'admin' && isAdmin(await getUserData())) {
+                root.innerHTML = await renderAdminPanel();
                 attachDashboardHandlers();
             } else {
-                root.innerHTML = renderDashboard();
+                root.innerHTML = await renderDashboard();
                 attachDashboardHandlers();
             }
         } else {
