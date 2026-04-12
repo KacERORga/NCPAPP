@@ -48,10 +48,97 @@
             background: linear-gradient(145deg, #0a0f1a 0%, #0f1722 100%);
         }
 
+        /* Экран загрузки */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.5s ease;
+        }
+        body.dark .loading-screen {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+        }
+        .loading-content {
+            text-align: center;
+            color: white;
+        }
+        .loading-logo {
+            font-size: 4rem;
+            margin-bottom: 24px;
+            animation: pulse 1.5s infinite;
+        }
+        .loading-text {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+        .loading-status {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-bottom: 20px;
+        }
+        .loading-progress-bar {
+            width: 250px;
+            height: 4px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+        .loading-progress-fill {
+            width: 0%;
+            height: 100%;
+            background: white;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        .loading-steps {
+            margin-top: 24px;
+            font-size: 0.7rem;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: left;
+            background: rgba(0,0,0,0.2);
+            padding: 12px 20px;
+            border-radius: 60px;
+        }
+        .loading-step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .loading-step .step-icon {
+            width: 18px;
+            text-align: center;
+        }
+        .loading-step.completed {
+            opacity: 1;
+        }
+        .loading-step.pending {
+            opacity: 0.5;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
         .app-container {
             max-width: 700px;
             width: 100%;
             margin: 0 auto;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .app-container.visible {
+            opacity: 1;
         }
 
         .ncp-logo {
@@ -133,10 +220,6 @@
             background: #10b981;
             border-radius: 50%;
             animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.2); }
         }
 
         .admin-panel {
@@ -515,7 +598,42 @@
     </style>
 </head>
 <body>
-<div class="app-container">
+
+<!-- ЭКРАН ЗАГРУЗКИ -->
+<div id="loadingScreen" class="loading-screen">
+    <div class="loading-content">
+        <div class="loading-logo">🏦</div>
+        <div class="loading-text">NCPBANK</div>
+        <div class="loading-status" id="loadingStatus">Инициализация...</div>
+        <div class="loading-progress-bar">
+            <div class="loading-progress-fill" id="loadingProgress"></div>
+        </div>
+        <div class="loading-steps" id="loadingSteps">
+            <div class="loading-step pending" data-step="1">
+                <span class="step-icon">◌</span>
+                <span>Загрузка модулей</span>
+            </div>
+            <div class="loading-step pending" data-step="2">
+                <span class="step-icon">◌</span>
+                <span>Подключение к облаку</span>
+            </div>
+            <div class="loading-step pending" data-step="3">
+                <span class="step-icon">◌</span>
+                <span>Синхронизация данных</span>
+            </div>
+            <div class="loading-step pending" data-step="4">
+                <span class="step-icon">◌</span>
+                <span>Проверка сессии</span>
+            </div>
+            <div class="loading-step pending" data-step="5">
+                <span class="step-icon">◌</span>
+                <span>Запуск приложения</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="app-container" id="appContainer">
     <div class="ncp-logo">
         <h1>🏦 NCP BANK</h1>
         <p>Независимый Центр Решений</p>
@@ -525,6 +643,39 @@
 </div>
 
 <script>
+    // ========== ФУНКЦИИ ЗАГРУЗКИ ==========
+    let currentProgress = 0;
+    let currentStep = 0;
+    
+    function updateLoading(step, status, progress) {
+        const stepEl = document.querySelector(`.loading-step[data-step="${step}"]`);
+        if (stepEl) {
+            stepEl.classList.remove('pending');
+            stepEl.classList.add('completed');
+            stepEl.querySelector('.step-icon').textContent = '✓';
+        }
+        const statusEl = document.getElementById('loadingStatus');
+        if (statusEl) statusEl.textContent = status;
+        const progressEl = document.getElementById('loadingProgress');
+        if (progressEl) {
+            currentProgress = progress;
+            progressEl.style.width = `${progress}%`;
+        }
+        if (step === 5) {
+            setTimeout(() => {
+                const loadingScreen = document.getElementById('loadingScreen');
+                const appContainer = document.getElementById('appContainer');
+                if (loadingScreen) {
+                    loadingScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                    }, 500);
+                }
+                if (appContainer) appContainer.classList.add('visible');
+            }, 300);
+        }
+    }
+
     // ========== КЛЮЧИ ==========
     const USERS_KEY = 'ncpbank_cloud_v2';
     const SESSION_KEY = 'ncpbank_session_cloud';
@@ -577,13 +728,16 @@
 
     async function loadUsers() {
         if (cachedUsers) return cachedUsers;
+        updateLoading(2, 'Подключение к облаку...', 25);
         const cloudUsers = await loadUsersCloud();
         if (cloudUsers) {
             cachedUsers = cloudUsers;
+            updateLoading(3, 'Синхронизация данных...', 50);
             return cachedUsers;
         }
         const local = localStorage.getItem(USERS_KEY);
         cachedUsers = local ? JSON.parse(local) : {};
+        updateLoading(3, 'Синхронизация данных...', 50);
         return cachedUsers;
     }
     
@@ -788,7 +942,6 @@
     async function collectInvestmentIncome(user) {
         if (!user) return 0;
         let totalIncome = 0;
-        // Депозиты
         if (user.activeDeposit) {
             const deposit = INVESTMENTS.deposits.find(d => d.id === user.activeDeposit.id);
             if (deposit) {
@@ -800,28 +953,24 @@
                 }
             }
         }
-        // Активы
         if (user.assets) {
             for (let a of user.assets) {
                 const asset = INVESTMENTS.assets.find(ast => ast.id === a.id);
                 if (asset) totalIncome += asset.income;
             }
         }
-        // Майнинг
         if (user.mining) {
             for (let m of user.mining) {
                 const mine = INVESTMENTS.mining.find(mn => mn.id === m.id);
                 if (mine) totalIncome += mine.income;
             }
         }
-        // Ценные бумаги
         if (user.securities) {
             for (let s of user.securities) {
                 const security = INVESTMENTS.securities.find(sec => sec.id === s.id);
                 if (security) totalIncome += security.dividend;
             }
         }
-        // Недвижимость
         if (user.realty) {
             for (let r of user.realty) {
                 const realty = INVESTMENTS.realty.find(re => re.id === r.id);
@@ -1085,7 +1234,6 @@
             linkHtml = `<div class="link-box"><div>📄 Договор: ${currentContract}</div>${currentNote ? `<div>📝 ${escapeHtml(currentNote)}</div>` : ''}<textarea rows="2" readonly id="transferLink">${currentLink}</textarea><button id="copyLinkBtn" class="copy-btn">📋 Копировать</button><button id="clearLinkBtn">Очистить</button></div>`;
         }
         
-        // Обработка перехода по ссылке при загрузке
         if (window.location.hash && window.location.hash.startsWith('#transfer/') && !window._transferProcessed) {
             window._transferProcessed = true;
             setTimeout(async () => {
@@ -1230,7 +1378,6 @@
             `;
         }
         
-        // Получаем топ клиентов (асинхронно)
         const users = await loadUsers();
         const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
         const topClients = Object.values(users).map(u => ({
@@ -1378,7 +1525,6 @@
             }); 
         });
         
-        // Создание ссылки
         document.getElementById('createLinkBtn')?.addEventListener('click', async () => {
             const amount = parseFloat(document.getElementById('transferAmount')?.value);
             const note = document.getElementById('transferNote')?.value || '';
@@ -1395,7 +1541,6 @@
             if (ta) { ta.select(); document.execCommand('copy'); alert('✅ Ссылка скопирована'); }
         });
         
-        // РУЧНОЙ ВВОД ССЫЛКИ
         document.getElementById('submitLinkBtn')?.addEventListener('click', async () => {
             const linkInput = document.getElementById('manualLinkInput')?.value.trim();
             if (!linkInput) { alert('Введите ссылку'); return; }
@@ -1423,7 +1568,6 @@
             } catch(e) { alert('❌ Неверная ссылка'); }
         });
         
-        // Инвестиции
         document.querySelectorAll('.buy-deposit')?.forEach(btn => {
             btn.addEventListener('click', async () => {
                 const user = await getUserData();
@@ -1494,7 +1638,6 @@
             });
         });
         
-        // Лояльность
         document.getElementById('claimDailyBonus')?.addEventListener('click', async () => {
             const user = await getUserData();
             const lastBonus = user.lastBonusDate;
@@ -1520,7 +1663,6 @@
             }
         });
         
-        // Маркетплейс
         document.querySelectorAll('.buy-btn')?.forEach(btn => {
             btn.addEventListener('click', async () => {
                 const result = await purchaseItem(btn.dataset.id);
@@ -1537,7 +1679,6 @@
             });
         });
         
-        // Админка
         document.getElementById('adminGiveBtn')?.addEventListener('click', async () => {
             const nick = document.getElementById('adminGiveNick')?.value.trim();
             const amount = parseFloat(document.getElementById('adminGiveAmount')?.value);
@@ -1678,9 +1819,22 @@
         if (counterEl) counterEl.textContent = onlineCount;
     }
 
-    loadSettings();
-    if (!localStorage.getItem(AGREEMENT_KEY)) showAgreementModal = true;
-    ensureAdminExists().then(() => renderApp());
+    // ЗАПУСК С ЭКРАНОМ ЗАГРУЗКИ
+    updateLoading(1, 'Загрузка модулей...', 10);
+    setTimeout(() => {
+        loadSettings();
+        updateLoading(2, 'Подключение к облаку...', 30);
+        setTimeout(async () => {
+            if (!localStorage.getItem(AGREEMENT_KEY)) showAgreementModal = true;
+            await ensureAdminExists();
+            updateLoading(4, 'Проверка сессии...', 70);
+            setTimeout(() => {
+                updateLoading(5, 'Запуск приложения...', 100);
+                renderApp();
+            }, 300);
+        }, 300);
+    }, 200);
+    
     setInterval(() => { const ce = document.getElementById('onlineCounter'); if(ce) ce.textContent = onlineCount; }, 1000);
 </script>
 </body>
