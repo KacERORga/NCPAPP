@@ -1,34 +1,40 @@
 package com.ncpbank.app
 
-import android.app.Activity
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.IntentFilter
+import android.nfc.NdefMessage
+import android.nfc.NdefRecord
 import android.nfc.NfcAdapter
 import android.nfc.Tag
-import android.nfc.tech.IsoDep
+import android.nfc.tech.Ndef
+import android.nfc.tech.NdefFormatable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.webkit.JavascriptInterface
-import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.nio.charset.Charset
 
 class MainActivity : AppCompatActivity() {
     
     private lateinit var webView: WebView
     private var nfcAdapter: NfcAdapter? = null
     private var pendingIntent: PendingIntent? = null
-    private var nfcIntentFilters: Array<IntentFilter>? = null
     
-    private var currentPaymentAmount: Double = 0.0
-    private var currentPaymentCallback: String = ""
+    // Данные для P2P перевода
+    private var isWaitingForTransfer = false
+    private var pendingAmount = 0.0
+    private var pendingNote = ""
+    private var currentUserNickname = ""
+    private var currentUserBalance = 0.0
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,57 +51,28 @@ class MainActivity : AppCompatActivity() {
             domStorageEnabled = true
             allowFileAccess = true
             allowContentAccess = true
-            setSupportZoom(true)
-            builtInZoomControls = true
-            displayZoomControls = false
-            loadWithOverviewMode = true
-            useWideViewPort = true
         }
         
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
-                // Инжектим JavaScript для NFC
                 injectNfcInterface()
             }
-            
-            override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
-                url?.let {
-                    if (it.startsWith("ncpbank://")) {
-                        handleDeepLink(it)
-                        return true
-                    }
-                }
-                return super.shouldOverrideUrlLoading(view, url)
-            }
         }
         
-        webView.webChromeClient = object : WebChromeClient() {
-            override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                super.onProgressChanged(view, newProgress)
-                // Можно показать прогресс загрузки
-            }
-        }
-        
-        // Загрузка твоего сайта
         webView.loadUrl("https://ncpapp.vercel.app/")
     }
     
     private fun injectNfcInterface() {
-        // Добавляем JavaScript интерфейс для вызова из WebView
-        webView.addJavascriptInterface(NfcBridge(), "NfcPay")
+        webView.addJavascriptInterface(NfcP2PBridge(), "NfcP2P")
     }
     
     private fun setupNFC() {
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         
         if (nfcAdapter == null) {
-            Toast.makeText(this, "NFC не поддерживается на этом устройстве", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "NFC не поддерживается", Toast.LENGTH_LONG).show()
             return
-        }
-        
-        if (!nfcAdapter!!.isEnabled) {
-            Toast.makeText(this, "Пожалуйста, включите NFC в настройках", Toast.LENGTH_LONG).show()
         }
         
         pendingIntent = PendingIntent.getActivity(
@@ -103,32 +80,13 @@ class MainActivity : AppCompatActivity() {
             Intent(this, javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
             PendingIntent.FLAG_MUTABLE
         )
-        
-        val techLists = arrayOf(
-            arrayOf("android.nfc.tech.IsoDep"),
-            arrayOf("android.nfc.tech.NfcA"),
-            arrayOf("android.nfc.tech.NfcB"),
-            arrayOf("android.nfc.tech.NfcF"),
-            arrayOf("android.nfc.tech.NfcV"),
-            arrayOf("android.nfc.tech.MifareClassic"),
-            arrayOf("android.nfc.tech.MifareUltralight"),
-            arrayOf("android.nfc.tech.Ndef")
-        )
-        
-        nfcIntentFilters = arrayOf(
-            IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED),
-            IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED),
-            IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED)
-        )
     }
     
     override fun onResume() {
         super.onResume()
         nfcAdapter?.let {
             if (it.isEnabled) {
-                pendingIntent?.let { intent ->
-                    it.enableForegroundDispatch(this, intent, nfcIntentFilters, null)
-                }
+                it.enableForegroundDispatch(this, pendingIntent, null, null)
             }
         }
     }
@@ -141,112 +99,232 @@ class MainActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        handleNfcIntent(intent)
-    }
-    
-    private fun handleNfcIntent(intent: Intent) {
+        
         when (intent.action) {
-            NfcAdapter.ACTION_TECH_DISCOVERED,
-            NfcAdapter.ACTION_NDEF_DISCOVERED,
+            NfcAdapter.ACTION_NDEF_DISCOVERED -> {
+                processNdefMessage(intent)
+            }
             NfcAdapter.ACTION_TAG_DISCOVERED -> {
-                val tag = intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG)
-                tag?.let {
-                    processNfcPayment(it)
+                // Если тег обнаружен, но не NDEF
+                processTagDiscovered(intent)
+            }
+        }
+    }
+    
+    private fun processNdefMessage(intent: Intent) {
+        val rawMessages = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
+        if (rawMessages != null) {
+            val messages = rawMessages.map { it as NdefMessage }
+            for (message in messages) {
+                for (record in message.records) {
+                    val payload = String(record.payload, Charset.forName("UTF-8"))
+                    handleIncomingTransfer(payload)
                 }
             }
         }
     }
     
-    private fun processNfcPayment(tag: Tag) {
-        if (currentPaymentAmount <= 0) {
-            sendNfcCallback(false, "Сумма не указана")
-            return
+    private fun processTagDiscovered(intent: Intent) {
+        val tag = intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG)
+        if (tag != null && isWaitingForTransfer) {
+            // Отправляем данные на другой телефон
+            sendTransferData(tag)
+        } else {
+            // Просто читаем тег
+            readTagData(tag)
         }
-        
-        // Здесь должна быть логика реальной оплаты через NFC
-        // Например, чтение данных с карты и списание средств
-        // Для демонстрации имитируем успешную оплату
-        
-        Toast.makeText(this, "Обработка NFC оплаты...", Toast.LENGTH_SHORT).show()
-        
-        // Имитация задержки оплаты
-        Handler(Looper.getMainLooper()).postDelayed({
-            // Генерируем ID транзакции
-            val transactionId = "NCP_${System.currentTimeMillis()}_${(Math.random() * 10000).toInt()}"
-            
-            // Успешная оплата
-            sendNfcCallback(true, transactionId)
-            Toast.makeText(this, "✅ Оплата прошла успешно! Сумма: ${currentPaymentAmount} ₽", Toast.LENGTH_LONG).show()
-            
-            currentPaymentAmount = 0.0
-        }, 1500)
-        
-        // Реальная реализация потребовала бы:
-        // 1. Установление соединения с картой через IsoDep
-        // 2. Аутентификация
-        // 3. Чтение/запись данных
-        // 4. Списание средств через платёжный шлюз
     }
     
-    private fun sendNfcCallback(success: Boolean, result: String) {
-        val jsonResult = JSONObject().apply {
-            put("success", success)
-            if (success) {
-                put("transactionId", result)
+    private fun sendTransferData(tag: Tag) {
+        try {
+            val ndef = Ndef.get(tag)
+            if (ndef != null) {
+                ndef.connect()
+                if (ndef.isWritable) {
+                    // Создаём сообщение с данными перевода
+                    val transferData = JSONObject().apply {
+                        put("type", "transfer")
+                        put("from", currentUserNickname)
+                        put("amount", pendingAmount)
+                        put("note", pendingNote)
+                        put("timestamp", System.currentTimeMillis())
+                    }.toString()
+                    
+                    val message = createNdefMessage(transferData)
+                    ndef.writeNdefMessage(message)
+                    
+                    Toast.makeText(this, "✅ Данные перевода отправлены!", Toast.LENGTH_SHORT).show()
+                    
+                    // Отправляем подтверждение в WebView
+                    sendToWebView("transferSent", true)
+                    
+                    isWaitingForTransfer = false
+                }
+                ndef.close()
             } else {
-                put("error", result)
-            }
-        }
-        
-        // Вызываем JavaScript колбэк в WebView
-        webView.evaluateJavascript(
-            "window.NfcPayCallback && window.NfcPayCallback($jsonResult)",
-            null
-        )
-    }
-    
-    private fun handleDeepLink(url: String) {
-        // Обработка глубоких ссылок ncpbank://...
-        Log.d("NCPBank", "Deep link: $url")
-    }
-    
-    // JavaScript интерфейс для вызова из WebView
-    inner class NfcBridge {
-        @JavascriptInterface
-        fun startPayment(amount: String, data: String) {
-            runOnUiThread {
-                try {
-                    currentPaymentAmount = amount.toDouble()
-                    Log.d("NCPBank", "NFC оплата на сумму: $currentPaymentAmount")
-                    
-                    Toast.makeText(
-                        this@MainActivity,
-                        "💳 Приложите карту к телефону для оплаты $amount ₽",
-                        Toast.LENGTH_LONG
-                    ).show()
-                    
-                    // Отправляем сообщение в WebView о готовности
-                    webView.evaluateJavascript(
-                        "window.updateNfcStatus && window.updateNfcStatus('ready', 'Приложите карту')",
-                        null
+                // Форматируем тег если нужно
+                val ndefFormatable = NdefFormatable.get(tag)
+                if (ndefFormatable != null) {
+                    ndefFormatable.connect()
+                    val message = createNdefMessage(
+                        JSONObject().apply {
+                            put("type", "handshake")
+                            put("from", currentUserNickname)
+                        }.toString()
                     )
-                } catch (e: Exception) {
-                    sendNfcCallback(false, "Ошибка: ${e.message}")
+                    ndefFormatable.format(message)
+                    ndefFormatable.close()
+                    Toast.makeText(this, "📱 Тег отформатирован", Toast.LENGTH_SHORT).show()
                 }
             }
+        } catch (e: IOException) {
+            Log.e("NCP", "Ошибка отправки", e)
+            Toast.makeText(this, "❌ Ошибка: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun readTagData(tag: Tag?) {
+        if (tag == null) return
+        
+        try {
+            val ndef = Ndef.get(tag)
+            if (ndef != null) {
+                ndef.connect()
+                val message = ndef.ndefMessage
+                if (message != null) {
+                    for (record in message.records) {
+                        val payload = String(record.payload, Charset.forName("UTF-8"))
+                        handleIncomingTransfer(payload)
+                    }
+                }
+                ndef.close()
+            }
+        } catch (e: IOException) {
+            Log.e("NCP", "Ошибка чтения", e)
+        }
+    }
+    
+    private fun handleIncomingTransfer(data: String) {
+        try {
+            val json = JSONObject(data)
+            val type = json.optString("type")
+            
+            when (type) {
+                "transfer" -> {
+                    val from = json.optString("from")
+                    val amount = json.optDouble("amount")
+                    val note = json.optString("note")
+                    
+                    // Показываем диалог подтверждения
+                    runOnUiThread {
+                        showTransferConfirmDialog(from, amount, note)
+                    }
+                }
+                "handshake" -> {
+                    val from = json.optString("from")
+                    runOnUiThread {
+                        Toast.makeText(this, "📱 Обнаружен пользователь: $from", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("NCP", "Ошибка парсинга", e)
+        }
+    }
+    
+    private fun showTransferConfirmDialog(from: String, amount: Double, note: String) {
+        val builder = androidx.appcompat.app.AlertDialog.Builder(this)
+        builder.setTitle("💰 Входящий перевод")
+        builder.setMessage("""
+            От: $from
+            Сумма: $amount -_-
+            Назначение: ${if (note.isNotEmpty()) note else "Без назначения"}
+            
+            Принять перевод?
+        """.trimIndent())
+        builder.setPositiveButton("✅ Принять") { _, _ ->
+            confirmTransfer(from, amount, note)
+        }
+        builder.setNegativeButton("❌ Отказать") { _, _ ->
+            Toast.makeText(this, "Перевод отклонён", Toast.LENGTH_SHORT).show()
+        }
+        builder.show()
+    }
+    
+    private fun confirmTransfer(from: String, amount: Double, note: String) {
+        // Отправляем подтверждение в WebView для обработки перевода
+        val data = JSONObject().apply {
+            put("action", "receiveTransfer")
+            put("from", from)
+            put("amount", amount)
+            put("note", note)
+        }.toString()
+        
+        sendToWebView("nfcTransfer", data)
+        Toast.makeText(this, "🔄 Обработка перевода...", Toast.LENGTH_SHORT).show()
+    }
+    
+    private fun createNdefMessage(data: String): NdefMessage {
+        val record = NdefRecord(
+            NdefRecord.TNF_MIME_MEDIA,
+            "application/com.ncpbank.p2p".toByteArray(),
+            ByteArray(0),
+            data.toByteArray(Charset.forName("UTF-8"))
+        )
+        return NdefMessage(arrayOf(record))
+    }
+    
+    private fun sendToWebView(action: String, data: String) {
+        val jsCode = "window.handleNfcEvent && window.handleNfcEvent('$action', $data)"
+        webView.evaluateJavascript(jsCode, null)
+    }
+    
+    // JavaScript интерфейс для WebView
+    inner class NfcP2PBridge {
+        
+        @JavascriptInterface
+        fun startTransfer(amount: String, note: String, fromUser: String) {
+            runOnUiThread {
+                pendingAmount = amount.toDoubleOrNull() ?: 0.0
+                pendingNote = note
+                currentUserNickname = fromUser
+                isWaitingForTransfer = true
+                
+                Toast.makeText(
+                    this@MainActivity,
+                    "💫 Приложите телефоны друг к другу для перевода $amount -_-",
+                    Toast.LENGTH_LONG
+                ).show()
+                
+                // Таймаут через 30 секунд
+                Handler(Looper.getMainLooper()).postDelayed({
+                    if (isWaitingForTransfer) {
+                        isWaitingForTransfer = false
+                        Toast.makeText(this@MainActivity, "⏰ Время ожидания истекло", Toast.LENGTH_SHORT).show()
+                        sendToWebView("transferTimeout", "{}")
+                    }
+                }, 30000)
+            }
         }
         
         @JavascriptInterface
-        fun cancelPayment() {
-            runOnUiThread {
-                currentPaymentAmount = 0.0
-                Toast.makeText(this@MainActivity, "Оплата отменена", Toast.LENGTH_SHORT).show()
-            }
+        fun updateUserInfo(nickname: String, balance: String) {
+            currentUserNickname = nickname
+            currentUserBalance = balance.toDoubleOrNull() ?: 0.0
         }
         
         @JavascriptInterface
         fun isNfcAvailable(): Boolean {
             return nfcAdapter != null && nfcAdapter!!.isEnabled
+        }
+        
+        @JavascriptInterface
+        fun cancelTransfer() {
+            isWaitingForTransfer = false
+            pendingAmount = 0.0
+            runOnUiThread {
+                Toast.makeText(this@MainActivity, "Перевод отменён", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }
