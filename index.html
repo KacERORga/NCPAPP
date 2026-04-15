@@ -3,289 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>NCP BANK | Независимый Центр Решений</title>
-    
-    <!-- Яндекс.Метрика -->
-    <script type="text/javascript">
-        (function(m,e,t,r,i,k,a){
-            m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-            m[i].l=1*new Date();
-            for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
-        })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=108498118', 'ym');
-    
-        ym(108498118, 'init', {
-            ssr: true,
-            webvisor: true,
-            clickmap: true,
-            ecommerce: "dataLayer",
-            referrer: document.referrer,
-            url: location.href,
-            accurateTrackBounce: true,
-            trackLinks: true
-        });
-    </script>
-    <noscript><div><img src="https://mc.yandex.ru/watch/108498118" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <title>NCP BANK | KC-KacKoin P2P NFC</title>
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-        }
-
-        body {
-            background: linear-gradient(145deg, #e0eafc 0%, #cfdef3 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 24px;
-        }
-
-        body.dark {
-            background: linear-gradient(145deg, #0a0f1a 0%, #0f1722 100%);
-        }
-
-        /* Экран загрузки */
-        .loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+        body { background: linear-gradient(145deg, #e0eafc 0%, #cfdef3 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 24px; }
+        body.dark { background: linear-gradient(145deg, #0a0f1a 0%, #0f1722 100%); }
+        .app-container { max-width: 700px; width: 100%; margin: 0 auto; }
+        .ncp-logo { text-align: center; margin-bottom: 20px; }
+        .ncp-logo h1 { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, #1E2A3E, #3b82f6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        body.dark .ncp-logo h1 { background: linear-gradient(135deg, #fbbf24, #3b82f6); -webkit-background-clip: text; background-clip: text; }
+        .ncp-logo p { font-size: 0.7rem; color: #64748b; margin-top: 4px; }
+        
+        .nfc-payment-section {
             background: linear-gradient(135deg, #667eea, #764ba2);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            transition: opacity 0.5s ease;
-        }
-        body.dark .loading-screen {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-        }
-        .loading-content {
-            text-align: center;
-            color: white;
-        }
-        .loading-logo {
-            font-size: 4rem;
-            margin-bottom: 24px;
-            animation: pulse 1.5s infinite;
-        }
-        .loading-text {
-            font-size: 1.2rem;
-            font-weight: 500;
-            margin-bottom: 16px;
-        }
-        .loading-status {
-            font-size: 0.8rem;
-            opacity: 0.8;
+            border-radius: 32px;
+            padding: 20px;
             margin-bottom: 20px;
-        }
-        .loading-progress-bar {
-            width: 250px;
-            height: 4px;
-            background: rgba(255,255,255,0.3);
-            border-radius: 4px;
-            overflow: hidden;
-            margin: 0 auto;
-        }
-        .loading-progress-fill {
-            width: 0%;
-            height: 100%;
-            background: white;
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-        .loading-steps {
-            margin-top: 24px;
-            font-size: 0.7rem;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            text-align: left;
-            background: rgba(0,0,0,0.2);
-            padding: 12px 20px;
-            border-radius: 60px;
-        }
-        .loading-step {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .loading-step .step-icon {
-            width: 18px;
+            color: white;
             text-align: center;
         }
-        .loading-step.completed {
-            opacity: 1;
-        }
-        .loading-step.pending {
-            opacity: 0.5;
+        .nfc-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            animation: pulse 1.5s infinite;
         }
         @keyframes pulse {
             0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 0.9; }
         }
-
-        .app-container {
-            max-width: 700px;
-            width: 100%;
-            margin: 0 auto;
-            opacity: 0;
-            transition: opacity 0.5s ease;
+        .nfc-status {
+            font-size: 0.9rem;
+            margin: 10px 0;
+            padding: 8px;
+            border-radius: 60px;
+            background: rgba(0,0,0,0.3);
         }
-        .app-container.visible {
-            opacity: 1;
-        }
-
-        .ncp-logo {
+        .nfc-status.active { background: #10b981; }
+        .nfc-status.error { background: #ef4444; }
+        .nfc-amount { font-size: 1.8rem; font-weight: bold; margin: 15px 0; }
+        .nfc-amount input {
+            font-size: 1.5rem;
+            padding: 12px;
+            width: 200px;
             text-align: center;
-            margin-bottom: 20px;
-        }
-        .ncp-logo h1 {
-            font-size: 2rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #1E2A3E, #3b82f6);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        body.dark .ncp-logo h1 {
-            background: linear-gradient(135deg, #fbbf24, #3b82f6);
-            -webkit-background-clip: text;
-            background-clip: text;
-        }
-        .ncp-logo p {
-            font-size: 0.7rem;
-            color: #64748b;
-            margin-top: 4px;
-        }
-
-        .nav-tabs {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-        .nav-tab {
-            background: rgba(255,255,255,0.7);
-            backdrop-filter: blur(4px);
-            padding: 8px 16px;
             border-radius: 60px;
-            color: #1e2a3e;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: 0.2s;
-            font-weight: 500;
-        }
-        body.dark .nav-tab {
-            background: rgba(0,0,0,0.4);
-            color: #e2e8f0;
-        }
-        .nav-tab.active {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .nav-tab:hover {
-            background: rgba(255,255,255,0.9);
-            transform: translateY(-2px);
-        }
-        body.dark .nav-tab:hover {
-            background: rgba(255,255,255,0.2);
-        }
-
-        .online-counter {
-            background: rgba(255,255,255,0.9);
-            border-radius: 60px;
-            padding: 6px 16px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.75rem;
-            color: #10b981;
-            margin-bottom: 16px;
-            border: 1px solid #10b981;
-        }
-        body.dark .online-counter {
-            background: rgba(0,0,0,0.5);
-            color: #10b981;
-        }
-        .online-dot {
-            width: 8px;
-            height: 8px;
-            background: #10b981;
-            border-radius: 50%;
-            animation: pulse 1.5s infinite;
-        }
-
-        .admin-panel {
-            background: linear-gradient(135deg, #fff9e6, #fff3d4);
-            border-radius: 24px;
-            padding: 20px;
-            margin: 20px 0;
-            border: 2px solid #fbbf24;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-        }
-        body.dark .admin-panel {
-            background: linear-gradient(135deg, #1e293b, #0f1722);
-            border-color: #fbbf24;
-        }
-        .admin-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 16px;
-            font-size: 1rem;
-            color: #92400e;
+            border: none;
+            background: white;
+            color: #1e293b;
             font-weight: bold;
         }
-        body.dark .admin-title {
-            color: #fbbf24;
-        }
-        .admin-stats {
-            background: rgba(0,0,0,0.05);
-            border-radius: 16px;
-            padding: 12px;
-            margin-bottom: 16px;
-        }
-        .admin-stats div {
-            margin: 6px 0;
-            font-size: 0.85rem;
-            color: #334155;
-        }
-        body.dark .admin-stats div {
-            color: #cbd5e1;
-        }
-        .give-money-form {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .give-money-form input {
-            flex: 1;
-            padding: 10px;
+        .nfc-pay-btn {
+            background: #fbbf24;
+            color: #1e293b;
+            border: none;
+            padding: 14px 28px;
             border-radius: 60px;
-            border: 1px solid #e2e8f0;
-            background: white;
-            outline: none;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.2s;
         }
-        body.dark .give-money-form input {
-            background: #1e293b;
-            border-color: #475569;
-            color: white;
-        }
-        .give-money-form button {
-            width: auto;
-            padding: 10px 20px;
-            margin: 0;
-            background: #10b981;
-        }
-
-        .card, .dashboard-card, .register-card, .login-card, .settings-panel, .create-card-page, .legal-page {
+        .nfc-pay-btn:hover { transform: scale(1.02); background: #f59e0b; }
+        
+        .card, .dashboard-card, .register-card, .login-card, .settings-panel {
             background: rgba(255, 255, 255, 0.96);
             backdrop-filter: blur(2px);
             border-radius: 40px;
@@ -293,144 +82,11 @@
             padding: 28px 24px 32px;
         }
         body.dark .card, body.dark .dashboard-card, body.dark .register-card,
-        body.dark .login-card, body.dark .settings-panel, body.dark .create-card-page, body.dark .legal-page {
+        body.dark .login-card, body.dark .settings-panel {
             background: rgba(30, 41, 59, 0.96);
             color: #f1f5f9;
         }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(8px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        .modal-content {
-            max-width: 550px;
-            width: 90%;
-            background: white;
-            border-radius: 32px;
-            padding: 28px;
-            max-height: 85vh;
-            overflow-y: auto;
-        }
-        body.dark .modal-content { background: #1e293b; color: #f1f5f9; }
-        .legal-scroll { 
-            max-height: 450px; 
-            overflow-y: auto; 
-            padding: 16px; 
-            border: 1px solid #e2e8f0; 
-            border-radius: 20px; 
-            margin: 16px 0; 
-            font-size: 0.85rem; 
-        }
-        .modal-actions { display: flex; gap: 12px; margin-top: 20px; }
-        .accept-btn { background: #10b981; }
-        .decline-btn { background: #ef4444; }
-
-        .bank-card {
-            background: linear-gradient(135deg, #1E2A3E 0%, #0F1722 100%);
-            border-radius: 28px;
-            padding: 24px;
-            color: white;
-            margin-bottom: 20px;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        body.dark .bank-card {
-            background: linear-gradient(135deg, #2d3a5e 0%, #1e293b 100%);
-        }
-        .bank-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 20px 30px -10px rgba(0,0,0,0.3);
-        }
-        .card-chip { display: flex; justify-content: space-between; margin-bottom: 28px; }
-        .chip-icon {
-            background: linear-gradient(145deg, #E9B35F, #D4A04A);
-            width: 48px; height: 38px;
-            border-radius: 10px;
-            position: relative;
-        }
-        .chip-icon:before {
-            content: "";
-            position: absolute;
-            width: 70%; height: 60%;
-            background: rgba(255,215,120,0.4);
-            top: 20%;
-            left: 15%;
-            border-radius: 4px;
-        }
-        .card-network {
-            font-size: 12px;
-            letter-spacing: 2px;
-            background: rgba(255,255,255,0.2);
-            padding: 6px 12px;
-            border-radius: 30px;
-        }
-        .card-number {
-            font-size: 1.2rem;
-            letter-spacing: 2px;
-            font-family: monospace;
-            margin: 20px 0;
-        }
-        .card-details { display: flex; justify-content: space-between; font-size: 0.7rem; }
-
-        .cards-switcher {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 16px;
-        }
-        .card-tab {
-            background: #e2e8f0;
-            padding: 6px 14px;
-            border-radius: 60px;
-            font-size: 0.7rem;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        body.dark .card-tab { background: #334155; color: #e2e8f0; }
-        .card-tab.active {
-            background: #667eea;
-            color: white;
-        }
-        .add-card-btn {
-            background: #10b981;
-            padding: 6px 14px;
-            border-radius: 60px;
-            font-size: 0.7rem;
-            cursor: pointer;
-            color: white;
-        }
-
-        .level-bar {
-            background: #e2e8f0;
-            border-radius: 60px;
-            height: 8px;
-            margin: 12px 0;
-            overflow: hidden;
-        }
-        .level-progress {
-            background: linear-gradient(90deg, #f59e0b, #10b981);
-            height: 100%;
-            width: 0%;
-            transition: width 0.3s;
-        }
-        .level-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.75rem;
-            margin-bottom: 8px;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
+        
         .input-group { margin-bottom: 18px; }
         label { font-weight: 600; font-size: 0.8rem; display: block; margin-bottom: 6px; color: #334155; }
         body.dark label { color: #cbd5e1; }
@@ -455,258 +111,95 @@
             margin-top: 8px;
             transition: all 0.2s;
         }
-        button:hover {
-            background: #2d3a4e;
-            transform: scale(0.98);
-        }
-        .danger-btn { background: #dc2626; }
-        .back-btn { background: #64748b; margin-bottom: 20px; width: auto; padding: 10px 24px; display: inline-block; }
-        .error-msg { background: #fee2e2; color: #b91c1c; padding: 10px; border-radius: 60px; font-size: 0.8rem; margin-top: 12px; text-align: center; }
-        .success-msg { background: #dcfce7; color: #15803d; padding: 10px; border-radius: 60px; margin-top: 12px; text-align: center; }
+        button:hover { background: #2d3a4e; transform: scale(0.98); }
         .balance { background: #f8fafc; padding: 16px 20px; border-radius: 28px; margin: 20px 0; display: flex; justify-content: space-between; align-items: center; }
         body.dark .balance { background: #334155; }
         .balance-amount { font-size: 1.8rem; font-weight: 800; color: #0f1722; }
         body.dark .balance-amount { color: #fbbf24; }
         .flex-buttons { display: flex; gap: 12px; margin-top: 12px; }
-        .settings-btn { background: #8b5cf6; }
         .logout-btn { background: #475569; }
         .legal-footer { text-align: center; font-size: 0.7rem; margin-top: 20px; }
-        .legal-footer a { color: #3b82f6; cursor: pointer; margin: 0 8px; }
-        body.dark .legal-footer a { color: #60a5fa; }
-        .privacy-badge { font-size: 0.65rem; text-align: center; margin-top: 16px; color: #64748b; }
+        .legal-footer a { color: #3b82f6; cursor: pointer; }
         .ncp-tag { font-size: 0.6rem; text-align: center; margin-top: 16px; color: #94a3b8; }
-        .welcome-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-        .user-greeting { background: #eef2ff; padding: 4px 12px; border-radius: 60px; font-size: 0.7rem; color: #1e40af; font-weight: 600; }
-        body.dark .user-greeting { background: #3b82f6; color: white; }
-        .theme-toggle { width: 50px; height: 26px; background: #cbd5e1; border-radius: 30px; position: relative; cursor: pointer; }
-        body.dark .theme-toggle { background: #3b82f6; }
-        .theme-toggle:after { content: "☀️"; position: absolute; width: 22px; height: 22px; background: white; border-radius: 50%; top: 2px; left: 3px; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: 0.2s; }
-        body.dark .theme-toggle:after { content: "🌙"; left: 25px; }
-        .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #e2e8f0; }
-        .card-type-option { background: linear-gradient(135deg, #1E2A3E, #0F1722); border-radius: 16px; padding: 12px; margin-bottom: 10px; cursor: pointer; border: 2px solid transparent; color: white; }
-        .card-type-option.selected { border-color: #fbbf24; }
+        .online-counter { background: rgba(255,255,255,0.9); border-radius: 60px; padding: 6px 16px; display: inline-flex; align-items: center; gap: 8px; font-size: 0.75rem; color: #10b981; margin-bottom: 16px; border: 1px solid #10b981; }
+        .online-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 1.5s infinite; }
         .switch-mode { text-align: center; margin-top: 16px; }
         .switch-mode a { color: #3b82f6; cursor: pointer; }
-        .transfer-section { background: #eef2ff; padding: 16px; border-radius: 24px; margin: 20px 0; }
-        body.dark .transfer-section { background: #1e293b; }
-        .transfer-title { font-weight: bold; margin-bottom: 12px; }
-        .link-box { background: #f1f5f9; border-radius: 16px; padding: 12px; margin: 12px 0; }
-        body.dark .link-box { background: #0f1722; }
-        textarea { width: 100%; padding: 10px; font-family: monospace; font-size: 0.7rem; border-radius: 12px; border: 1px solid #e2e8f0; background: white; }
-        body.dark textarea { background: #1e293b; border-color: #475569; color: #f1f5f9; }
-        .copy-btn { background: #3b82f6; margin-top: 8px; }
-        .no-card-message { text-align: center; padding: 40px 20px; background: #f1f5f9; border-radius: 24px; margin-bottom: 20px; }
-        body.dark .no-card-message { background: #334155; }
-        .create-card-btn { background: #f59e0b; margin-top: 16px; }
-        .card-click-hint { text-align: center; font-size: 0.65rem; margin-top: -12px; margin-bottom: 16px; opacity: 0.7; }
-        .link-input-section {
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid #e2e8f0;
-        }
-        body.dark .link-input-section {
-            border-top-color: #475569;
-        }
-        .submit-link-btn {
-            background: #f59e0b;
-            margin-top: 8px;
-        }
-
-        .market-balance {
-            background: linear-gradient(135deg, #1E2A3E, #0F1722);
-            border-radius: 20px;
-            padding: 16px 20px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: white;
-        }
-        .market-balance span:last-child { font-size: 1.5rem; font-weight: bold; color: #fbbf24; }
-        .marketplace-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 16px;
-            margin: 16px 0;
-        }
-        .shop-item {
-            background: #f8fafc;
-            border-radius: 20px;
-            padding: 16px;
-            transition: transform 0.2s;
-            border: 1px solid #e2e8f0;
-        }
-        body.dark .shop-item { background: #334155; border-color: #475569; }
-        .shop-item:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
-        .shop-item.owned { opacity: 0.7; background: #dcfce7; }
-        body.dark .shop-item.owned { background: #14532d; }
-        .shop-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .shop-item-icon { font-size: 1.8rem; }
-        .shop-item-price { font-size: 1.2rem; font-weight: bold; color: #f59e0b; }
-        .shop-item-title { font-size: 1rem; font-weight: bold; margin-bottom: 6px; }
-        .shop-item-desc { font-size: 0.7rem; color: #64748b; margin-bottom: 12px; }
-        .buy-btn { background: #10b981; padding: 8px; font-size: 0.8rem; margin-top: 0; }
-        .equip-btn { background: #3b82f6; padding: 8px; font-size: 0.8rem; margin-top: 0; }
-        .equipped-badge { background: #10b981; padding: 4px 12px; border-radius: 60px; font-size: 0.65rem; display: inline-block; margin-top: 8px; color: white; text-align: center; }
-        .section-title { font-size: 1.2rem; font-weight: bold; margin: 20px 0 12px 0; }
-        .demo-hint { font-size: 0.7rem; text-align: center; margin-top: 16px; color: #64748b; }
-
-        .investment-card {
-            background: #f8fafc;
-            border-radius: 20px;
-            padding: 16px;
-            margin: 12px 0;
-            border: 1px solid #e2e8f0;
-        }
-        body.dark .investment-card {
-            background: #1e293b;
-            border-color: #475569;
-        }
-        .investment-header {
-            font-weight: bold;
-            margin-bottom: 12px;
-            color: #1e40af;
-        }
-        body.dark .investment-header {
-            color: #a5b4fc;
-        }
-        .investment-row {
-            display: flex;
-            justify-content: space-between;
-            margin: 8px 0;
-            font-size: 0.85rem;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .back-to-main {
-            background: #e2e8f0;
-            margin-bottom: 20px;
-            width: auto;
-            padding: 8px 20px;
-            display: inline-block;
+        .error-msg { background: #fee2e2; color: #b91c1c; padding: 10px; border-radius: 60px; font-size: 0.8rem; margin-top: 12px; text-align: center; }
+        .success-msg { background: #dcfce7; color: #15803d; padding: 10px; border-radius: 60px; margin-top: 12px; text-align: center; }
+        .nav-tab {
+            background: rgba(255,255,255,0.7);
+            padding: 8px 16px;
             border-radius: 60px;
             cursor: pointer;
             font-size: 0.8rem;
-            color: #1e293b;
             font-weight: 500;
+            transition: 0.2s;
         }
-        body.dark .back-to-main {
-            background: #334155;
-            color: #e2e8f0;
+        body.dark .nav-tab { background: rgba(0,0,0,0.4); color: #e2e8f0; }
+        .nav-tab.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .nav-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+        
+        .transfer-section {
+            background: #eef2ff;
+            padding: 16px;
+            border-radius: 24px;
+            margin: 20px 0;
         }
+        body.dark .transfer-section { background: #1e293b; }
+        .transfer-title { font-weight: bold; margin-bottom: 12px; }
+        
+        /* P2P NFC кнопка */
+        .nfc-p2p-btn {
+            background: #8b5cf6 !important;
+            margin-top: 10px;
+        }
+        .nfc-p2p-btn:hover { background: #7c3aed !important; transform: scale(1.02); }
     </style>
 </head>
 <body>
 
-<!-- ЭКРАН ЗАГРУЗКИ -->
-<div id="loadingScreen" class="loading-screen">
-    <div class="loading-content">
-        <div class="loading-logo">🏦</div>
-        <div class="loading-text">NCPBANK</div>
-        <div class="loading-status" id="loadingStatus">Инициализация...</div>
-        <div class="loading-progress-bar">
-            <div class="loading-progress-fill" id="loadingProgress"></div>
-        </div>
-        <div class="loading-steps" id="loadingSteps">
-            <div class="loading-step pending" data-step="1">
-                <span class="step-icon">◌</span>
-                <span>Загрузка модулей</span>
-            </div>
-            <div class="loading-step pending" data-step="2">
-                <span class="step-icon">◌</span>
-                <span>Подключение к облаку</span>
-            </div>
-            <div class="loading-step pending" data-step="3">
-                <span class="step-icon">◌</span>
-                <span>Синхронизация данных</span>
-            </div>
-            <div class="loading-step pending" data-step="4">
-                <span class="step-icon">◌</span>
-                <span>Проверка сессии</span>
-            </div>
-            <div class="loading-step pending" data-step="5">
-                <span class="step-icon">◌</span>
-                <span>Запуск приложения</span>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="app-container" id="appContainer">
     <div class="ncp-logo">
         <h1>🏦 NCP BANK</h1>
-        <p>Независимый Центр Решений</p>
+        <p>Независимый Центр Решений | KC-KacKoin (-_-)</p>
     </div>
     <div id="appRoot"></div>
     <div class="ncp-tag">⚡ Решения принимаются здесь. Где здесь — неизвестно.</div>
 </div>
 
 <script>
-    // ========== ФУНКЦИИ ЗАГРУЗКИ ==========
-    let currentProgress = 0;
-    let currentStep = 0;
-    
-    function updateLoading(step, status, progress) {
-        const stepEl = document.querySelector(`.loading-step[data-step="${step}"]`);
-        if (stepEl) {
-            stepEl.classList.remove('pending');
-            stepEl.classList.add('completed');
-            stepEl.querySelector('.step-icon').textContent = '✓';
-        }
-        const statusEl = document.getElementById('loadingStatus');
-        if (statusEl) statusEl.textContent = status;
-        const progressEl = document.getElementById('loadingProgress');
-        if (progressEl) {
-            currentProgress = progress;
-            progressEl.style.width = `${progress}%`;
-        }
-        if (step === 5) {
-            setTimeout(() => {
-                const loadingScreen = document.getElementById('loadingScreen');
-                const appContainer = document.getElementById('appContainer');
-                if (loadingScreen) {
-                    loadingScreen.style.opacity = '0';
-                    setTimeout(() => {
-                        loadingScreen.style.display = 'none';
-                    }, 500);
-                }
-                if (appContainer) appContainer.classList.add('visible');
-            }, 300);
-        }
-    }
-
     // ========== КЛЮЧИ ==========
     const USERS_KEY = 'ncpbank_cloud_v2';
     const SESSION_KEY = 'ncpbank_session_cloud';
     const CURRENT_USER_KEY = 'ncpbank_current_cloud';
     const SETTINGS_KEY = 'ncpbank_settings_cloud';
-    const AGREEMENT_KEY = 'ncpbank_agreement_cloud';
     const ONLINE_KEY = 'ncpbank_online';
     const ADMIN_PASSWORD = '6369';
     const ADMIN_NICK = 'KacERORga';
     const INFINITY_MONEY = 999999999;
 
-    // JSONBin.io настройки (твои ключи)
     const JSONBIN_URL = 'https://api.jsonbin.io/v3/b/69db179b856a682189246d42';
     const JSONBIN_KEY = '$2a$10$2aGZ8tMwhc3EUmimZmaGYOzsVH9qQO1s7jqu1m9TwOTUSGPOmkNzW';
-    let USE_CLOUD = true;  // ОБЛАКО ВКЛЮЧЕНО!
+    let USE_CLOUD = true;
+    
+    let cachedUsers = null;
+    let currentTab = 'dashboard';
+    let showSettings = false;
+    let currentView = 'login';
+    let appSettings = { theme: 'light' };
+    let onlineCount = 0;
+    let currentUserNickname = '';
+    let currentUserBalance = 0;
     
     // ========== ОБЛАЧНЫЕ ФУНКЦИИ ==========
-    let cachedUsers = null;
-    
     async function loadUsersCloud() {
         if (!USE_CLOUD) return null;
         try {
-            const res = await fetch(JSONBIN_URL, {
-                headers: { 'X-Master-Key': JSONBIN_KEY }
-            });
+            const res = await fetch(JSONBIN_URL, { headers: { 'X-Master-Key': JSONBIN_KEY } });
             const data = await res.json();
             return data.record.users || {};
-        } catch(e) {
-            console.log('Облако недоступно, используем localStorage');
-            return null;
-        }
+        } catch(e) { return null; }
     }
     
     async function saveUsersCloud(users) {
@@ -714,30 +207,22 @@
         try {
             await fetch(JSONBIN_URL, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Master-Key': JSONBIN_KEY
-                },
+                headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY },
                 body: JSON.stringify({ users })
             });
             return true;
-        } catch(e) {
-            return false;
-        }
+        } catch(e) { return false; }
     }
 
     async function loadUsers() {
         if (cachedUsers) return cachedUsers;
-        updateLoading(2, 'Подключение к облаку...', 25);
         const cloudUsers = await loadUsersCloud();
         if (cloudUsers) {
             cachedUsers = cloudUsers;
-            updateLoading(3, 'Синхронизация данных...', 50);
             return cachedUsers;
         }
         const local = localStorage.getItem(USERS_KEY);
         cachedUsers = local ? JSON.parse(local) : {};
-        updateLoading(3, 'Синхронизация данных...', 50);
         return cachedUsers;
     }
     
@@ -778,6 +263,10 @@
             user.balance = INFINITY_MONEY;
             await saveUsers(users);
         }
+        if (user) {
+            currentUserNickname = user.nickname;
+            currentUserBalance = user.balance || 0;
+        }
         return user || null;
     }
     
@@ -789,6 +278,7 @@
             users[nick] = { ...users[nick], ...data };
             if (users[nick].nickname === ADMIN_NICK) users[nick].balance = INFINITY_MONEY;
             await saveUsers(users);
+            if (data.balance !== undefined) currentUserBalance = data.balance;
             return true;
         }
         return false;
@@ -809,13 +299,6 @@
             activeCardIndex: 0,
             totalTransactions: 0,
             marketInventory: [],
-            activeBoosts: [],
-            achievements: [],
-            assets: [],
-            mining: [],
-            securities: [],
-            realty: [],
-            streak: 0,
             createdAt: Date.now(),
             transactions: []
         };
@@ -833,313 +316,195 @@
         return { success: true };
     }
     
-    async function adminGiveMoney(toNick, amount) {
+    async function addBalance(amount) {
         const user = await getUserData();
-        if (!user || user.nickname !== ADMIN_NICK) return { success: false, error: 'Доступ только у администратора' };
-        const users = await loadUsers();
-        const target = users[toNick];
-        if (!target) return { success: false, error: 'Клиент не найден' };
-        target.balance = (target.balance || 0) + amount;
-        await saveUsers(users);
-        return { success: true };
-    }
-    
-    async function purchaseItem(itemId) {
-        const user = await getUserData();
-        if (!user) return { success: false, error: 'Ошибка' };
-        const item = ALL_ITEMS.find(i => i.id === itemId);
-        if (!item) return { success: false, error: 'Услуга не найдена' };
-        if (user.marketInventory?.includes(itemId)) return { success: false, error: 'Услуга уже активирована' };
-        if ((user.balance || 0) < item.price && user.nickname !== ADMIN_NICK) return { success: false, error: `Недостаточно средств` };
-        
-        if (user.nickname !== ADMIN_NICK) user.balance -= item.price;
-        if (!user.marketInventory) user.marketInventory = [];
-        user.marketInventory.push(itemId);
-        
-        if (item.type === 'boost') {
-            if (!user.activeBoosts) user.activeBoosts = [];
-            user.activeBoosts.push({ id: item.id, value: parseFloat(item.value), expiresAt: Date.now() + (item.duration * 1000) });
-        }
-        if (item.type === 'money') {
-            user.balance += item.value;
-        }
-        
+        if (!user) return false;
+        user.balance = (user.balance || 0) + amount;
         if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
-        const users = await loadUsers();
-        users[user.nickname] = user;
-        await saveUsers(users);
-        return { success: true, item: item };
+        await updateUserData({ balance: user.balance });
+        return true;
     }
     
-    async function addCard(cardTypeId, cardNumber, cvv) {
-        const user = await getUserData();
-        if (!user) return { success: false, error: 'Ошибка' };
-        if (user.cards.length >= 5) return { success: false, error: 'Максимум 5 карт' };
-        const cardType = CARD_TYPES.find(c => c.id === cardTypeId);
-        if (!cardType) return { success: false, error: 'Неверный тип' };
-        user.cards.push({
+    async function sendP2PTransfer(from, to, amount, note) {
+        const users = await loadUsers();
+        const fromUser = users[from];
+        const toUser = users[to];
+        
+        if (!fromUser || !toUser) return { success: false, error: 'Пользователь не найден' };
+        if (fromUser.balance < amount && from !== ADMIN_NICK) return { success: false, error: 'Недостаточно средств' };
+        
+        if (from !== ADMIN_NICK) fromUser.balance -= amount;
+        toUser.balance = (toUser.balance || 0) + amount;
+        
+        if (from === ADMIN_NICK) fromUser.balance = INFINITY_MONEY;
+        if (to === ADMIN_NICK) toUser.balance = INFINITY_MONEY;
+        
+        const transaction = {
             id: Date.now(),
-            typeId: cardTypeId,
-            typeName: cardType.name,
-            emoji: cardType.emoji,
-            cardNumber: cardNumber,
-            cvv: cvv,
-            expiry: '08/28'
-        });
-        if (user.cards.length === 1) {
-            user.activeCardIndex = 0;
-            if (user.balance === undefined || user.balance === 0) {
-                user.balance = 100;
-            }
-        }
-        if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
-        const users = await loadUsers();
-        users[user.nickname] = user;
-        await saveUsers(users);
-        return { success: true };
-    }
-    
-    async function executeTransfer(fromNick, amount, contract, note) {
-        const current = await getUserData();
-        if (!current) return { success: false, error: 'Ошибка авторизации' };
-        if (fromNick === current.nickname) return { success: false, error: 'Нельзя перевести самому себе' };
-        const users = await loadUsers();
-        const fromUser = users[fromNick];
-        if (!fromUser) return { success: false, error: 'Отправитель не найден' };
-        if ((fromUser.balance || 0) < amount && fromNick !== ADMIN_NICK) return { success: false, error: 'Недостаточно средств' };
+            type: 'p2p',
+            from: from,
+            to: to,
+            amount: amount,
+            note: note,
+            date: new Date().toLocaleString()
+        };
         
-        let boostedAmount = amount;
-        if (fromNick !== ADMIN_NICK) {
-            const boosts = getActiveBoosts(current);
-            let multiplier = 1;
-            for (let b of boosts) multiplier *= b.value;
-            const hour = new Date().getHours();
-            if (hour >= 19 && hour < 20) multiplier *= 1.5;
-            const day = new Date().getDay();
-            if (day === 6 || day === 0) multiplier *= 2;
-            boostedAmount = amount * multiplier;
-        }
-        
-        if (fromNick !== ADMIN_NICK) {
-            fromUser.balance -= amount;
-        }
-        current.balance += boostedAmount;
+        fromUser.transactions = [transaction, ...(fromUser.transactions || [])].slice(0, 50);
+        toUser.transactions = [transaction, ...(toUser.transactions || [])].slice(0, 50);
         fromUser.totalTransactions = (fromUser.totalTransactions || 0) + 1;
-        current.totalTransactions = (current.totalTransactions || 0) + 1;
+        toUser.totalTransactions = (toUser.totalTransactions || 0) + 1;
         
-        if (fromNick === ADMIN_NICK) fromUser.balance = INFINITY_MONEY;
-        if (current.nickname === ADMIN_NICK) current.balance = INFINITY_MONEY;
-        
-        fromUser.transactions = [{ id: Date.now(), type: 'out', to: current.nickname, amount, date: new Date().toLocaleString(), method: 'link', contractNumber: contract, note }, ...(fromUser.transactions || [])].slice(0,50);
-        current.transactions = [{ id: Date.now(), type: 'in', from: fromUser.nickname, amount: boostedAmount, date: new Date().toLocaleString(), method: 'link', contractNumber: contract, note }, ...(current.transactions || [])].slice(0,50);
-        
-        users[fromUser.nickname] = fromUser;
-        users[current.nickname] = current;
         await saveUsers(users);
-        return { success: true, amount: boostedAmount, from: fromUser.nickname, contract };
+        return { success: true, amount: amount };
     }
     
-    async function collectInvestmentIncome(user) {
-        if (!user) return 0;
-        let totalIncome = 0;
-        if (user.activeDeposit) {
-            const deposit = INVESTMENTS.deposits.find(d => d.id === user.activeDeposit.id);
-            if (deposit) {
-                const daysPassed = Math.floor((Date.now() - user.activeDeposit.startDate) / (1000 * 60 * 60 * 24));
-                if (daysPassed >= deposit.minDays) {
-                    const income = user.activeDeposit.amount * (deposit.dailyPercent / 100) * daysPassed;
-                    user.activeDeposit = null;
-                    totalIncome += income;
-                }
-            }
+    // ========== NFC P2P ФУНКЦИИ ДЛЯ WEBVIEW ==========
+    function initNfcP2P() {
+        if (window.NfcP2P && window.NfcP2P.isNfcAvailable()) {
+            console.log('✅ NFC P2P доступен');
+            window.NfcP2P.updateUserInfo(currentUserNickname, currentUserBalance.toString());
+            addNfcP2PButton();
         }
-        if (user.assets) {
-            for (let a of user.assets) {
-                const asset = INVESTMENTS.assets.find(ast => ast.id === a.id);
-                if (asset) totalIncome += asset.income;
-            }
-        }
-        if (user.mining) {
-            for (let m of user.mining) {
-                const mine = INVESTMENTS.mining.find(mn => mn.id === m.id);
-                if (mine) totalIncome += mine.income;
-            }
-        }
-        if (user.securities) {
-            for (let s of user.securities) {
-                const security = INVESTMENTS.securities.find(sec => sec.id === s.id);
-                if (security) totalIncome += security.dividend;
-            }
-        }
-        if (user.realty) {
-            for (let r of user.realty) {
-                const realty = INVESTMENTS.realty.find(re => re.id === r.id);
-                if (realty) totalIncome += realty.rent;
-            }
-        }
-        if (totalIncome > 0) {
-            user.balance += totalIncome;
-            if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
-            await updateUserData({ balance: user.balance, lastIncomeCollect: Date.now() });
-        }
-        return totalIncome;
     }
 
-    // ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
+    function addNfcP2PButton() {
+        const container = document.querySelector('.transfer-section');
+        if (container && !document.getElementById('nfcP2PBtn')) {
+            const nfcBtn = document.createElement('button');
+            nfcBtn.id = 'nfcP2PBtn';
+            nfcBtn.innerHTML = '📱 P2P Перевод (NFC)';
+            nfcBtn.className = 'nfc-p2p-btn';
+            nfcBtn.style.cssText = 'background:#8b5cf6; margin-top:10px; width:100%;';
+            nfcBtn.onclick = () => {
+                const amount = document.getElementById('transferAmount')?.value;
+                const note = document.getElementById('transferNote')?.value;
+                if (!amount || amount <= 0) {
+                    alert('Введите сумму');
+                    return;
+                }
+                if (parseFloat(amount) > currentUserBalance && currentUserNickname !== ADMIN_NICK) {
+                    alert('❌ Недостаточно средств');
+                    return;
+                }
+                window.NfcP2P.startTransfer(amount, note || '', currentUserNickname);
+                alert(`💫 Приложите телефоны друг к другу для перевода ${amount} -_-`);
+            };
+            container.appendChild(nfcBtn);
+        }
+    }
+
+    window.handleNfcEvent = function(action, data) {
+        console.log('NFC Event:', action, data);
+        
+        if (action === 'transferSent') {
+            const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+            if (parsed.success) {
+                alert('✅ Перевод отправлен! Средства списаны с вашего счёта');
+                location.reload();
+            } else {
+                alert('❌ Ошибка отправки перевода');
+            }
+        }
+        
+        if (action === 'nfcTransfer') {
+            const transfer = typeof data === 'string' ? JSON.parse(data) : data;
+            if (transfer.action === 'receiveTransfer') {
+                receiveP2PTransfer(transfer.from, transfer.amount, transfer.note);
+            }
+        }
+        
+        if (action === 'transferTimeout') {
+            alert('⏰ Время ожидания перевода истекло');
+        }
+    };
+
+    async function receiveP2PTransfer(from, amount, note) {
+        const user = await getUserData();
+        if (!user) {
+            alert('❌ Войдите в аккаунт для получения перевода');
+            return;
+        }
+        
+        const result = await sendP2PTransfer(from, user.nickname, parseFloat(amount), note);
+        if (result.success) {
+            alert(`✅ Получено ${amount} -_- от ${from}\nНазначение: ${note || 'Без назначения'}`);
+            location.reload();
+        } else {
+            alert(`❌ Ошибка: ${result.error}`);
+        }
+    }
+    
+    // ========== NFC ОПЛАТА ЧЕРЕЗ WEBVIEW ==========
+    function startNfcPayment(amount, callback) {
+        if (window.NfcPay && typeof window.NfcPay.startPayment === 'function') {
+            window.NfcPay.startPayment(amount, JSON.stringify({
+                amount: amount,
+                currency: 'KacKoin',
+                description: 'Пополнение баланса NCP BANK'
+            }));
+            
+            window.NfcPayCallback = function(result) {
+                if (result.success) {
+                    callback(true, result.transactionId);
+                } else {
+                    callback(false, result.error);
+                }
+            };
+        } else if (typeof window.nfcSimulation !== 'undefined' && window.nfcSimulation) {
+            simulateNfcPayment(amount, callback);
+        } else {
+            showNfcSimulationDialog(amount, callback);
+        }
+    }
+    
+    function simulateNfcPayment(amount, callback) {
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 20;
+            if (progress >= 100) {
+                clearInterval(interval);
+                callback(true, 'SIM_' + Date.now());
+            }
+        }, 300);
+    }
+    
+    function showNfcSimulationDialog(amount, callback) {
+        const modal = document.createElement('div');
+        modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:10000;display:flex;align-items:center;justify-content:center;';
+        modal.innerHTML = `
+            <div style="background:white;border-radius:32px;padding:30px;text-align:center;max-width:320px;">
+                <div style="font-size:3rem;">📱💳</div>
+                <h3 style="margin:15px 0;">Приложите карту или телефон</h3>
+                <p style="font-size:0.85rem;color:#666;">Сумма: ${amount} -_-</p>
+                <div id="nfcProgress" style="width:100%;height:4px;background:#ddd;border-radius:4px;margin:20px 0;"><div id="nfcProgressFill" style="width:0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s;"></div></div>
+                <button id="cancelNfcBtn" style="background:#ef4444;color:white;border:none;padding:10px;border-radius:60px;width:100%;">Отмена</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 20;
+            const fill = document.getElementById('nfcProgressFill');
+            if (fill) fill.style.width = progress + '%';
+            if (progress >= 100) {
+                clearInterval(interval);
+                modal.remove();
+                callback(true, 'SIM_' + Date.now());
+            }
+        }, 400);
+        
+        document.getElementById('cancelNfcBtn')?.addEventListener('click', () => {
+            clearInterval(interval);
+            modal.remove();
+            callback(false, 'Отменено пользователем');
+        });
+    }
+    
+    // ========== UI ФУНКЦИИ ==========
     function getCurrencySymbol() { return '-_-'; }
     function getCurrencyName() { return 'KacKoin'; }
     
-    function getActiveBoosts(user) {
-        if (!user?.activeBoosts) return [];
-        const now = Date.now();
-        return user.activeBoosts.filter(b => b.expiresAt > now);
-    }
-    
-    function getEquippedPrefix(user) {
-        if (!user?.equippedPrefix) return null;
-        const item = ALL_ITEMS.find(i => i.id === user.equippedPrefix);
-        return item ? item.value : null;
-    }
-    
-    function getCardSkinEffect(user) {
-        if (!user?.equippedSkin) return '';
-        const item = ALL_ITEMS.find(i => i.id === user.equippedSkin);
-        return item ? item.effect : '';
-    }
-    
-    function getActiveCard(user) {
-        if (!user?.cards?.length) return null;
-        return user.cards[user.activeCardIndex || 0];
-    }
-    
-    function getClientStatus(transactions) {
-        for (let i = CLIENT_STATUSES.length - 1; i >= 0; i--) {
-            if (transactions >= CLIENT_STATUSES[i].minTrans) {
-                const current = CLIENT_STATUSES[i];
-                const next = CLIENT_STATUSES[i + 1] || null;
-                const progress = next ? ((transactions - current.minTrans) / (next.minTrans - current.minTrans)) * 100 : 100;
-                return { current, next, progress: Math.min(100, progress) };
-            }
-        }
-        return { current: CLIENT_STATUSES[0], next: CLIENT_STATUSES[1], progress: 0 };
-    }
-    
-    function formatCardNumber(num) {
-        if (!num) return '**** **** **** ****';
-        const parts = num.split(' ');
-        return parts.length === 4 ? `${parts[0]} **** **** ${parts[3]}` : num;
-    }
-    
-    function escapeHtml(str) { return str?.replace(/[&<>]/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;' }[m])) || ''; }
-    
-    function generateContractNumber() { return `NCP-${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}-${Math.floor(Math.random()*10000).toString().padStart(4,'0')}`; }
-    
-    async function createTransferLink(amount, note) {
-        const user = await getUserData();
-        if (!user) return null;
-        if ((user.balance || 0) < amount && user.nickname !== ADMIN_NICK) return { error: `Недостаточно средств` };
-        const contract = generateContractNumber();
-        const link = `${location.origin}${location.pathname}#transfer/${encodeURIComponent(user.nickname)}/${encodeURIComponent(contract)}/${amount}/${encodeURIComponent(note || '')}`;
-        return { link, contractNumber: contract, note: note || '' };
-    }
-
-    // ========== КОНСТАНТЫ ==========
-    const CLIENT_STATUSES = [
-        { level: 1, name: 'Обычный', minTrans: 0, maxTrans: 0, emoji: '👤' },
-        { level: 2, name: 'NовиCок', minTrans: 1, maxTrans: 4, emoji: '🌱' },
-        { level: 3, name: 'Переводчик', minTrans: 5, maxTrans: 14, emoji: '🔄' },
-        { level: 4, name: 'Благодетель', minTrans: 15, maxTrans: 29, emoji: '🤝' },
-        { level: 5, name: 'Багач', minTrans: 30, maxTrans: 49, emoji: '💰' },
-        { level: 6, name: 'Супер богач', minTrans: 50, maxTrans: 79, emoji: '💎' },
-        { level: 7, name: 'Банкир', minTrans: 80, maxTrans: 119, emoji: '🏦' },
-        { level: 8, name: 'Владелец KacKoin', minTrans: 120, maxTrans: 199, emoji: '👑' },
-        { level: 9, name: 'Создатель NCPBANK', minTrans: 200, maxTrans: 499, emoji: '⭐' },
-        { level: 10, name: 'Супер пупер ультра супер тонкий Благодетель', minTrans: 500, maxTrans: Infinity, emoji: '🌟' }
-    ];
-
-    const MARKET_ITEMS = {
-        vipStatuses: [
-            { id: 'vip_silver', name: '🥈 Silver', desc: 'Серебряный статус', price: 500, type: 'prefix', value: '🥈 Silver', emoji: '🥈' },
-            { id: 'vip_gold', name: '🥇 Gold', desc: 'Золотой статус', price: 1000, type: 'prefix', value: '🥇 Gold', emoji: '🥇' },
-            { id: 'vip_platinum', name: '💎 Platinum', desc: 'Платиновый статус', price: 2000, type: 'prefix', value: '💎 Platinum', emoji: '💎' },
-            { id: 'vip_black', name: '🖤 Black Card', desc: 'Чёрная карта', price: 5000, type: 'prefix', value: '🖤 Black Card', emoji: '🖤' },
-            { id: 'vip_private', name: '🏦 Private', desc: 'Приватный банкинг', price: 10000, type: 'prefix', value: '🏦 Private', emoji: '🏦' }
-        ],
-        cardDesigns: [
-            { id: 'design_gold', name: '✨ Gold Edition', desc: 'Золотое оформление', price: 3000, type: 'skin', value: 'gold', effect: 'box-shadow: 0 0 20px gold; border-color:#fbbf24;', emoji: '✨' },
-            { id: 'design_black', name: '🖤 Black Edition', desc: 'Чёрное оформление', price: 5000, type: 'skin', value: 'black', effect: 'box-shadow: 0 0 20px #6366f1; border-color:#818cf8;', emoji: '🖤' },
-            { id: 'design_carbon', name: '⚡ Carbon', desc: 'Карбоновое оформление', price: 4000, type: 'skin', value: 'carbon', effect: 'box-shadow: 0 0 20px #475569;', emoji: '⚡' }
-        ],
-        tariffs: [
-            { id: 'tariff_plus', name: '📊 Тариф Плюс', desc: '+50% к доходам (24ч)', price: 1500, type: 'boost', value: '1.5', duration: 86400, emoji: '📊' },
-            { id: 'tariff_premium', name: '⭐ Тариф Премиум', desc: '+100% к доходам (24ч)', price: 3500, type: 'boost', value: '2', duration: 86400, emoji: '⭐' }
-        ],
-        bonuses: [
-            { id: 'bonus_1000', name: '💰 Бонус 1 000', desc: '+1 000 NCP', price: 50000, type: 'money', value: 1000, emoji: '💰' },
-            { id: 'bonus_10000', name: '💰 Бонус 10 000', desc: '+10 000 NCP', price: 400000, type: 'money', value: 10000, emoji: '💰' },
-            { id: 'bonus_100000', name: '💰 Бонус 100 000', desc: '+100 000 NCP', price: 3500000, type: 'money', value: 100000, emoji: '💰' }
-        ]
-    };
-
-    const ALL_ITEMS = [...MARKET_ITEMS.vipStatuses, ...MARKET_ITEMS.cardDesigns, ...MARKET_ITEMS.tariffs, ...MARKET_ITEMS.bonuses];
-
-    const INVESTMENTS = {
-        deposits: [
-            { id: 'deposit_1000', name: '💰 Сберегательный счёт', amount: 1000, dailyPercent: 5, minDays: 1 },
-            { id: 'deposit_5000', name: '💰 Инвестиционный счёт', amount: 5000, dailyPercent: 5.5, minDays: 3 },
-            { id: 'deposit_10000', name: '💰 Премиум счёт', amount: 10000, dailyPercent: 6, minDays: 7 },
-            { id: 'deposit_50000', name: '💰 VIP счёт', amount: 50000, dailyPercent: 7, minDays: 14 },
-            { id: 'deposit_100000', name: '💰 Executive счёт', amount: 100000, dailyPercent: 8, minDays: 30 }
-        ],
-        assets: [
-            { id: 'asset_kiosk', name: '🏪 Киоск', price: 5000, income: 50 },
-            { id: 'asset_cafe', name: '☕ Кафе', price: 25000, income: 300 },
-            { id: 'asset_restaurant', name: '🍽️ Ресторан', price: 100000, income: 1500 },
-            { id: 'asset_hotel', name: '🏨 Отель', price: 500000, income: 8000 },
-            { id: 'asset_corporation', name: '🏢 Корпорация', price: 2000000, income: 35000 }
-        ],
-        mining: [
-            { id: 'mining_cpu', name: '💻 CPU ферма', price: 10000, income: 10 },
-            { id: 'mining_gpu', name: '🖥️ GPU ферма', price: 50000, income: 60 },
-            { id: 'mining_asics', name: '⚡ ASIC ферма', price: 250000, income: 350 },
-            { id: 'mining_quantum', name: '🌀 Квантовый майнинг', price: 1000000, income: 2000 }
-        ],
-        securities: [
-            { id: 'stock_ncp', name: '🏦 Акции NCPBANK', price: 10000, dividend: 50 },
-            { id: 'stock_tech', name: '💻 Акции TechCorp', price: 25000, dividend: 150 },
-            { id: 'stock_crypto', name: '🪙 Акции CryptoEx', price: 100000, dividend: 750 }
-        ],
-        realty: [
-            { id: 'realty_studio', name: '🏠 Студия', price: 50000, rent: 200 },
-            { id: 'realty_apartment', name: '🏢 Квартира', price: 200000, rent: 1000 },
-            { id: 'realty_house', name: '🏡 Дом', price: 800000, rent: 5000 },
-            { id: 'realty_mansion', name: '🏰 Особняк', price: 3000000, rent: 25000 }
-        ]
-    };
-
-    const ACHIEVEMENTS = [
-        { id: 'first_transfer', name: 'Первый перевод', reward: 100, condition: (u) => u.totalTransactions >= 1 },
-        { id: 'ten_transfers', name: '10 переводов', reward: 500, condition: (u) => u.totalTransactions >= 10 },
-        { id: 'fifty_transfers', name: '50 переводов', reward: 2000, condition: (u) => u.totalTransactions >= 50 },
-        { id: 'hundred_transfers', name: '100 переводов', reward: 5000, condition: (u) => u.totalTransactions >= 100 },
-        { id: 'first_card', name: 'Первая карта', reward: 200, condition: (u) => u.cards?.length >= 1 },
-        { id: 'five_cards', name: '5 карт', reward: 1000, condition: (u) => u.cards?.length >= 5 },
-        { id: 'first_purchase', name: 'Первая покупка', reward: 300, condition: (u) => u.marketInventory?.length >= 1 },
-        { id: 'collector', name: 'Коллекционер', reward: 2000, condition: (u) => u.marketInventory?.length >= 10 },
-        { id: 'millionaire', name: 'Миллионер', reward: 10000, condition: (u) => u.balance >= 1000000 }
-    ];
-
-    const CARD_TYPES = [
-        { id: 'classic', name: 'Classic', emoji: '💳' },
-        { id: 'gold', name: 'Gold', emoji: '🥇' },
-        { id: 'platinum', name: 'Platinum', emoji: '💎' },
-        { id: 'black', name: 'Black', emoji: '🖤' },
-        { id: 'corporate', name: 'Corporate', emoji: '🏢' },
-        { id: 'executive', name: 'Executive', emoji: '👑' }
-    ];
-
-    // ========== ОНЛАЙН-СЧЁТЧИК ==========
-    let onlineCount = 0;
     function updateOnlineCounter() {
         const now = Date.now();
         const sessions = JSON.parse(localStorage.getItem(ONLINE_KEY) || '{}');
@@ -1158,317 +523,126 @@
     }
     setInterval(updateOnlineCounter, 30000);
     updateOnlineCounter();
-
-    // ========== UI СОСТОЯНИЕ ==========
-    let currentTab = 'dashboard';
-    let showSettings = false, showCreateCard = false, showAgreementModal = false;
-    let currentView = 'login';
-    let selectedCardType = CARD_TYPES[0].id;
-    let currentLink = null, currentContract = null, currentNote = '';
-    let appSettings = { theme: 'light' };
     
     function loadSettings() { const saved = localStorage.getItem(SETTINGS_KEY); if (saved) { appSettings = JSON.parse(saved); applyTheme(); } }
     function saveSettings() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(appSettings)); applyTheme(); }
     function applyTheme() { if (appSettings.theme === 'dark') document.body.classList.add('dark'); else document.body.classList.remove('dark'); }
-
+    
     function isAdmin(user) { return user && user.nickname === ADMIN_NICK; }
-
-    // ========== РЕНДЕР ФУНКЦИИ ==========
+    function escapeHtml(str) { return str?.replace(/[&<>]/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;' }[m])) || ''; }
     function getOnlineBadge(user) { if (!isAdmin(user)) return ''; return `<div class="online-counter"><span class="online-dot"></span> 👥 Онлайн: <span id="onlineCounter">${onlineCount}</span></div>`; }
+    
+    function renderNfcSection() {
+        return `
+            <div class="nfc-payment-section">
+                <div class="nfc-icon">💳📱</div>
+                <div class="nfc-amount">
+                    <input type="number" id="nfcAmount" placeholder="Сумма" value="100" step="100" min="1">
+                </div>
+                <div class="nfc-status" id="nfcStatusText">Готов к оплате через NFC</div>
+                <button class="nfc-pay-btn" id="nfcPayBtn">💳 Оплатить через NFC</button>
+            </div>
+        `;
+    }
+    
+    async function renderDashboard() {
+        const user = await getUserData();
+        if (!user) return renderLoginScreen();
+        
+        const symbol = getCurrencySymbol();
+        const balance = (user.balance || 0).toFixed(2);
+        const hasCard = user.cards && user.cards.length > 0;
+        
+        return `
+            <div class="dashboard-card">
+                ${getOnlineBadge(user)}
+                <div class="nav-tabs">
+                    <div class="nav-tab ${currentTab === 'dashboard' ? 'active' : ''}" data-tab="dashboard">🏦 Главная</div>
+                    <div class="nav-tab ${currentTab === 'nfc' ? 'active' : ''}" data-tab="nfc">💳 NFC-оплата</div>
+                    ${isAdmin(user) ? `<div class="nav-tab ${currentTab === 'admin' ? 'active' : ''}" data-tab="admin">👑 Админка</div>` : ''}
+                </div>
+                
+                ${currentTab === 'nfc' ? renderNfcSection() : ''}
+                
+                <div class="welcome-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h2>🏦 Привет, ${escapeHtml(user.nickname)}</h2>
+                </div>
+                
+                <div class="balance"><span>💰 Баланс</span><span class="balance-amount">${balance} ${symbol}</span></div>
+                
+                <div class="transfer-section">
+                    <div class="transfer-title">🔗 Перевод по ссылке / P2P NFC</div>
+                    <div class="input-group"><input type="number" id="transferAmount" placeholder="Сумма" step="0.01"></div>
+                    <div class="input-group"><input type="text" id="transferNote" placeholder="Назначение"></div>
+                    <button id="createLinkBtn">✨ Создать ссылку</button>
+                    <div id="linkResult"></div>
+                </div>
+                
+                ${!hasCard ? `<div class="no-card-message" style="text-align:center; padding:20px; background:#f1f5f9; border-radius:24px; margin:20px 0;">💳 У вас ещё нет карты<br><button id="createCardBtn" style="background:#f59e0b; margin-top:10px;">✨ Выпустить карту</button></div>` : ''}
+                
+                <div class="flex-buttons"><button id="settingsBtn" class="settings-btn">⚙️ Настройки</button><button id="logoutBtn" class="logout-btn">🚪 Выйти</button></div>
+                <div class="legal-footer"><a id="showAgreementBtn">📜 Договор</a></div>
+            </div>
+        `;
+    }
     
     async function renderAdminPanel() {
         const users = await loadUsers();
         return `
             <div class="dashboard-card">
-                <div class="back-to-main" id="backToMainBtn">← На главную</div>
+                <div class="nav-tabs">
+                    <div class="nav-tab" data-tab="dashboard">🏦 Главная</div>
+                    <div class="nav-tab ${currentTab === 'admin' ? 'active' : ''}" data-tab="admin">👑 Админка</div>
+                </div>
                 <div class="admin-panel">
-                    <div class="admin-title">👑 Админ-панель KacERORga</div>
-                    <div class="admin-stats">
+                    <div class="admin-title" style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">👑 Админ-панель KacERORga</div>
+                    <div class="admin-stats" style="background:rgba(0,0,0,0.05); border-radius:16px; padding:12px; margin-bottom:16px;">
                         <div>📊 Всего клиентов: ${Object.keys(users).length}</div>
                         <div>💰 Общий баланс: ${Object.values(users).reduce((s,u) => s + (u.balance||0), 0).toFixed(2)} -_-</div>
-                        <div>💳 Активных карт: ${Object.values(users).reduce((s,u) => s + (u.cards?.length||0), 0)}</div>
-                        <div>📜 Всего транзакций: ${Object.values(users).reduce((s,u) => s + (u.totalTransactions||0), 0)}</div>
                     </div>
-                    <div class="give-money-form">
-                        <input type="text" id="adminGiveNick" placeholder="Ник клиента">
-                        <input type="number" id="adminGiveAmount" placeholder="Сумма">
-                        <button id="adminGiveBtn">Выдать средства</button>
+                    <div class="give-money-form" style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <input type="text" id="adminGiveNick" placeholder="Ник клиента" style="flex:1;">
+                        <input type="number" id="adminGiveAmount" placeholder="Сумма" style="flex:1;">
+                        <button id="adminGiveBtn" style="width:auto; background:#10b981;">Выдать</button>
                     </div>
                     <div id="adminMsg"></div>
                 </div>
+                <div class="flex-buttons"><button id="logoutBtn" class="logout-btn">🚪 Выйти</button></div>
             </div>
         `;
     }
-
-    async function renderDashboard() {
-        const user = await getUserData();
-        if (!user) return renderLoginScreen();
-        
-        const hasCard = user.cards && user.cards.length > 0;
-        const symbol = getCurrencySymbol();
-        const balance = (user.balance || 0).toFixed(2);
-        const activeCard = getActiveCard(user);
-        const prefix = getEquippedPrefix(user);
-        const displayName = prefix ? `${prefix} ${user.nickname}` : user.nickname;
-        const cardEffect = getCardSkinEffect(user);
-        const status = getClientStatus(user.totalTransactions || 0);
-        const cardsListHtml = (user.cards || []).map((c, i) => `<div class="card-tab ${i === (user.activeCardIndex||0) ? 'active' : ''}" data-card-idx="${i}">${c.emoji} ${c.typeName}</div>`).join('');
-        
-        let cardHtml = '';
-        if (hasCard && activeCard) {
-            cardHtml = `<div id="clickableCard" class="bank-card" style="${cardEffect}">
-                <div class="card-chip"><div class="chip-icon"></div><div class="card-network">NCP</div></div>
-                <div class="card-number">${formatCardNumber(activeCard.cardNumber)}</div>
-                <div class="card-details">
-                    <div class="card-holder"><span>Card Holder</span><p>${escapeHtml(user.nickname.toUpperCase())}</p></div>
-                    <div class="card-expiry"><span>Expires</span><p>${activeCard.expiry}</p></div>
-                </div>
-            </div>
-            <div class="card-click-hint">👆 Нажмите на карту для деталей</div>`;
-        } else {
-            cardHtml = `<div class="no-card-message">💳 У вас ещё нет карты<br><button id="createCardBtn" class="create-card-btn">✨ Выпустить карту</button></div>`;
-        }
-        
-        let linkHtml = '';
-        if (currentLink && hasCard) {
-            linkHtml = `<div class="link-box"><div>📄 Договор: ${currentContract}</div>${currentNote ? `<div>📝 ${escapeHtml(currentNote)}</div>` : ''}<textarea rows="2" readonly id="transferLink">${currentLink}</textarea><button id="copyLinkBtn" class="copy-btn">📋 Копировать</button><button id="clearLinkBtn">Очистить</button></div>`;
-        }
-        
-        if (window.location.hash && window.location.hash.startsWith('#transfer/') && !window._transferProcessed) {
-            window._transferProcessed = true;
-            setTimeout(async () => {
-                const parts = window.location.hash.split('/');
-                if (parts.length >= 5) {
-                    const fromNick = decodeURIComponent(parts[1]);
-                    const contract = decodeURIComponent(parts[2]);
-                    const amount = parseFloat(parts[3]);
-                    const note = decodeURIComponent(parts[4] || '');
-                    const cur = await getUserData();
-                    if (cur && fromNick !== cur.nickname) {
-                        if (confirm(`📥 Получить перевод ${amount} ${getCurrencySymbol()} от ${fromNick}?`)) {
-                            const res = await executeTransfer(fromNick, amount, contract, note);
-                            alert(res.success ? `✅ Получено ${res.amount} ${getCurrencySymbol()}` : `❌ ${res.error}`);
-                            window.location.hash = '';
-                            renderApp();
-                        } else { window.location.hash = ''; }
-                    }
-                }
-            }, 500);
-        }
-        
-        return `
-            <div class="dashboard-card">${getOnlineBadge(user)}
-                <div class="nav-tabs">
-                    <div class="nav-tab ${currentTab === 'dashboard' ? 'active' : ''}" data-tab="dashboard">🏦 Главная</div>
-                    <div class="nav-tab ${currentTab === 'investments' ? 'active' : ''}" data-tab="investments">📈 Инвестиции</div>
-                    <div class="nav-tab ${currentTab === 'loyalty' ? 'active' : ''}" data-tab="loyalty">🎯 Лояльность</div>
-                    <div class="nav-tab ${currentTab === 'market' ? 'active' : ''}" data-tab="market">🛍️ Маркетплейс</div>
-                    ${isAdmin(user) ? `<div class="nav-tab ${currentTab === 'admin' ? 'active' : ''}" data-tab="admin">👑 Админка</div>` : ''}
-                </div>
-                <div class="welcome-header"><h2>🏦 Привет, ${escapeHtml(displayName)}</h2><div class="user-greeting">${status.current.emoji} ${status.current.name}</div></div>
-                <div class="level-info"><span>⭐ Статус: ${status.current.name}</span><span>📊 ${user.totalTransactions || 0} транзакций</span></div>
-                <div class="level-bar"><div class="level-progress" style="width:${status.progress}%"></div></div>
-                <div class="cards-switcher">${cardsListHtml}<div id="addCardBtn" class="add-card-btn">+ Новая карта</div></div>
-                ${cardHtml}
-                ${hasCard ? `
-                <div class="balance"><span>💰 Баланс</span><span class="balance-amount">${balance} ${symbol}</span></div>
-                <div class="transfer-section">
-                    <div class="transfer-title">🔗 Перевод по ссылке</div>
-                    <div class="input-group"><input type="number" id="transferAmount" placeholder="Сумма" step="0.01"></div>
-                    <div class="input-group"><input type="text" id="transferNote" placeholder="Назначение"></div>
-                    <button id="createLinkBtn">✨ Создать ссылку</button>
-                    ${linkHtml}
-                    
-                    <div class="link-input-section">
-                        <div class="transfer-title">📎 Ввести готовую ссылку</div>
-                        <div class="input-group"><input type="text" id="manualLinkInput" placeholder="Вставьте ссылку на перевод"></div>
-                        <button id="submitLinkBtn" class="submit-link-btn">🔗 Получить перевод</button>
-                    </div>
-                </div>
-                ` : ''}
-                <div class="flex-buttons"><button id="settingsBtn" class="settings-btn">⚙️</button><button id="logoutBtn" class="logout-btn">🚪</button></div>
-                <div class="legal-footer"><a id="showAgreementBtn">📜 Договор</a></div>
-                <div class="privacy-badge">🔐 KC-KacKoin (-_-)</div>
-            </div>
-        `;
-    }
-
-    async function renderInvestments() {
-        const user = await getUserData();
-        if (!user) return '';
-        await collectInvestmentIncome(user);
-        
-        const hasCard = user.cards && user.cards.length > 0;
-        if (!hasCard) {
-            return `
-                <div class="dashboard-card">
-                    <div class="back-to-main" id="backToMainBtn">← На главную</div>
-                    <div class="no-card-message">💳 Сначала выпустите карту, чтобы получить доступ к инвестициям<br><button id="createCardBtn" class="create-card-btn">✨ Выпустить карту</button></div>
-                </div>
-            `;
-        }
-        
-        const symbol = getCurrencySymbol();
-        
-        return `
-            <div class="dashboard-card">
-                <div class="back-to-main" id="backToMainBtn">← На главную</div>
-                <h2>📈 Инвестиционный портфель</h2>
-                
-                <div class="investment-card">
-                    <div class="investment-header">💰 Сберегательные счета</div>
-                    ${INVESTMENTS.deposits.map(d => `
-                        <div class="investment-row">
-                            <span>${d.name} (${d.dailyPercent}%/день)</span>
-                            <span>${d.amount} ${symbol}</span>
-                            <button class="buy-deposit" data-id="${d.id}" data-amount="${d.amount}" style="width:auto; padding:4px 12px;">Открыть</button>
-                        </div>
-                    `).join('')}
-                    ${user.activeDeposit ? `<div class="investment-row" style="margin-top:8px; background:#334155; padding:8px; border-radius:12px; color:#f1f5f9;">📌 Активный счёт: ${user.activeDeposit.amount} ${symbol}</div>` : ''}
-                </div>
-                
-                <div class="investment-card">
-                    <div class="investment-header">🏪 Бизнес-активы</div>
-                    ${INVESTMENTS.assets.map(a => {
-                        const owned = user.assets?.some(ass => ass.id === a.id);
-                        return `<div class="investment-row"><span>${a.name} (+${a.income} ${symbol}/день)</span><span>${a.price} ${symbol}</span><button class="buy-asset" data-id="${a.id}" data-price="${a.price}" ${owned ? 'disabled' : ''} style="width:auto; padding:4px 12px;">${owned ? '✅' : 'Купить'}</button></div>`;
-                    }).join('')}
-                </div>
-                
-                <div class="investment-card">
-                    <div class="investment-header">💻 Майнинг-фермы</div>
-                    ${INVESTMENTS.mining.map(m => {
-                        const owned = user.mining?.some(mn => mn.id === m.id);
-                        return `<div class="investment-row"><span>${m.name} (+${m.income} ${symbol}/день)</span><span>${m.price} ${symbol}</span><button class="buy-mining" data-id="${m.id}" data-price="${m.price}" ${owned ? 'disabled' : ''} style="width:auto; padding:4px 12px;">${owned ? '✅' : 'Купить'}</button></div>`;
-                    }).join('')}
-                </div>
-                
-                <div class="investment-card">
-                    <div class="investment-header">📈 Ценные бумаги</div>
-                    ${INVESTMENTS.securities.map(s => {
-                        const owned = user.securities?.some(sec => sec.id === s.id);
-                        return `<div class="investment-row"><span>${s.name} (+${s.dividend} ${symbol}/день)</span><span>${s.price} ${symbol}</span><button class="buy-security" data-id="${s.id}" data-price="${s.price}" ${owned ? 'disabled' : ''} style="width:auto; padding:4px 12px;">${owned ? '✅' : 'Купить'}</button></div>`;
-                    }).join('')}
-                </div>
-                
-                <div class="investment-card">
-                    <div class="investment-header">🏠 Недвижимость</div>
-                    ${INVESTMENTS.realty.map(r => {
-                        const owned = user.realty?.some(re => re.id === r.id);
-                        return `<div class="investment-row"><span>${r.name} (+${r.rent} ${symbol}/день)</span><span>${r.price} ${symbol}</span><button class="buy-realty" data-id="${r.id}" data-price="${r.price}" ${owned ? 'disabled' : ''} style="width:auto; padding:4px 12px;">${owned ? '✅' : 'Инвестировать'}</button></div>`;
-                    }).join('')}
-                </div>
-                <div id="investMsg"></div>
-            </div>
-        `;
-    }
-
-    async function renderLoyalty() {
-        const user = await getUserData();
-        if (!user) return '';
-        const symbol = getCurrencySymbol();
-        
-        const hasCard = user.cards && user.cards.length > 0;
-        if (!hasCard) {
-            return `
-                <div class="dashboard-card">
-                    <div class="back-to-main" id="backToMainBtn">← На главную</div>
-                    <div class="no-card-message">💳 Сначала выпустите карту, чтобы получить доступ к программе лояльности<br><button id="createCardBtn" class="create-card-btn">✨ Выпустить карту</button></div>
-                </div>
-            `;
-        }
-        
-        const users = await loadUsers();
-        const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-        const topClients = Object.values(users).map(u => ({
-            nick: u.nickname,
-            weekTrans: (u.transactions || []).filter(t => t.date && new Date(t.date).getTime() > weekAgo && t.type === 'out').length
-        })).sort((a,b) => b.weekTrans - a.weekTrans).slice(0, 5);
-        
-        return `
-            <div class="dashboard-card">
-                <div class="back-to-main" id="backToMainBtn">← На главную</div>
-                <h2>🎯 Программа лояльности</h2>
-                
-                <div class="investment-card">
-                    <div class="investment-header">🏆 Достижения</div>
-                    ${ACHIEVEMENTS.map(a => `<div class="investment-row"><span>${a.name}</span><span>${user.achievements?.includes(a.id) ? '✅ +' + a.reward + ' ' + symbol : '🔒'}</span></div>`).join('')}
-                </div>
-                
-                <div class="investment-card">
-                    <div class="investment-header">📅 Ежедневный бонус</div>
-                    <div class="investment-row"><button id="claimDailyBonus" style="width:auto;">Получить бонус</button></div>
-                    <div class="investment-row"><span>Недельный квест: 10 переводов</span><span>Прогресс: ${user.weekTransfers || 0}/10</span>${user.weekTransfers >= 10 && !user.weekQuestClaimed ? '<button id="claimWeekQuestBtn" style="width:auto;">Забрать 2000</button>' : user.weekQuestClaimed ? '✅ Получено' : ''}</div>
-                </div>
-                
-                <div class="investment-card">
-                    <div class="investment-header">🏅 Топ клиентов недели</div>
-                    ${topClients.map((u,i) => `<div class="investment-row"><span>${i+1}. ${escapeHtml(u.nick)}</span><span>📤 ${u.weekTrans} переводов</span></div>`).join('')}
-                    ${topClients.length === 0 ? '<div>Нет данных</div>' : ''}
-                </div>
-                
-                <div class="investment-card">
-                    <div class="investment-header">🔗 Реферальная программа</div>
-                    <div style="background:#e2e8f0; padding:12px; border-radius:12px; word-break:break-all; color:#1e293b; font-family:monospace; font-size:0.75rem;">${location.origin}${location.pathname}?ref=${encodeURIComponent(user.nickname)}</div>
-                    <div class="investment-row" style="margin-top:8px;">Приглашайте друзей → 10% от их переводов</div>
-                </div>
-                
-                <div id="loyaltyMsg"></div>
-            </div>
-        `;
-    }
-
-    async function renderMarketplace() {
-        const user = await getUserData();
-        if (!user) return '';
-        const symbol = getCurrencySymbol();
-        const inventory = user.marketInventory || [];
-        
-        function renderSection(title, items) {
-            return `<div class="section-title">${title}</div><div class="marketplace-grid">${items.map(item => {
-                const owned = inventory.includes(item.id);
-                const isEquipped = (item.type === 'prefix' && user.equippedPrefix === item.id) || (item.type === 'skin' && user.equippedSkin === item.id);
-                return `<div class="shop-item ${owned ? 'owned' : ''}"><div class="shop-item-header"><span class="shop-item-icon">${item.emoji}</span><span class="shop-item-price">${item.price} ${symbol}</span></div><div class="shop-item-title">${item.name}</div><div class="shop-item-desc">${item.desc}</div>${!owned ? `<button class="buy-btn" data-id="${item.id}">Купить</button>` : `<button class="equip-btn" data-id="${item.id}">Экипировать</button>${isEquipped ? '<div class="equipped-badge">✅ Экипировано</div>' : ''}</div>`}</div>`;
-            }).join('')}</div>`;
-        }
-        
-        return `
-            <div class="dashboard-card">
-                <div class="back-to-main" id="backToMainBtn">← На главную</div>
-                <div class="market-balance"><span>💰 Доступно средств</span><span>${(user.balance || 0).toFixed(2)} ${symbol}</span></div>
-                <h2>🛍️ Маркетплейс NCP</h2>
-                ${renderSection('👑 Премиум-статусы', MARKET_ITEMS.vipStatuses)}
-                ${renderSection('💳 Оформление карт', MARKET_ITEMS.cardDesigns)}
-                ${renderSection('📊 Тарифные планы', MARKET_ITEMS.tariffs)}
-                ${renderSection('💰 Денежные бонусы', MARKET_ITEMS.bonuses)}
-                <div class="demo-hint">🏆 Приобретите все услуги для эксклюзивного статуса</div>
-            </div>
-        `;
-    }
-
+    
     function renderLoginScreen() {
-        return `<div class="login-card"><form id="loginForm"><div class="input-group"><label>👤 Ник</label><input type="text" id="loginNickname"></div><div class="input-group"><label>🔒 Пароль</label><input type="password" id="loginPassword"></div><button type="submit">Войти →</button></form><div class="switch-mode"><a id="switchToRegister">📝 Регистрация</a></div><div class="legal-footer"><a id="showAgreementBtn">📜 Соглашение</a></div></div>`;
+        return `<div class="login-card">
+            <form id="loginForm">
+                <div class="input-group"><label>👤 Ник</label><input type="text" id="loginNickname"></div>
+                <div class="input-group"><label>🔒 Пароль</label><input type="password" id="loginPassword"></div>
+                <button type="submit">Войти →</button>
+            </form>
+            <div class="switch-mode"><a id="switchToRegister">📝 Регистрация</a></div>
+            <div class="legal-footer"><a id="showAgreementBtn">📜 Соглашение</a></div>
+        </div>`;
     }
-
+    
     function renderRegisterScreen() {
-        return `<div class="register-card"><form id="registerForm"><div class="input-group"><label>👤 Ник (3-20)</label><input type="text" id="regNickname"></div><div class="input-group"><label>🔒 Пароль (мин.3)</label><input type="password" id="regPassword"></div><button type="submit">Создать аккаунт →</button></form><div class="switch-mode"><a id="switchToLogin">🔙 Войти</a></div></div>`;
+        return `<div class="register-card">
+            <form id="registerForm">
+                <div class="input-group"><label>👤 Ник (3-20)</label><input type="text" id="regNickname"></div>
+                <div class="input-group"><label>🔒 Пароль (мин.3)</label><input type="password" id="regPassword"></div>
+                <button type="submit">Создать аккаунт →</button>
+            </form>
+            <div class="switch-mode"><a id="switchToLogin">🔙 Войти</a></div>
+        </div>`;
     }
-
-    function renderAgreementModal() {
-        return `<div class="modal-overlay"><div class="modal-content"><h2>📜 Добро пожаловать в NCPBANK!</h2><div class="legal-scroll"><p><strong>Правила NCPBANK:</strong></p><p>1. Мем-проект, валюта KC-KacKoin (-_-) без реальной ценности</p><p>2. Только анонимные ники, реальные имена запрещены</p><p>3. Пароли в SHA-256</p><p>4. Максимум 5 карт</p><p>5. Инвестиции приносят пассивный доход</p><p>6. Маркетплейс: премиум-статусы, оформление, бонусы</p><p>7. Программа лояльности: достижения, ежедневный бонус, квесты</p><p>8. Сервис для лиц 18+</p><p>9. Решения принимаются здесь. Где здесь — неизвестно.</p></div><div class="modal-actions"><button id="acceptBtn" class="accept-btn">✅ Принимаю</button><button id="declineBtn" class="decline-btn">❌ Отказаться</button></div></div></div>`;
-    }
-
+    
     function renderSettings() {
-        return `<div class="settings-panel"><div style="display:flex; justify-content:space-between;"><h2>⚙️ Настройки</h2><button id="closeSettingsBtn" class="back-btn">←</button></div><div class="setting-item"><span>🌙 Тёмная тема</span><div class="theme-toggle" id="themeToggle"></div></div><button id="resetAllDataBtn" class="danger-btn">🗑️ Сбросить данные</button><div class="legal-footer"><a id="showAgreementBtn">📜 Соглашение</a></div></div>`;
+        return `<div class="settings-panel">
+            <div style="display:flex; justify-content:space-between;"><h2>⚙️ Настройки</h2><button id="closeSettingsBtn" style="width:auto; background:#64748b;">←</button></div>
+            <div class="setting-item" style="display:flex; justify-content:space-between; align-items:center; padding:12px 0;"><span>🌙 Тёмная тема</span><div id="themeToggle" style="width:50px; height:26px; background:#cbd5e1; border-radius:30px; position:relative; cursor:pointer;"></div></div>
+            <div class="legal-footer"><a id="showAgreementBtn">📜 Соглашение</a></div>
+        </div>`;
     }
-
-    function renderCreateCardPage() {
-        return `<div class="create-card-page"><button id="backFromCreateBtn" class="back-btn">← Назад</button><h2>💳 Новая карта</h2><div id="cardTypesList" style="display:flex; gap:8px; flex-wrap:wrap; margin:16px 0;">${CARD_TYPES.map(c => `<div class="card-type-option ${selectedCardType === c.id ? 'selected' : ''}" data-card-id="${c.id}">${c.emoji} ${c.name}</div>`).join('')}</div>
-        <div class="input-group"><input type="text" id="cardNumberInput" placeholder="Номер карты (16 цифр)"></div>
-        <div class="input-group"><input type="text" id="cvvInput" placeholder="CVV (3 цифры)"></div>
-        <button id="confirmCreateCardBtn">✨ Создать</button><div id="createCardMsg"></div></div>`;
-    }
-
+    
     // ========== ОБРАБОТЧИКИ ==========
     function attachLoginHandlers() {
         document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
@@ -1476,15 +650,10 @@
             const nick = document.getElementById('loginNickname').value.trim();
             const pass = document.getElementById('loginPassword').value;
             const res = await loginUser(nick, pass);
-            if (res.success) {
-                currentTab = 'dashboard';
-                renderApp();
-            } else {
-                alert(`❌ ${res.error}`);
-            }
+            if (res.success) { currentTab = 'dashboard'; renderApp(); }
+            else alert(`❌ ${res.error}`);
         });
         document.getElementById('switchToRegister')?.addEventListener('click', () => { currentView = 'register'; renderApp(); });
-        document.getElementById('showAgreementBtn')?.addEventListener('click', () => { showAgreementModal = true; renderApp(); });
     }
     
     function attachRegisterHandlers() {
@@ -1493,12 +662,8 @@
             const nick = document.getElementById('regNickname').value.trim();
             const pass = document.getElementById('regPassword').value;
             const res = await registerUser(nick, pass);
-            if (res.success) {
-                currentTab = 'dashboard';
-                renderApp();
-            } else {
-                alert(`❌ ${res.error}`);
-            }
+            if (res.success) { currentTab = 'dashboard'; renderApp(); }
+            else alert(`❌ ${res.error}`);
         });
         document.getElementById('switchToLogin')?.addEventListener('click', () => { currentView = 'login'; renderApp(); });
     }
@@ -1507,225 +672,58 @@
         document.querySelectorAll('.nav-tab').forEach(tab => {
             tab.addEventListener('click', () => { currentTab = tab.dataset.tab; renderApp(); });
         });
-        document.querySelectorAll('.back-to-main').forEach(btn => {
-            btn.addEventListener('click', () => { currentTab = 'dashboard'; renderApp(); });
-        });
-        document.getElementById('logoutBtn')?.addEventListener('click', async () => { 
-            localStorage.removeItem(SESSION_KEY); 
-            localStorage.removeItem(CURRENT_USER_KEY); 
-            renderApp(); 
-        });
+        document.getElementById('logoutBtn')?.addEventListener('click', async () => { localStorage.removeItem(SESSION_KEY); renderApp(); });
         document.getElementById('settingsBtn')?.addEventListener('click', () => { showSettings = true; renderApp(); });
-        document.getElementById('createCardBtn')?.addEventListener('click', () => { showCreateCard = true; renderApp(); });
-        document.getElementById('addCardBtn')?.addEventListener('click', () => { showCreateCard = true; renderApp(); });
-        document.querySelectorAll('.card-tab').forEach(el => { 
-            el.addEventListener('click', async () => { 
-                await setActiveCard(parseInt(el.dataset.cardIdx)); 
-                renderApp(); 
-            }); 
-        });
-        
-        document.getElementById('createLinkBtn')?.addEventListener('click', async () => {
-            const amount = parseFloat(document.getElementById('transferAmount')?.value);
-            const note = document.getElementById('transferNote')?.value || '';
+        document.getElementById('createCardBtn')?.addEventListener('click', () => { alert('💳 Функция создания карты будет доступна в следующем обновлении'); });
+        document.getElementById('createLinkBtn')?.addEventListener('click', () => {
+            const amount = document.getElementById('transferAmount')?.value;
+            const note = document.getElementById('transferNote')?.value;
             if (!amount || amount <= 0) { alert('Введите сумму'); return; }
-            const user = await getUserData();
-            if (user.balance < amount && user.nickname !== ADMIN_NICK) { alert(`Недостаточно средств`); return; }
-            const res = await createTransferLink(amount, note);
-            if (res.error) alert(res.error);
-            else { currentLink = res.link; currentContract = res.contractNumber; currentNote = res.note; renderApp(); }
-        });
-        document.getElementById('clearLinkBtn')?.addEventListener('click', () => { currentLink = null; currentContract = null; currentNote = ''; renderApp(); });
-        document.getElementById('copyLinkBtn')?.addEventListener('click', () => {
-            const ta = document.getElementById('transferLink');
-            if (ta) { ta.select(); document.execCommand('copy'); alert('✅ Ссылка скопирована'); }
+            const link = `${location.origin}${location.pathname}#transfer/${currentUserNickname}/${Date.now()}/${amount}/${encodeURIComponent(note || '')}`;
+            document.getElementById('linkResult').innerHTML = `<div class="success-msg" style="margin-top:10px;">🔗 Ссылка: <input type="text" readonly value="${link}" style="width:100%; margin-top:5px; font-size:0.7rem;" onclick="this.select()"></div>`;
         });
         
-        document.getElementById('submitLinkBtn')?.addEventListener('click', async () => {
-            const linkInput = document.getElementById('manualLinkInput')?.value.trim();
-            if (!linkInput) { alert('Введите ссылку'); return; }
-            try {
-                const url = new URL(linkInput);
-                const hash = url.hash;
-                if (hash && hash.startsWith('#transfer/')) {
-                    const parts = hash.split('/');
-                    if (parts.length >= 5) {
-                        const fromNick = decodeURIComponent(parts[1]);
-                        const contract = decodeURIComponent(parts[2]);
-                        const amount = parseFloat(parts[3]);
-                        const note = decodeURIComponent(parts[4] || '');
-                        const cur = await getUserData();
-                        if (!cur) { alert('❌ Войдите в аккаунт'); return; }
-                        if (fromNick === cur.nickname) { alert('❌ Нельзя перевести самому себе'); return; }
-                        if (confirm(`📥 Получить перевод ${amount} ${getCurrencySymbol()} от ${fromNick}?`)) {
-                            const res = await executeTransfer(fromNick, amount, contract, note);
-                            alert(res.success ? `✅ Получено ${res.amount} ${getCurrencySymbol()}` : `❌ ${res.error}`);
-                            document.getElementById('manualLinkInput').value = '';
-                            renderApp();
-                        }
-                    } else { alert('❌ Неверный формат ссылки'); }
-                } else { alert('❌ Это не ссылка на перевод NCPBANK'); }
-            } catch(e) { alert('❌ Неверная ссылка'); }
-        });
-        
-        document.querySelectorAll('.buy-deposit')?.forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const user = await getUserData();
-                const amount = parseInt(btn.dataset.amount);
-                if (user.balance >= amount || user.nickname === ADMIN_NICK) {
-                    if (user.nickname !== ADMIN_NICK) user.balance -= amount;
-                    if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
-                    user.activeDeposit = { id: btn.dataset.id, amount: amount, startDate: Date.now() };
-                    await updateUserData({ balance: user.balance, activeDeposit: user.activeDeposit });
+        document.getElementById('nfcPayBtn')?.addEventListener('click', async () => {
+            const amount = parseFloat(document.getElementById('nfcAmount')?.value);
+            if (!amount || amount <= 0) { alert('Введите корректную сумму'); return; }
+            const statusDiv = document.getElementById('nfcStatusText');
+            if (statusDiv) { statusDiv.textContent = '🔍 Приложите карту к телефону...'; statusDiv.classList.add('active'); }
+            startNfcPayment(amount, async (success, result) => {
+                if (success) {
+                    await addBalance(amount);
+                    if (statusDiv) { statusDiv.textContent = '✅ Оплата прошла успешно! Баланс пополнен'; statusDiv.classList.remove('active'); }
                     renderApp();
-                } else alert('Недостаточно средств');
-            });
-        });
-        document.querySelectorAll('.buy-asset')?.forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const user = await getUserData();
-                const price = parseInt(btn.dataset.price);
-                if (user.balance >= price || user.nickname === ADMIN_NICK) {
-                    if (user.nickname !== ADMIN_NICK) user.balance -= price;
-                    if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
-                    if (!user.assets) user.assets = [];
-                    user.assets.push({ id: btn.dataset.id });
-                    await updateUserData({ balance: user.balance, assets: user.assets });
-                    renderApp();
-                } else alert('Недостаточно средств');
-            });
-        });
-        document.querySelectorAll('.buy-mining')?.forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const user = await getUserData();
-                const price = parseInt(btn.dataset.price);
-                if (user.balance >= price || user.nickname === ADMIN_NICK) {
-                    if (user.nickname !== ADMIN_NICK) user.balance -= price;
-                    if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
-                    if (!user.mining) user.mining = [];
-                    user.mining.push({ id: btn.dataset.id });
-                    await updateUserData({ balance: user.balance, mining: user.mining });
-                    renderApp();
-                } else alert('Недостаточно средств');
-            });
-        });
-        document.querySelectorAll('.buy-security')?.forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const user = await getUserData();
-                const price = parseInt(btn.dataset.price);
-                if (user.balance >= price || user.nickname === ADMIN_NICK) {
-                    if (user.nickname !== ADMIN_NICK) user.balance -= price;
-                    if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
-                    if (!user.securities) user.securities = [];
-                    user.securities.push({ id: btn.dataset.id });
-                    await updateUserData({ balance: user.balance, securities: user.securities });
-                    renderApp();
-                } else alert('Недостаточно средств');
-            });
-        });
-        document.querySelectorAll('.buy-realty')?.forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const user = await getUserData();
-                const price = parseInt(btn.dataset.price);
-                if (user.balance >= price || user.nickname === ADMIN_NICK) {
-                    if (user.nickname !== ADMIN_NICK) user.balance -= price;
-                    if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
-                    if (!user.realty) user.realty = [];
-                    user.realty.push({ id: btn.dataset.id });
-                    await updateUserData({ balance: user.balance, realty: user.realty });
-                    renderApp();
-                } else alert('Недостаточно средств');
+                } else {
+                    if (statusDiv) { statusDiv.textContent = '❌ Ошибка оплаты: ' + result; statusDiv.classList.add('error'); setTimeout(() => { statusDiv.textContent = 'Готов к оплате через NFC'; statusDiv.classList.remove('error'); }, 3000); }
+                }
             });
         });
         
-        document.getElementById('claimDailyBonus')?.addEventListener('click', async () => {
-            const user = await getUserData();
-            const lastBonus = user.lastBonusDate;
-            const today = new Date().toDateString();
-            if (lastBonus === today) { alert('Бонус уже получен сегодня'); return; }
-            const bonus = Math.floor(Math.random() * 500) + 50;
-            user.balance += bonus;
-            if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
-            user.lastBonusDate = today;
-            await updateUserData({ balance: user.balance, lastBonusDate: user.lastBonusDate });
-            alert(`✅ Получено ${bonus} ${getCurrencySymbol()}`);
-            renderApp();
-        });
-        document.getElementById('claimWeekQuestBtn')?.addEventListener('click', async () => {
-            const user = await getUserData();
-            if (user.weekTransfers >= 10 && !user.weekQuestClaimed) {
-                user.balance += 2000;
-                if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
-                user.weekQuestClaimed = true;
-                await updateUserData({ balance: user.balance, weekQuestClaimed: true });
-                alert('✅ Получено 2000 -_- за квест недели!');
-                renderApp();
-            }
-        });
-        
-        document.querySelectorAll('.buy-btn')?.forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const result = await purchaseItem(btn.dataset.id);
-                if (result.success) alert(`✅ Куплено: ${result.item.name}`);
-                else alert(`❌ ${result.error}`);
-                renderApp();
-            });
-        });
-        document.querySelectorAll('.equip-btn')?.forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const result = await equipItem(btn.dataset.id);
-                if (result) alert('✅ Экипировано!');
-                renderApp();
-            });
-        });
-        
+        // Инициализируем P2P NFC после загрузки DOM
+        setTimeout(() => { initNfcP2P(); }, 500);
+    }
+    
+    function attachAdminHandlers() {
         document.getElementById('adminGiveBtn')?.addEventListener('click', async () => {
             const nick = document.getElementById('adminGiveNick')?.value.trim();
             const amount = parseFloat(document.getElementById('adminGiveAmount')?.value);
             if (!nick || !amount) { alert('Введите данные'); return; }
-            const res = await adminGiveMoney(nick, amount);
-            alert(res.success ? `✅ Выдано ${amount} ${getCurrencySymbol()}` : `❌ ${res.error}`);
-            renderApp();
-        });
-    }
-    
-    function attachCreateCardHandlers() {
-        document.getElementById('backFromCreateBtn')?.addEventListener('click', () => { showCreateCard = false; renderApp(); });
-        document.querySelectorAll('.card-type-option').forEach(el => {
-            el.addEventListener('click', () => { selectedCardType = el.dataset.cardId; renderApp(); });
-        });
-        document.getElementById('confirmCreateCardBtn')?.addEventListener('click', async () => {
-            const number = document.getElementById('cardNumberInput').value.trim();
-            const cvv = document.getElementById('cvvInput').value.trim();
-            const msg = document.getElementById('createCardMsg');
-            const clean = number.replace(/\s/g, '');
-            if (!clean || clean.length !== 16 || !/^\d+$/.test(clean)) { msg.innerHTML = '<div class="error-msg">❌ 16 цифр номера</div>'; return; }
-            if (!cvv || cvv.length !== 3 || !/^\d+$/.test(cvv)) { msg.innerHTML = '<div class="error-msg">❌ 3 цифры CVV</div>'; return; }
-            const formatted = clean.replace(/(\d{4})(?=\d)/g, '$1 ');
-            const res = await addCard(selectedCardType, formatted, cvv);
-            if (res.success) { msg.innerHTML = '<div class="success-msg">✅ Карта создана! На ваш счёт зачислено 100 -_-</div>'; setTimeout(() => { showCreateCard = false; renderApp(); }, 1500); }
-            else msg.innerHTML = `<div class="error-msg">❌ ${res.error}</div>`;
+            const users = await loadUsers();
+            if (users[nick]) {
+                users[nick].balance = (users[nick].balance || 0) + amount;
+                if (nick === ADMIN_NICK) users[nick].balance = INFINITY_MONEY;
+                await saveUsers(users);
+                alert(`✅ Выдано ${amount} ${getCurrencySymbol()} пользователю ${nick}`);
+                renderApp();
+            } else alert('Пользователь не найден');
         });
     }
     
     function attachSettingsHandlers() {
         document.getElementById('closeSettingsBtn')?.addEventListener('click', () => { showSettings = false; renderApp(); });
         document.getElementById('themeToggle')?.addEventListener('click', () => { appSettings.theme = appSettings.theme === 'light' ? 'dark' : 'light'; saveSettings(); renderApp(); });
-        document.getElementById('resetAllDataBtn')?.addEventListener('click', async () => { 
-            if(confirm('Удалить все данные? (Это действие необратимо)')) { 
-                localStorage.clear(); 
-                await saveUsers({});
-                location.reload(); 
-            } 
-        });
-        document.getElementById('showAgreementBtn')?.addEventListener('click', () => { showAgreementModal = true; renderApp(); });
     }
     
-    function attachAgreementHandlers() {
-        document.getElementById('acceptBtn')?.addEventListener('click', () => { localStorage.setItem(AGREEMENT_KEY, 'true'); showAgreementModal = false; renderApp(); });
-        document.getElementById('declineBtn')?.addEventListener('click', () => { alert('❌ Без принятия условий нельзя'); });
-    }
-
     async function ensureAdminExists() {
         const users = await loadUsers();
         if (!users[ADMIN_NICK]) {
@@ -1737,70 +735,26 @@
                 activeCardIndex: 0,
                 totalTransactions: 1000,
                 marketInventory: [],
-                achievements: [],
-                assets: [],
-                mining: [],
-                securities: [],
-                realty: [],
-                activeBoosts: [],
-                streak: 100,
                 createdAt: Date.now(),
                 transactions: []
             };
             await saveUsers(users);
-            console.log('✅ Админ KacERORga создан с бесконечными деньгами и максимальным уровнем');
-        }
-    }
-
-    async function setActiveCard(index) {
-        const user = await getUserData();
-        if (user && user.cards[index]) {
-            await updateUserData({ activeCardIndex: index });
         }
     }
     
-    async function equipItem(itemId) {
-        const user = await getUserData();
-        if (!user) return false;
-        const item = ALL_ITEMS.find(i => i.id === itemId);
-        if (!item) return false;
-        if (!user.marketInventory?.includes(itemId)) return false;
-        if (item.type === 'prefix') await updateUserData({ equippedPrefix: itemId });
-        else if (item.type === 'skin') await updateUserData({ equippedSkin: itemId });
-        else if (item.type === 'effect') await updateUserData({ equippedEffect: itemId });
-        return true;
-    }
-
     async function renderApp() {
         const root = document.getElementById('appRoot');
         if (!root) return;
-        
-        if (showAgreementModal) {
-            root.innerHTML = renderAgreementModal();
-            attachAgreementHandlers();
-            return;
-        }
         
         const session = await loadSession();
         if (session) {
             if (showSettings) {
                 root.innerHTML = renderSettings();
                 attachSettingsHandlers();
-            } else if (showCreateCard) {
-                root.innerHTML = renderCreateCardPage();
-                attachCreateCardHandlers();
-            } else if (currentTab === 'investments') {
-                root.innerHTML = await renderInvestments();
-                attachDashboardHandlers();
-            } else if (currentTab === 'loyalty') {
-                root.innerHTML = await renderLoyalty();
-                attachDashboardHandlers();
-            } else if (currentTab === 'market') {
-                root.innerHTML = await renderMarketplace();
-                attachDashboardHandlers();
             } else if (currentTab === 'admin' && isAdmin(await getUserData())) {
                 root.innerHTML = await renderAdminPanel();
                 attachDashboardHandlers();
+                attachAdminHandlers();
             } else {
                 root.innerHTML = await renderDashboard();
                 attachDashboardHandlers();
@@ -1818,23 +772,10 @@
         const counterEl = document.getElementById('onlineCounter');
         if (counterEl) counterEl.textContent = onlineCount;
     }
-
-    // ЗАПУСК С ЭКРАНОМ ЗАГРУЗКИ
-    updateLoading(1, 'Загрузка модулей...', 10);
-    setTimeout(() => {
-        loadSettings();
-        updateLoading(2, 'Подключение к облаку...', 30);
-        setTimeout(async () => {
-            if (!localStorage.getItem(AGREEMENT_KEY)) showAgreementModal = true;
-            await ensureAdminExists();
-            updateLoading(4, 'Проверка сессии...', 70);
-            setTimeout(() => {
-                updateLoading(5, 'Запуск приложения...', 100);
-                renderApp();
-            }, 300);
-        }, 300);
-    }, 200);
     
+    // ЗАПУСК
+    loadSettings();
+    ensureAdminExists().then(() => renderApp());
     setInterval(() => { const ce = document.getElementById('onlineCounter'); if(ce) ce.textContent = onlineCount; }, 1000);
 </script>
 </body>
