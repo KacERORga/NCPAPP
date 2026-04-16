@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>NCP BANK | KC-KacKoin P2P NFC</title>
+    <title>NCP BANK | KC-KacKoin - Переводы по ссылке и NFC</title>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
@@ -14,65 +14,6 @@
         .ncp-logo h1 { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, #1E2A3E, #3b82f6); -webkit-background-clip: text; background-clip: text; color: transparent; }
         body.dark .ncp-logo h1 { background: linear-gradient(135deg, #fbbf24, #3b82f6); -webkit-background-clip: text; background-clip: text; }
         .ncp-logo p { font-size: 0.7rem; color: #64748b; margin-top: 4px; }
-        
-        .nfc-payment-section {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 32px;
-            padding: 20px;
-            margin-bottom: 20px;
-            color: white;
-            text-align: center;
-        }
-        .nfc-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 15px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.9; }
-        }
-        .nfc-status {
-            font-size: 0.9rem;
-            margin: 10px 0;
-            padding: 8px;
-            border-radius: 60px;
-            background: rgba(0,0,0,0.3);
-        }
-        .nfc-status.active { background: #10b981; }
-        .nfc-status.error { background: #ef4444; }
-        .nfc-amount { font-size: 1.8rem; font-weight: bold; margin: 15px 0; }
-        .nfc-amount input {
-            font-size: 1.5rem;
-            padding: 12px;
-            width: 200px;
-            text-align: center;
-            border-radius: 60px;
-            border: none;
-            background: white;
-            color: #1e293b;
-            font-weight: bold;
-        }
-        .nfc-pay-btn {
-            background: #fbbf24;
-            color: #1e293b;
-            border: none;
-            padding: 14px 28px;
-            border-radius: 60px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: 0.2s;
-        }
-        .nfc-pay-btn:hover { transform: scale(1.02); background: #f59e0b; }
         
         .card, .dashboard-card, .register-card, .login-card, .settings-panel {
             background: rgba(255, 255, 255, 0.96);
@@ -149,12 +90,30 @@
         body.dark .transfer-section { background: #1e293b; }
         .transfer-title { font-weight: bold; margin-bottom: 12px; }
         
-        /* P2P NFC кнопка */
-        .nfc-p2p-btn {
-            background: #8b5cf6 !important;
-            margin-top: 10px;
+        .link-preview {
+            background: #f1f5f9;
+            border-radius: 16px;
+            padding: 12px;
+            margin-top: 12px;
+            word-break: break-all;
+            font-size: 0.7rem;
+            font-family: monospace;
         }
-        .nfc-p2p-btn:hover { background: #7c3aed !important; transform: scale(1.02); }
+        body.dark .link-preview { background: #0f1722; }
+        
+        .nfc-status {
+            font-size: 0.9rem;
+            margin: 10px 0;
+            padding: 8px;
+            border-radius: 60px;
+            background: rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        .nfc-status.active { background: #10b981; color: white; }
+        .nfc-status.error { background: #ef4444; color: white; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        
+        .copy-btn { background: #3b82f6; margin-top: 8px; }
     </style>
 </head>
 <body>
@@ -172,7 +131,6 @@
     // ========== КЛЮЧИ ==========
     const USERS_KEY = 'ncpbank_cloud_v2';
     const SESSION_KEY = 'ncpbank_session_cloud';
-    const CURRENT_USER_KEY = 'ncpbank_current_cloud';
     const SETTINGS_KEY = 'ncpbank_settings_cloud';
     const ONLINE_KEY = 'ncpbank_online';
     const ADMIN_PASSWORD = '6369';
@@ -238,7 +196,7 @@
         return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
     }
     
-    function saveSession(nick) { localStorage.setItem(SESSION_KEY, JSON.stringify({ nickname: nick, timestamp: Date.now() })); localStorage.setItem(CURRENT_USER_KEY, nick); }
+    function saveSession(nick) { localStorage.setItem(SESSION_KEY, JSON.stringify({ nickname: nick, timestamp: Date.now() })); }
     
     async function loadSession() {
         const raw = localStorage.getItem(SESSION_KEY);
@@ -294,7 +252,7 @@
         users[nick] = {
             nickname: nick,
             passwordHash: await hashPassword(pass),
-            balance: 0,
+            balance: 100,
             cards: [],
             activeCardIndex: 0,
             totalTransactions: 0,
@@ -316,22 +274,15 @@
         return { success: true };
     }
     
-    async function addBalance(amount) {
-        const user = await getUserData();
-        if (!user) return false;
-        user.balance = (user.balance || 0) + amount;
-        if (user.nickname === ADMIN_NICK) user.balance = INFINITY_MONEY;
-        await updateUserData({ balance: user.balance });
-        return true;
-    }
-    
-    async function sendP2PTransfer(from, to, amount, note) {
+    // ========== ОСНОВНАЯ ФУНКЦИЯ ПЕРЕВОДА ==========
+    async function sendTransfer(from, to, amount, note) {
         const users = await loadUsers();
         const fromUser = users[from];
         const toUser = users[to];
         
         if (!fromUser || !toUser) return { success: false, error: 'Пользователь не найден' };
         if (fromUser.balance < amount && from !== ADMIN_NICK) return { success: false, error: 'Недостаточно средств' };
+        if (amount <= 0) return { success: false, error: 'Сумма должна быть больше 0' };
         
         if (from !== ADMIN_NICK) fromUser.balance -= amount;
         toUser.balance = (toUser.balance || 0) + amount;
@@ -341,11 +292,11 @@
         
         const transaction = {
             id: Date.now(),
-            type: 'p2p',
+            type: 'transfer',
             from: from,
             to: to,
             amount: amount,
-            note: note,
+            note: note || '',
             date: new Date().toLocaleString()
         };
         
@@ -355,25 +306,74 @@
         toUser.totalTransactions = (toUser.totalTransactions || 0) + 1;
         
         await saveUsers(users);
-        return { success: true, amount: amount };
+        return { success: true, amount: amount, from: from, to: to };
     }
     
-    // ========== NFC P2P ФУНКЦИИ ДЛЯ WEBVIEW ==========
-    function initNfcP2P() {
-        if (window.NfcP2P && window.NfcP2P.isNfcAvailable()) {
+    // ========== ГЕНЕРАЦИЯ ССЫЛКИ ==========
+    function generateTransferLink(amount, note) {
+        const baseUrl = window.location.origin + window.location.pathname;
+        const encodedNote = encodeURIComponent(note || '');
+        return `${baseUrl}#translation/${currentUserNickname}/${amount}/${encodedNote}`;
+    }
+    
+    // ========== ОБРАБОТКА ССЫЛКИ ИЗ URL ==========
+    function handleUrlLink() {
+        const hash = window.location.hash;
+        if (hash && hash.startsWith('#translation/')) {
+            const parts = hash.split('/');
+            if (parts.length >= 4) {
+                const from = decodeURIComponent(parts[1]);
+                const amount = parseFloat(parts[2]);
+                const note = decodeURIComponent(parts[3] || '');
+                
+                // Показываем диалог подтверждения
+                setTimeout(async () => {
+                    const user = await getUserData();
+                    if (!user) {
+                        alert(`📥 Входящий перевод на ${amount} KacKoin от ${from}\n\nНазначение: ${note || 'Без назначения'}\n\n❗ Войдите в аккаунт, чтобы получить перевод`);
+                        return;
+                    }
+                    
+                    if (user.nickname === from) {
+                        alert('❌ Нельзя перевести самому себе');
+                        window.location.hash = '';
+                        return;
+                    }
+                    
+                    const confirmMsg = `📥 Входящий перевод\n\nОт: ${from}\nСумма: ${amount} KacKoin (-_-)\nНазначение: ${note || 'Без назначения'}\n\nПолучить перевод?`;
+                    if (confirm(confirmMsg)) {
+                        const result = await sendTransfer(from, user.nickname, amount, note);
+                        if (result.success) {
+                            alert(`✅ Перевод получен!\n+${amount} KacKoin на ваш счёт`);
+                            window.location.hash = '';
+                            renderApp();
+                        } else {
+                            alert(`❌ Ошибка: ${result.error}`);
+                            window.location.hash = '';
+                        }
+                    } else {
+                        window.location.hash = '';
+                    }
+                }, 500);
+            }
+        }
+    }
+    
+    // ========== NFC ФУНКЦИИ (для WebView приложения) ==========
+    function initNfcSupport() {
+        if (window.NfcP2P && window.NfcP2P.isAvailable()) {
             console.log('✅ NFC P2P доступен');
             window.NfcP2P.updateUserInfo(currentUserNickname, currentUserBalance.toString());
-            addNfcP2PButton();
+            addNfcButton();
         }
     }
 
-    function addNfcP2PButton() {
+    function addNfcButton() {
         const container = document.querySelector('.transfer-section');
         if (container && !document.getElementById('nfcP2PBtn')) {
             const nfcBtn = document.createElement('button');
             nfcBtn.id = 'nfcP2PBtn';
             nfcBtn.innerHTML = '📱 P2P Перевод (NFC)';
-            nfcBtn.className = 'nfc-p2p-btn';
             nfcBtn.style.cssText = 'background:#8b5cf6; margin-top:10px; width:100%;';
             nfcBtn.onclick = () => {
                 const amount = document.getElementById('transferAmount')?.value;
@@ -386,119 +386,48 @@
                     alert('❌ Недостаточно средств');
                     return;
                 }
-                window.NfcP2P.startTransfer(amount, note || '', currentUserNickname);
-                alert(`💫 Приложите телефоны друг к другу для перевода ${amount} -_-`);
+                if (window.NfcP2P && window.NfcP2P.sendTransfer) {
+                    window.NfcP2P.sendTransfer(amount, note || '', currentUserNickname);
+                    alert(`💫 Приложите телефоны друг к другу для перевода ${amount} KacKoin`);
+                } else {
+                    alert('❌ NFC недоступен. Используйте перевод по ссылке');
+                }
             };
             container.appendChild(nfcBtn);
         }
     }
 
     window.handleNfcEvent = function(action, data) {
-        console.log('NFC Event:', action, data);
-        
         if (action === 'transferSent') {
             const parsed = typeof data === 'string' ? JSON.parse(data) : data;
             if (parsed.success) {
-                alert('✅ Перевод отправлен! Средства списаны с вашего счёта');
-                location.reload();
+                alert('✅ Перевод отправлен через NFC! Средства списаны с вашего счёта');
+                renderApp();
             } else {
-                alert('❌ Ошибка отправки перевода');
+                alert('❌ Ошибка отправки перевода: ' + (parsed.error || 'Неизвестная ошибка'));
             }
         }
-        
-        if (action === 'nfcTransfer') {
+        if (action === 'transferReceived') {
             const transfer = typeof data === 'string' ? JSON.parse(data) : data;
             if (transfer.action === 'receiveTransfer') {
-                receiveP2PTransfer(transfer.from, transfer.amount, transfer.note);
+                receiveTransferFromNFC(transfer.from, transfer.amount, transfer.note);
             }
-        }
-        
-        if (action === 'transferTimeout') {
-            alert('⏰ Время ожидания перевода истекло');
         }
     };
 
-    async function receiveP2PTransfer(from, amount, note) {
+    async function receiveTransferFromNFC(from, amount, note) {
         const user = await getUserData();
         if (!user) {
             alert('❌ Войдите в аккаунт для получения перевода');
             return;
         }
-        
-        const result = await sendP2PTransfer(from, user.nickname, parseFloat(amount), note);
+        const result = await sendTransfer(from, user.nickname, parseFloat(amount), note);
         if (result.success) {
-            alert(`✅ Получено ${amount} -_- от ${from}\nНазначение: ${note || 'Без назначения'}`);
-            location.reload();
+            alert(`✅ Получено ${amount} KacKoin от ${from}\nНазначение: ${note || 'Без назначения'}`);
+            renderApp();
         } else {
             alert(`❌ Ошибка: ${result.error}`);
         }
-    }
-    
-    // ========== NFC ОПЛАТА ЧЕРЕЗ WEBVIEW ==========
-    function startNfcPayment(amount, callback) {
-        if (window.NfcPay && typeof window.NfcPay.startPayment === 'function') {
-            window.NfcPay.startPayment(amount, JSON.stringify({
-                amount: amount,
-                currency: 'KacKoin',
-                description: 'Пополнение баланса NCP BANK'
-            }));
-            
-            window.NfcPayCallback = function(result) {
-                if (result.success) {
-                    callback(true, result.transactionId);
-                } else {
-                    callback(false, result.error);
-                }
-            };
-        } else if (typeof window.nfcSimulation !== 'undefined' && window.nfcSimulation) {
-            simulateNfcPayment(amount, callback);
-        } else {
-            showNfcSimulationDialog(amount, callback);
-        }
-    }
-    
-    function simulateNfcPayment(amount, callback) {
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += 20;
-            if (progress >= 100) {
-                clearInterval(interval);
-                callback(true, 'SIM_' + Date.now());
-            }
-        }, 300);
-    }
-    
-    function showNfcSimulationDialog(amount, callback) {
-        const modal = document.createElement('div');
-        modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:10000;display:flex;align-items:center;justify-content:center;';
-        modal.innerHTML = `
-            <div style="background:white;border-radius:32px;padding:30px;text-align:center;max-width:320px;">
-                <div style="font-size:3rem;">📱💳</div>
-                <h3 style="margin:15px 0;">Приложите карту или телефон</h3>
-                <p style="font-size:0.85rem;color:#666;">Сумма: ${amount} -_-</p>
-                <div id="nfcProgress" style="width:100%;height:4px;background:#ddd;border-radius:4px;margin:20px 0;"><div id="nfcProgressFill" style="width:0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s;"></div></div>
-                <button id="cancelNfcBtn" style="background:#ef4444;color:white;border:none;padding:10px;border-radius:60px;width:100%;">Отмена</button>
-            </div>
-        `;
-        document.body.appendChild(modal);
-        
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += 20;
-            const fill = document.getElementById('nfcProgressFill');
-            if (fill) fill.style.width = progress + '%';
-            if (progress >= 100) {
-                clearInterval(interval);
-                modal.remove();
-                callback(true, 'SIM_' + Date.now());
-            }
-        }, 400);
-        
-        document.getElementById('cancelNfcBtn')?.addEventListener('click', () => {
-            clearInterval(interval);
-            modal.remove();
-            callback(false, 'Отменено пользователем');
-        });
     }
     
     // ========== UI ФУНКЦИИ ==========
@@ -532,38 +461,16 @@
     function escapeHtml(str) { return str?.replace(/[&<>]/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;' }[m])) || ''; }
     function getOnlineBadge(user) { if (!isAdmin(user)) return ''; return `<div class="online-counter"><span class="online-dot"></span> 👥 Онлайн: <span id="onlineCounter">${onlineCount}</span></div>`; }
     
-    function renderNfcSection() {
-        return `
-            <div class="nfc-payment-section">
-                <div class="nfc-icon">💳📱</div>
-                <div class="nfc-amount">
-                    <input type="number" id="nfcAmount" placeholder="Сумма" value="100" step="100" min="1">
-                </div>
-                <div class="nfc-status" id="nfcStatusText">Готов к оплате через NFC</div>
-                <button class="nfc-pay-btn" id="nfcPayBtn">💳 Оплатить через NFC</button>
-            </div>
-        `;
-    }
-    
     async function renderDashboard() {
         const user = await getUserData();
         if (!user) return renderLoginScreen();
         
         const symbol = getCurrencySymbol();
         const balance = (user.balance || 0).toFixed(2);
-        const hasCard = user.cards && user.cards.length > 0;
         
         return `
             <div class="dashboard-card">
                 ${getOnlineBadge(user)}
-                <div class="nav-tabs">
-                    <div class="nav-tab ${currentTab === 'dashboard' ? 'active' : ''}" data-tab="dashboard">🏦 Главная</div>
-                    <div class="nav-tab ${currentTab === 'nfc' ? 'active' : ''}" data-tab="nfc">💳 NFC-оплата</div>
-                    ${isAdmin(user) ? `<div class="nav-tab ${currentTab === 'admin' ? 'active' : ''}" data-tab="admin">👑 Админка</div>` : ''}
-                </div>
-                
-                ${currentTab === 'nfc' ? renderNfcSection() : ''}
-                
                 <div class="welcome-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                     <h2>🏦 Привет, ${escapeHtml(user.nickname)}</h2>
                 </div>
@@ -571,43 +478,15 @@
                 <div class="balance"><span>💰 Баланс</span><span class="balance-amount">${balance} ${symbol}</span></div>
                 
                 <div class="transfer-section">
-                    <div class="transfer-title">🔗 Перевод по ссылке / P2P NFC</div>
+                    <div class="transfer-title">🔗 Перевод по ссылке</div>
                     <div class="input-group"><input type="number" id="transferAmount" placeholder="Сумма" step="0.01"></div>
-                    <div class="input-group"><input type="text" id="transferNote" placeholder="Назначение"></div>
-                    <button id="createLinkBtn">✨ Создать ссылку</button>
+                    <div class="input-group"><input type="text" id="transferNote" placeholder="Назначение (необязательно)"></div>
+                    <button id="createLinkBtn">✨ Создать ссылку для перевода</button>
                     <div id="linkResult"></div>
                 </div>
                 
-                ${!hasCard ? `<div class="no-card-message" style="text-align:center; padding:20px; background:#f1f5f9; border-radius:24px; margin:20px 0;">💳 У вас ещё нет карты<br><button id="createCardBtn" style="background:#f59e0b; margin-top:10px;">✨ Выпустить карту</button></div>` : ''}
-                
                 <div class="flex-buttons"><button id="settingsBtn" class="settings-btn">⚙️ Настройки</button><button id="logoutBtn" class="logout-btn">🚪 Выйти</button></div>
                 <div class="legal-footer"><a id="showAgreementBtn">📜 Договор</a></div>
-            </div>
-        `;
-    }
-    
-    async function renderAdminPanel() {
-        const users = await loadUsers();
-        return `
-            <div class="dashboard-card">
-                <div class="nav-tabs">
-                    <div class="nav-tab" data-tab="dashboard">🏦 Главная</div>
-                    <div class="nav-tab ${currentTab === 'admin' ? 'active' : ''}" data-tab="admin">👑 Админка</div>
-                </div>
-                <div class="admin-panel">
-                    <div class="admin-title" style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">👑 Админ-панель KacERORga</div>
-                    <div class="admin-stats" style="background:rgba(0,0,0,0.05); border-radius:16px; padding:12px; margin-bottom:16px;">
-                        <div>📊 Всего клиентов: ${Object.keys(users).length}</div>
-                        <div>💰 Общий баланс: ${Object.values(users).reduce((s,u) => s + (u.balance||0), 0).toFixed(2)} -_-</div>
-                    </div>
-                    <div class="give-money-form" style="display:flex; gap:10px; flex-wrap:wrap;">
-                        <input type="text" id="adminGiveNick" placeholder="Ник клиента" style="flex:1;">
-                        <input type="number" id="adminGiveAmount" placeholder="Сумма" style="flex:1;">
-                        <button id="adminGiveBtn" style="width:auto; background:#10b981;">Выдать</button>
-                    </div>
-                    <div id="adminMsg"></div>
-                </div>
-                <div class="flex-buttons"><button id="logoutBtn" class="logout-btn">🚪 Выйти</button></div>
             </div>
         `;
     }
@@ -650,7 +529,7 @@
             const nick = document.getElementById('loginNickname').value.trim();
             const pass = document.getElementById('loginPassword').value;
             const res = await loginUser(nick, pass);
-            if (res.success) { currentTab = 'dashboard'; renderApp(); }
+            if (res.success) { renderApp(); }
             else alert(`❌ ${res.error}`);
         });
         document.getElementById('switchToRegister')?.addEventListener('click', () => { currentView = 'register'; renderApp(); });
@@ -662,61 +541,43 @@
             const nick = document.getElementById('regNickname').value.trim();
             const pass = document.getElementById('regPassword').value;
             const res = await registerUser(nick, pass);
-            if (res.success) { currentTab = 'dashboard'; renderApp(); }
+            if (res.success) { renderApp(); }
             else alert(`❌ ${res.error}`);
         });
         document.getElementById('switchToLogin')?.addEventListener('click', () => { currentView = 'login'; renderApp(); });
     }
     
     function attachDashboardHandlers() {
-        document.querySelectorAll('.nav-tab').forEach(tab => {
-            tab.addEventListener('click', () => { currentTab = tab.dataset.tab; renderApp(); });
-        });
         document.getElementById('logoutBtn')?.addEventListener('click', async () => { localStorage.removeItem(SESSION_KEY); renderApp(); });
         document.getElementById('settingsBtn')?.addEventListener('click', () => { showSettings = true; renderApp(); });
-        document.getElementById('createCardBtn')?.addEventListener('click', () => { alert('💳 Функция создания карты будет доступна в следующем обновлении'); });
-        document.getElementById('createLinkBtn')?.addEventListener('click', () => {
+        
+        document.getElementById('createLinkBtn')?.addEventListener('click', async () => {
             const amount = document.getElementById('transferAmount')?.value;
             const note = document.getElementById('transferNote')?.value;
             if (!amount || amount <= 0) { alert('Введите сумму'); return; }
-            const link = `${location.origin}${location.pathname}#transfer/${currentUserNickname}/${Date.now()}/${amount}/${encodeURIComponent(note || '')}`;
-            document.getElementById('linkResult').innerHTML = `<div class="success-msg" style="margin-top:10px;">🔗 Ссылка: <input type="text" readonly value="${link}" style="width:100%; margin-top:5px; font-size:0.7rem;" onclick="this.select()"></div>`;
-        });
-        
-        document.getElementById('nfcPayBtn')?.addEventListener('click', async () => {
-            const amount = parseFloat(document.getElementById('nfcAmount')?.value);
-            if (!amount || amount <= 0) { alert('Введите корректную сумму'); return; }
-            const statusDiv = document.getElementById('nfcStatusText');
-            if (statusDiv) { statusDiv.textContent = '🔍 Приложите карту к телефону...'; statusDiv.classList.add('active'); }
-            startNfcPayment(amount, async (success, result) => {
-                if (success) {
-                    await addBalance(amount);
-                    if (statusDiv) { statusDiv.textContent = '✅ Оплата прошла успешно! Баланс пополнен'; statusDiv.classList.remove('active'); }
-                    renderApp();
-                } else {
-                    if (statusDiv) { statusDiv.textContent = '❌ Ошибка оплаты: ' + result; statusDiv.classList.add('error'); setTimeout(() => { statusDiv.textContent = 'Готов к оплате через NFC'; statusDiv.classList.remove('error'); }, 3000); }
-                }
+            if (parseFloat(amount) > currentUserBalance && currentUserNickname !== ADMIN_NICK) {
+                alert('❌ Недостаточно средств');
+                return;
+            }
+            
+            const link = generateTransferLink(amount, note);
+            const resultDiv = document.getElementById('linkResult');
+            resultDiv.innerHTML = `
+                <div class="link-preview">
+                    🔗 Ссылка для перевода:<br>
+                    <input type="text" readonly value="${link}" style="width:100%; margin:8px 0; padding:8px; font-size:0.7rem;" onclick="this.select()">
+                    <button id="copyLinkBtn" class="copy-btn">📋 Копировать ссылку</button>
+                    <div class="nfc-status" style="margin-top:8px;">💡 Отправьте эту ссылку другу — он получит перевод</div>
+                </div>
+            `;
+            document.getElementById('copyLinkBtn')?.addEventListener('click', () => {
+                navigator.clipboard.writeText(link);
+                alert('✅ Ссылка скопирована!');
             });
         });
         
-        // Инициализируем P2P NFC после загрузки DOM
-        setTimeout(() => { initNfcP2P(); }, 500);
-    }
-    
-    function attachAdminHandlers() {
-        document.getElementById('adminGiveBtn')?.addEventListener('click', async () => {
-            const nick = document.getElementById('adminGiveNick')?.value.trim();
-            const amount = parseFloat(document.getElementById('adminGiveAmount')?.value);
-            if (!nick || !amount) { alert('Введите данные'); return; }
-            const users = await loadUsers();
-            if (users[nick]) {
-                users[nick].balance = (users[nick].balance || 0) + amount;
-                if (nick === ADMIN_NICK) users[nick].balance = INFINITY_MONEY;
-                await saveUsers(users);
-                alert(`✅ Выдано ${amount} ${getCurrencySymbol()} пользователю ${nick}`);
-                renderApp();
-            } else alert('Пользователь не найден');
-        });
+        // NFC инициализация
+        setTimeout(() => { initNfcSupport(); }, 500);
     }
     
     function attachSettingsHandlers() {
@@ -751,10 +612,6 @@
             if (showSettings) {
                 root.innerHTML = renderSettings();
                 attachSettingsHandlers();
-            } else if (currentTab === 'admin' && isAdmin(await getUserData())) {
-                root.innerHTML = await renderAdminPanel();
-                attachDashboardHandlers();
-                attachAdminHandlers();
             } else {
                 root.innerHTML = await renderDashboard();
                 attachDashboardHandlers();
@@ -775,7 +632,17 @@
     
     // ЗАПУСК
     loadSettings();
-    ensureAdminExists().then(() => renderApp());
+    ensureAdminExists().then(() => {
+        renderApp();
+        handleUrlLink(); // Обрабатываем ссылку при загрузке
+    });
+    
+    // Слушаем изменения hash в URL
+    window.addEventListener('hashchange', () => {
+        handleUrlLink();
+        renderApp();
+    });
+    
     setInterval(() => { const ce = document.getElementById('onlineCounter'); if(ce) ce.textContent = onlineCount; }, 1000);
 </script>
 </body>
